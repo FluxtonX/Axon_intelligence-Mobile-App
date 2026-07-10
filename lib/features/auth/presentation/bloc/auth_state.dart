@@ -38,3 +38,8 @@ class AuthError extends AuthState {
   @override
   List<Object?> get props => [message];
 }
+
+/// User signed out — navigate back to Auth
+class AuthUnauthenticated extends AuthState {
+  const AuthUnauthenticated();
+}

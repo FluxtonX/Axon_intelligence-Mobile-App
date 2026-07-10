@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/theme/theme.dart';
+import '../../../auth/presentation/bloc/auth_bloc.dart';
+import '../../../auth/presentation/bloc/auth_event.dart';
 
 class HomeHeader extends StatelessWidget {
   const HomeHeader({super.key});
@@ -8,17 +11,37 @@ class HomeHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        // Profile Picture
-        Container(
-          width: 48,
-          height: 48,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            image: const DecorationImage(
-              image: NetworkImage('https://i.pravatar.cc/150?img=11'),
-              fit: BoxFit.cover,
+        // Profile Picture with Sign Out Menu
+        PopupMenuButton<String>(
+          onSelected: (value) {
+            if (value == 'logout') {
+              context.read<AuthBloc>().add(const SignOutRequested());
+            }
+          },
+          offset: const Offset(0, 50),
+          itemBuilder: (context) => [
+            const PopupMenuItem(
+              value: 'logout',
+              child: Row(
+                children: [
+                  Icon(Icons.logout_rounded, color: Colors.redAccent, size: 20),
+                  SizedBox(width: 12),
+                  Text('Sign Out', style: TextStyle(color: Colors.redAccent)),
+                ],
+              ),
             ),
-            border: Border.all(color: const Color(0xFFE5E7EB), width: 1.5),
+          ],
+          child: Container(
+            width: 48,
+            height: 48,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              image: const DecorationImage(
+                image: NetworkImage('https://i.pravatar.cc/150?img=11'),
+                fit: BoxFit.cover,
+              ),
+              border: Border.all(color: const Color(0xFFE5E7EB), width: 1.5),
+            ),
           ),
         ),
         const SizedBox(width: 12),

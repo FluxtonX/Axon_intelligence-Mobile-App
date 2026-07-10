@@ -14,10 +14,7 @@ class AuthPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (_) => AuthBloc(),
-      child: const _AuthView(),
-    );
+    return const _AuthView();
   }
 }
 

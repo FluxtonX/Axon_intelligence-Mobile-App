@@ -55,17 +55,6 @@ class _HomeView extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         const Expanded(child: HomeHeader()),
-                        // Debug Toggle (Temporary for testing)
-                        IconButton(
-                          icon: Icon(
-                            Icons.developer_mode_rounded,
-                            color: AppColors.primary.withValues(alpha: 0.5),
-                          ),
-                          onPressed: () {
-                            context.read<HomeBloc>().add(const HomeDebugStateToggled());
-                          },
-                          tooltip: 'Toggle Empty/Active State',
-                        ),
                       ],
                     ),
                     const SizedBox(height: 24),

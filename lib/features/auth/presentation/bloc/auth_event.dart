@@ -17,3 +17,7 @@ class EmailSignInRequested extends AuthEvent {
 class GuestBrowsingRequested extends AuthEvent {
   const GuestBrowsingRequested();
 }
+
+class SignOutRequested extends AuthEvent {
+  const SignOutRequested();
+}

@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'auth_event.dart';
@@ -8,6 +9,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     on<GoogleSignInRequested>(_onGoogleSignIn);
     on<EmailSignInRequested>(_onEmailSignIn);
     on<GuestBrowsingRequested>(_onGuestBrowsing);
+    on<SignOutRequested>(_onSignOut);
   }
 
   final GoogleSignIn _googleSignIn = GoogleSignIn();
@@ -18,6 +20,9 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   ) async {
     emit(const AuthGoogleLoading());
     try {
+      // Force the account picker to show every time by signing out first
+      await _googleSignIn.signOut();
+      
       final account = await _googleSignIn.signIn();
       if (account == null) {
         // User cancelled the sign-in
@@ -44,5 +49,14 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     Emitter<AuthState> emit,
   ) {
     emit(const AuthGuestMode());
+  }
+
+  Future<void> _onSignOut(
+    SignOutRequested event,
+    Emitter<AuthState> emit,
+  ) async {
+    await _googleSignIn.signOut();
+    await FirebaseAuth.instance.signOut();
+    emit(const AuthUnauthenticated());
   }
 }

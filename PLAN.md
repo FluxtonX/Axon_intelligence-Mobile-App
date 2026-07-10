@@ -20,9 +20,9 @@
 | 1 | Splash Screen | ✅ Done | Gradient bg, logo animation |
 | 2 | Onboarding (3 slides) | ✅ Done | AI match, expertise, trust |
 | 3 | **Auth Screen** | 🔄 In Progress | Google + Email. No Apple. No role selection. |
-| 4 | Marketplace Home | ⏳ Pending | Search, categories, featured freelancers |
+| 4 | Buyer Home Screen | ✅ Done | Project stats, notifications, talent preview |
 | 5 | Freelancer Profile | ⏳ Pending | Portfolio, ratings, hire button |
-| 6 | Search & Filters | ⏳ Pending | Category, budget, rating filters |
+| 6 | Search & Filters | 🔄 In Progress | Category, budget, rating filters |
 | 7 | Chat / Messages | ⏳ Pending | Conversation list + chat screen |
 | 8 | Hire / Checkout | ⏳ Pending | Milestone-based payment flow |
 | 9 | Seller Onboarding | ⏳ Pending | "Become a Freelancer" flow |
