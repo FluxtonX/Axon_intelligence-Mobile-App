@@ -70,7 +70,7 @@ class _EmailAuthViewState extends State<_EmailAuthView> {
       body: BlocConsumer<EmailAuthBloc, EmailAuthState>(
         listener: (context, state) {
           if (state.isSuccess) {
-            // TODO: context.go('/home');
+            context.go('/home');
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(content: Text('Successfully authenticated!')),
             );

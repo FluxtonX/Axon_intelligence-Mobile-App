@@ -4,6 +4,8 @@ import '../../features/splash/presentation/pages/splash_page.dart';
 import '../../features/onboarding/presentation/pages/onboarding_page.dart';
 import '../../features/auth/presentation/pages/auth_page.dart';
 import '../../features/auth/presentation/pages/email_auth_page.dart';
+import '../../features/main_shell/presentation/pages/main_shell_page.dart';
+import '../../features/project_creation/presentation/pages/ai_project_creation_page.dart';
 
 /// Axon Intelligence — App Router
 final GoRouter appRouter = GoRouter(
@@ -30,7 +32,15 @@ final GoRouter appRouter = GoRouter(
       name: 'emailAuth',
       builder: (context, state) => const EmailAuthPage(),
     ),
-    // TODO: /home added as features are built
+    GoRoute(
+      path: '/home',
+      name: 'home',
+      builder: (context, state) => const MainShellPage(),
+    ),
+    GoRoute(
+      path: '/ai_project_creation',
+      builder: (context, state) => const AiProjectCreationPage(),
+    ),
   ],
   errorBuilder: (context, state) => Scaffold(
     body: Center(child: Text('Page not found: ${state.error}')),

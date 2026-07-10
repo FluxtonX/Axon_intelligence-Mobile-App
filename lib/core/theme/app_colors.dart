@@ -24,6 +24,7 @@ abstract class AppColors {
 
   // ─── Brand / Accent ───────────────────────────────────────────────────────
   static const Color primary = Color(0xFF3B6EF5);
+  static const Color surface = Color(0xFFF3F4F6);
 
   // ─── Onboarding Slide 1 — Blue ────────────────────────────────────────────
   static const Color ob1Accent  = Color(0xFF3B6EF5);

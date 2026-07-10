@@ -34,7 +34,7 @@ class _AuthView extends StatelessWidget {
     return BlocListener<AuthBloc, AuthState>(
       listener: (context, state) {
         if (state is AuthSuccess || state is AuthGuestMode) {
-          // TODO: context.go('/home');
+          context.go('/home');
         }
         if (state is AuthEmailFlowStarted) {
           context.push('/login/email');
