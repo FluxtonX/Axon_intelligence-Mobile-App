@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../features/splash/presentation/pages/splash_page.dart';
 import '../../features/onboarding/presentation/pages/onboarding_page.dart';
+import '../../features/auth/presentation/pages/auth_page.dart';
+import '../../features/auth/presentation/pages/email_auth_page.dart';
 
 /// Axon Intelligence — App Router
 final GoRouter appRouter = GoRouter(
@@ -18,7 +20,17 @@ final GoRouter appRouter = GoRouter(
       name: 'onboarding',
       builder: (context, state) => const OnboardingPage(),
     ),
-    // TODO: Add /login, /register, /home as features are built
+    GoRoute(
+      path: '/auth',
+      name: 'auth',
+      builder: (context, state) => const AuthPage(),
+    ),
+    GoRoute(
+      path: '/login/email',
+      name: 'emailAuth',
+      builder: (context, state) => const EmailAuthPage(),
+    ),
+    // TODO: /home added as features are built
   ],
   errorBuilder: (context, state) => Scaffold(
     body: Center(child: Text('Page not found: ${state.error}')),

@@ -1,4 +1,4 @@
-package com.example.axon_intelligence
+package com.axonintelligence.app
 
 import io.flutter.embedding.android.FlutterActivity
 

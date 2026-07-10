@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "934654769713",
+    "project_id": "axon-intelligence-16330",
+    "storage_bucket": "axon-intelligence-16330.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:934654769713:android:f09132bbc878d12ca0b310",
+        "android_client_info": {
+          "package_name": "com.axonintelligence.app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "934654769713-rhi4r5fue6l2f79vhfkma5bdjuvrg5nk.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.axonintelligence.app",
+            "certificate_hash": "e43d59821ed66d4baa295423b06797ee6ef4cb32"
+          }
+        },
+        {
+          "client_id": "934654769713-3pm6rq7l9977oo6g4d4qu2v1fvg3rvbd.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBQemyTA5yckCr0KYc6LyYOKH5Gnkx4jH0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "934654769713-3pm6rq7l9977oo6g4d4qu2v1fvg3rvbd.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

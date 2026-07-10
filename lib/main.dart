@@ -1,10 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'core/theme/theme.dart';
 import 'core/router/app_router.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  try {
+    await Firebase.initializeApp();
+  } catch (e) {
+    debugPrint('Firebase initialization error: $e');
+  }
 
   // Lock to portrait orientation
   await SystemChrome.setPreferredOrientations([

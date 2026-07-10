@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import '../../../../core/theme/theme.dart';
 import '../../../../core/constants/app_constants.dart';
 import '../../../../shared/widgets/primary_button.dart';
@@ -66,7 +67,7 @@ class _OnboardingViewState extends State<_OnboardingView> {
     return BlocListener<OnboardingBloc, OnboardingState>(
       listener: (context, state) {
         if (state is OnboardingDone) {
-          // TODO: context.go('/login');
+          context.go('/auth');
         }
       },
       child: Scaffold(
