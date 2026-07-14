@@ -6,6 +6,9 @@ import '../../features/auth/presentation/pages/auth_page.dart';
 import '../../features/auth/presentation/pages/email_auth_page.dart';
 import '../../features/main_shell/presentation/pages/main_shell_page.dart';
 import '../../features/project_creation/presentation/pages/ai_project_creation_page.dart';
+import '../../features/project_creation/presentation/pages/project_brief_review_page.dart';
+import '../../features/freelancer_profile/presentation/pages/freelancer_profile_page.dart';
+import '../../features/messages/presentation/pages/chat_detail_page.dart';
 
 /// Axon Intelligence — App Router
 final GoRouter appRouter = GoRouter(
@@ -40,6 +43,27 @@ final GoRouter appRouter = GoRouter(
     GoRoute(
       path: '/ai_project_creation',
       builder: (context, state) => const AiProjectCreationPage(),
+    ),
+    GoRoute(
+      path: '/project_brief_review',
+      builder: (context, state) => const ProjectBriefReviewPage(),
+    ),
+    GoRoute(
+      path: '/freelancer-profile',
+      name: 'freelancerProfile',
+      builder: (context, state) {
+        // We can pass data through state.extra if needed
+        return const FreelancerProfilePage();
+      },
+    ),
+    GoRoute(
+      path: '/chat/:id',
+      name: 'chatDetail',
+      builder: (context, state) {
+        final id = state.pathParameters['id']!;
+        final name = state.extra as String? ?? 'Freelancer';
+        return ChatDetailPage(chatId: id, name: name);
+      },
     ),
   ],
   errorBuilder: (context, state) => Scaffold(

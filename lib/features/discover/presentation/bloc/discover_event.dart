@@ -17,3 +17,18 @@ class DiscoverSearchInitiated extends DiscoverEvent {
 }
 
 class DiscoverSearchCleared extends DiscoverEvent {}
+
+class DiscoverFiltersUpdated extends DiscoverEvent {
+  final String? selectedCategory;
+  final double? minRating;
+  final double? maxBudget;
+
+  const DiscoverFiltersUpdated({
+    this.selectedCategory,
+    this.minRating,
+    this.maxBudget,
+  });
+
+  @override
+  List<Object?> get props => [selectedCategory, minRating, maxBudget];
+}

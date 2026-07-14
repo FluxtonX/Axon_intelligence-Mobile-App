@@ -1,10 +1,9 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/theme/theme.dart';
-import '../../../../core/constants/app_constants.dart';
-import '../../../../shared/widgets/primary_button.dart';
 import '../../domain/models/onboarding_slide_model.dart';
 import '../bloc/onboarding_bloc.dart';
 import '../bloc/onboarding_event.dart';
@@ -36,6 +35,7 @@ class _OnboardingViewState extends State<_OnboardingView> {
   void initState() {
     super.initState();
     _pageController = PageController();
+    
     SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
       statusBarColor: Colors.transparent,
       statusBarIconBrightness: Brightness.dark,
@@ -48,13 +48,12 @@ class _OnboardingViewState extends State<_OnboardingView> {
     super.dispose();
   }
 
-  void _onContinue(BuildContext context, int currentPage) {
+  void _onNext(BuildContext context, int currentPage) {
     final bloc = context.read<OnboardingBloc>();
     if (currentPage < onboardingSlides.length - 1) {
-      _pageController.animateToPage(
-        currentPage + 1,
-        duration: AppConstants.animationMedium,
-        curve: Curves.easeInOutCubic,
+      _pageController.nextPage(
+        duration: const Duration(milliseconds: 500),
+        curve: Curves.fastOutSlowIn,
       );
       bloc.add(const OnboardingNextPage());
     } else {
@@ -71,187 +70,172 @@ class _OnboardingViewState extends State<_OnboardingView> {
         }
       },
       child: Scaffold(
-        backgroundColor: AppColors.backgroundLight,
-        body: BlocBuilder<OnboardingBloc, OnboardingState>(
-          builder: (context, state) {
-            return SafeArea(
-              child: Column(
-                children: [
-                  // ── Slide content fills all available space ───────────
-                  Expanded(
-                    child: PageView.builder(
-                      controller: _pageController,
-                      itemCount: onboardingSlides.length,
-                      onPageChanged: (page) => context
-                          .read<OnboardingBloc>()
-                          .add(OnboardingPageChanged(page)),
-                      itemBuilder: (_, index) => _OnboardingSlide(
-                        slide: onboardingSlides[index],
+        backgroundColor: Colors.white,
+        body: Stack(
+          children: [
+            // ── Background Images (Top 65%) ──────────────────────
+            PageView.builder(
+              controller: _pageController,
+              itemCount: onboardingSlides.length,
+              physics: const BouncingScrollPhysics(),
+              onPageChanged: (page) => context
+                  .read<OnboardingBloc>()
+                  .add(OnboardingPageChanged(page)),
+              itemBuilder: (context, index) {
+                return Stack(
+                  children: [
+                    Positioned(
+                      top: 0,
+                      left: 0,
+                      right: 0,
+                      height: MediaQuery.of(context).size.height * 0.65,
+                      child: Image.asset(
+                        onboardingSlides[index].imagePath,
+                        fit: BoxFit.cover,
                       ),
                     ),
+                  ],
+                );
+              },
+            ),
+
+            // ── Bottom White Sheet (Adaptive Height) ─────────────────
+            Align(
+              alignment: Alignment.bottomCenter,
+              child: Container(
+                width: double.infinity,
+                decoration: const BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(40),
+                    topRight: Radius.circular(40),
                   ),
-
-                  // ── Page Dots ────────────────────────────────────────
-                  _PageIndicator(
-                    total: onboardingSlides.length,
-                    current: state.currentPage,
-                  ),
-
-                  const SizedBox(height: 20),
-
-                  // ── Continue / Get Started Button ─────────────────
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 24),
-                    child: PrimaryButton(
-                      label: state.currentPage == onboardingSlides.length - 1
-                          ? 'Get Started'
-                          : 'Continue',
-                      onTap: () => _onContinue(context, state.currentPage),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black12,
+                      blurRadius: 20,
+                      offset: Offset(0, -5),
                     ),
-                  ),
-
-                  const SizedBox(height: 36),
-                ],
+                  ],
+                ),
+                padding: const EdgeInsets.fromLTRB(32, 40, 32, 24),
+                child: SafeArea(
+                  top: false,
+                  child: BlocBuilder<OnboardingBloc, OnboardingState>(
+                    builder: (context, state) {
+                      final slide = onboardingSlides[state.currentPage];
+                      final isLastPage = state.currentPage == onboardingSlides.length - 1;
+                      
+                      return Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                        // Title
+                        Text(
+                          slide.title,
+                          style: AppTypography.displayLarge.copyWith(
+                            color: const Color(0xFF111827), // Gray 900
+                            fontSize: 32,
+                            fontWeight: FontWeight.w800,
+                            height: 1.2,
+                            letterSpacing: -0.5,
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        
+                        // Description
+                        Text(
+                          slide.description,
+                          style: AppTypography.bodyLarge.copyWith(
+                            color: const Color(0xFF6B7280), // Gray 500
+                            fontSize: 16,
+                            height: 1.5,
+                            fontWeight: FontWeight.w400,
+                          ),
+                        ),
+                        
+                        const SizedBox(height: 48),
+                        
+                        // Bottom Row (Dots & Button)
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            // Dots
+                            Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: List.generate(onboardingSlides.length, (index) {
+                                final isActive = index == state.currentPage;
+                                return AnimatedContainer(
+                                  duration: const Duration(milliseconds: 300),
+                                  margin: const EdgeInsets.only(right: 6),
+                                  width: isActive ? 24 : 8,
+                                  height: 8,
+                                  decoration: BoxDecoration(
+                                    color: isActive ? AppColors.primary : const Color(0xFFE5E7EB),
+                                    borderRadius: BorderRadius.circular(4),
+                                  ),
+                                );
+                              }),
+                            ),
+                            
+                            // Next Button
+                            Material(
+                              color: Colors.transparent,
+                              child: InkWell(
+                                onTap: () => _onNext(context, state.currentPage),
+                                borderRadius: BorderRadius.circular(30),
+                                child: Ink(
+                                  padding: EdgeInsets.symmetric(
+                                    horizontal: isLastPage ? 32 : 24, 
+                                    vertical: 16,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: AppColors.primary,
+                                    borderRadius: BorderRadius.circular(30),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: AppColors.primary.withValues(alpha: 0.3),
+                                        blurRadius: 12,
+                                        offset: const Offset(0, 4),
+                                      ),
+                                    ],
+                                  ),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Text(
+                                        isLastPage ? 'Get Started' : 'Next',
+                                        style: const TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.w700,
+                                        ),
+                                      ),
+                                      if (!isLastPage) ...[
+                                        const SizedBox(width: 8),
+                                        const Icon(
+                                          Icons.arrow_forward_rounded,
+                                          color: Colors.white,
+                                          size: 18,
+                                        ),
+                                      ],
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    );
+                  }
+                ),
               ),
-            );
-          },
+            ),
+            ), // closes Align
+          ],
         ),
       ),
-    );
-  }
-}
-
-// ─── Single Slide ─────────────────────────────────────────────────────────────
-class _OnboardingSlide extends StatelessWidget {
-  const _OnboardingSlide({required this.slide});
-  final OnboardingSlideModel slide;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 24),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // ── Top gap (from status bar / notch area) ───────────────
-          const SizedBox(height: 52),
-
-          // ── Figma icon PNG (centered horizontally) ───────────────
-          Center(
-            child: Image.asset(
-              slide.imagePath,
-              width: 88,
-              height: 88,
-              fit: BoxFit.contain,
-            ),
-          ),
-
-          const SizedBox(height: 32),
-
-          // ── Heading ───────────────────────────────────────────────
-          Text(
-            slide.title,
-            style: AppTypography.headingLarge.copyWith(
-              color: AppColors.textDark,
-              fontSize: 26,
-              fontWeight: FontWeight.w800,
-              height: 1.3,
-              letterSpacing: -0.4,
-            ),
-          ),
-
-          const SizedBox(height: 12),
-
-          // ── Description ───────────────────────────────────────────
-          Text(
-            slide.description,
-            style: AppTypography.bodyMedium.copyWith(
-              color: AppColors.textSecondary,
-              fontSize: 13.5,
-              height: 1.65,
-            ),
-          ),
-
-          const SizedBox(height: 28),
-
-          // ── Stat Card ─────────────────────────────────────────────
-          _StatCard(slide: slide),
-
-          // ── Push dots + button to bottom ─────────────────────────
-          const Spacer(),
-        ],
-      ),
-    );
-  }
-}
-
-// ─── Stat Card ────────────────────────────────────────────────────────────────
-class _StatCard extends StatelessWidget {
-  const _StatCard({required this.slide});
-  final OnboardingSlideModel slide;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
-      decoration: BoxDecoration(
-        color: slide.statBgColor,
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(
-            slide.statValue,
-            style: AppTypography.headingMedium.copyWith(
-              color: slide.statValueColor,
-              fontSize: 28,
-              fontWeight: FontWeight.w800,
-              letterSpacing: -0.5,
-              height: 1.1,
-            ),
-          ),
-          const SizedBox(height: 6),
-          Text(
-            slide.statLabel,
-            style: AppTypography.bodySmall.copyWith(
-              color: AppColors.textSecondary,
-              fontSize: 13,
-              height: 1.4,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-// ─── Page Indicator Dots ──────────────────────────────────────────────────────
-class _PageIndicator extends StatelessWidget {
-  const _PageIndicator({required this.total, required this.current});
-  final int total;
-  final int current;
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: List.generate(total, (index) {
-        final isActive = index == current;
-        return AnimatedContainer(
-          duration: AppConstants.animationFast,
-          curve: Curves.easeInOut,
-          margin: const EdgeInsets.symmetric(horizontal: 3.5),
-          width: isActive ? 22 : 7,
-          height: 7,
-          decoration: BoxDecoration(
-            color: isActive ? AppColors.primary : const Color(0xFFD1D5DB),
-            borderRadius: BorderRadius.circular(AppConstants.radiusFull),
-          ),
-        );
-      }),
     );
   }
 }

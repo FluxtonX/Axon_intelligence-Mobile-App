@@ -1,19 +1,13 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'core/blocs/user_mode_cubit.dart';
 import 'features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'core/theme/theme.dart';
 import 'core/router/app_router.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
-  try {
-    await Firebase.initializeApp();
-  } catch (e) {
-    debugPrint('Firebase initialization error: $e');
-  }
 
   // Lock to portrait orientation
   await SystemChrome.setPreferredOrientations([
@@ -41,6 +35,9 @@ class AxonIntelligenceApp extends StatelessWidget {
       providers: [
         BlocProvider<AuthBloc>(
           create: (context) => AuthBloc(),
+        ),
+        BlocProvider<UserModeCubit>(
+          create: (context) => UserModeCubit(),
         ),
       ],
       child: MaterialApp.router(

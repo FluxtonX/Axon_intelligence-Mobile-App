@@ -32,11 +32,11 @@ class AiProjectBloc extends Bloc<AiProjectEvent, AiProjectState> {
   }
 
   Future<void> _onUserMessageSubmitted(UserMessageSubmitted event, Emitter<AiProjectState> emit) async {
-    _handleUserReply(event.text, emit);
+    await _handleUserReply(event.text, emit);
   }
 
   Future<void> _onOptionSelected(OptionSelected event, Emitter<AiProjectState> emit) async {
-    _handleUserReply(event.optionText, emit);
+    await _handleUserReply(event.optionText, emit);
   }
 
   Future<void> _handleUserReply(String text, Emitter<AiProjectState> emit) async {

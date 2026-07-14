@@ -7,6 +7,8 @@ import '../../../auth/presentation/bloc/auth_bloc.dart';
 import '../../../auth/presentation/bloc/auth_state.dart';
 import '../../../profile/presentation/pages/profile_page.dart';
 import '../../../discover/presentation/pages/discover_page.dart';
+import '../../../messages/presentation/pages/messages_page.dart';
+import '../../../projects/presentation/pages/projects_page.dart';
 import '../bloc/main_shell_bloc.dart';
 import '../bloc/main_shell_event.dart';
 import '../bloc/main_shell_state.dart';
@@ -32,9 +34,9 @@ class _MainShellView extends StatelessWidget {
     // when switching between tabs.
     final List<Widget> pages = [
       const HomePage(),
-      const _PlaceholderPage(title: 'Projects'),
+      const ProjectsPage(),
       const DiscoverPage(),
-      const _PlaceholderPage(title: 'Messages'),
+      const MessagesPage(),
       const ProfilePage(),
     ];
 

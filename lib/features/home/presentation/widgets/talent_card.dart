@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import '../../../../core/theme/theme.dart';
 
 class TalentCard extends StatelessWidget {
@@ -23,7 +24,9 @@ class TalentCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return GestureDetector(
+      onTap: () => context.push('/freelancer-profile'),
+      child: Container(
       width: 240,
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -164,6 +167,7 @@ class TalentCard extends StatelessWidget {
             ],
           ),
         ],
+      ),
       ),
     );
   }

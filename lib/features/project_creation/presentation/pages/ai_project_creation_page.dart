@@ -96,10 +96,8 @@ class _AiProjectCreationViewState extends State<_AiProjectCreationView> {
               state.status == ProjectCreationStatus.waitingForInput) {
             _scrollToBottom();
           } else if (state.status == ProjectCreationStatus.complete) {
-            // Navigate to Brief Review (Step 6) - mock for now
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Project Brief Generated (Next Step)')),
-            );
+            // Navigate to Brief Review
+            context.pushReplacement('/project_brief_review');
           }
         },
         builder: (context, state) {

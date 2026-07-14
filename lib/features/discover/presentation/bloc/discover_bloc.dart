@@ -6,6 +6,7 @@ class DiscoverBloc extends Bloc<DiscoverEvent, DiscoverState> {
   DiscoverBloc() : super(const DiscoverState()) {
     on<DiscoverSearchInitiated>(_onSearchInitiated);
     on<DiscoverSearchCleared>(_onSearchCleared);
+    on<DiscoverFiltersUpdated>(_onFiltersUpdated);
   }
 
   Future<void> _onSearchInitiated(
@@ -32,6 +33,17 @@ class DiscoverBloc extends Bloc<DiscoverEvent, DiscoverState> {
     emit(state.copyWith(
       status: DiscoverStatus.initial,
       query: '',
+    ));
+  }
+
+  void _onFiltersUpdated(
+    DiscoverFiltersUpdated event,
+    Emitter<DiscoverState> emit,
+  ) {
+    emit(state.copyWith(
+      selectedCategory: event.selectedCategory,
+      minRating: event.minRating,
+      maxBudget: event.maxBudget,
     ));
   }
 }

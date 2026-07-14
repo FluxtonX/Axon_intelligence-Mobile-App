@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/theme/theme.dart';
+import '../../../../core/theme/theme.dart';
+import '../../../../core/blocs/user_mode_cubit.dart';
 import '../../../auth/presentation/bloc/auth_bloc.dart';
 import '../../../auth/presentation/bloc/auth_event.dart';
 
@@ -94,6 +96,25 @@ class ProfilePage extends StatelessWidget {
               ),
               child: Column(
                 children: [
+                  BlocBuilder<UserModeCubit, UserMode>(
+                    builder: (context, mode) {
+                      final isClient = mode == UserMode.client;
+                      return ListTile(
+                        leading: const Icon(Icons.swap_horiz_rounded, color: AppColors.primary),
+                        title: Text(
+                          isClient ? 'Switch to Freelancer Mode' : 'Switch to Client Mode',
+                          style: AppTypography.bodyMedium.copyWith(color: AppColors.primary, fontWeight: FontWeight.bold),
+                        ),
+                        onTap: () {
+                          context.read<UserModeCubit>().toggleMode();
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text('Switched to ${isClient ? 'Freelancer' : 'Client'} Mode')),
+                          );
+                        },
+                      );
+                    },
+                  ),
+                  const Divider(height: 1, indent: 16, endIndent: 16),
                   ListTile(
                     leading: const Icon(Icons.settings_outlined, color: AppColors.textDark),
                     title: Text('Settings', style: AppTypography.bodyMedium.copyWith(color: AppColors.textDark)),

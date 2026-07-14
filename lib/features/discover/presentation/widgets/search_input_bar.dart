@@ -7,11 +7,13 @@ class SearchInputBar extends StatefulWidget {
     required this.initialQuery,
     required this.onSearch,
     required this.onClear,
+    this.onFilter,
   });
 
   final String initialQuery;
   final ValueChanged<String> onSearch;
   final VoidCallback onClear;
+  final VoidCallback? onFilter;
 
   @override
   State<SearchInputBar> createState() => _SearchInputBarState();
@@ -45,60 +47,77 @@ class _SearchInputBarState extends State<SearchInputBar> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 48,
+      height: 56,
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: AppColors.primary, width: 1.5),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.primary.withValues(alpha: 0.1),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
+        color: const Color(0xFFF3F4F6), // Premium light gray background
+        borderRadius: BorderRadius.circular(16), // Smooth modern radius
       ),
-      child: Row(
-        children: [
-          const SizedBox(width: 16),
-          const Icon(
-            Icons.search_rounded,
-            color: AppColors.primary,
-            size: 20,
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: TextField(
-              controller: _controller,
-              onSubmitted: widget.onSearch,
-              decoration: InputDecoration(
-                hintText: 'Search for talent...',
-                hintStyle: AppTypography.bodyMedium.copyWith(
-                  color: AppColors.textSecondary,
-                  fontWeight: FontWeight.w400,
+      child: Material(
+        color: Colors.transparent,
+        child: Row(
+          children: [
+            const SizedBox(width: 20),
+            const Icon(
+              Icons.search_rounded,
+              color: Color(0xFF9CA3AF), // Subtle icon color
+              size: 24,
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: TextField(
+                controller: _controller,
+                onSubmitted: widget.onSearch,
+                textInputAction: TextInputAction.search,
+                decoration: InputDecoration(
+                  hintText: 'Search for talent, skills...',
+                  hintStyle: AppTypography.bodyMedium.copyWith(
+                    color: const Color(0xFF9CA3AF),
+                    fontWeight: FontWeight.w500,
+                  ),
+                  border: InputBorder.none,
+                  enabledBorder: InputBorder.none,
+                  focusedBorder: InputBorder.none,
+                  isDense: true,
+                  filled: false,
+                  contentPadding: const EdgeInsets.symmetric(vertical: 16),
                 ),
-                border: InputBorder.none,
-                isDense: true,
-                contentPadding: EdgeInsets.zero,
-              ),
-              style: AppTypography.bodyMedium.copyWith(
-                color: AppColors.textDark,
-                fontWeight: FontWeight.w500,
+                style: AppTypography.bodyMedium.copyWith(
+                  color: const Color(0xFF111827),
+                  fontWeight: FontWeight.w600,
+                  fontSize: 16,
+                ),
               ),
             ),
-          ),
-          if (_hasText)
-            IconButton(
-              icon: const Icon(Icons.close_rounded, size: 20, color: AppColors.textSecondary),
-              padding: EdgeInsets.zero,
-              constraints: const BoxConstraints(),
-              onPressed: () {
-                _controller.clear();
-                widget.onClear();
-              },
-            ),
-          const SizedBox(width: 16),
-        ],
+            if (_hasText)
+              IconButton(
+                icon: const Icon(Icons.close_rounded, size: 20, color: Color(0xFF9CA3AF)),
+                onPressed: () {
+                  _controller.clear();
+                  widget.onClear();
+                },
+              ),
+            if (widget.onFilter != null && !_hasText) ...[
+              const SizedBox(width: 8),
+              Container(
+                height: 32,
+                width: 1,
+                color: const Color(0xFFE5E7EB),
+              ),
+              const SizedBox(width: 8),
+              InkWell(
+                onTap: widget.onFilter,
+                borderRadius: BorderRadius.circular(12),
+                child: Padding(
+                  padding: const EdgeInsets.all(12.0),
+                  child: Icon(Icons.tune_rounded, size: 22, color: AppColors.primary),
+                ),
+              ),
+              const SizedBox(width: 8),
+            ] else if (!_hasText) ...[
+              const SizedBox(width: 20),
+            ]
+          ],
+        ),
       ),
     );
   }

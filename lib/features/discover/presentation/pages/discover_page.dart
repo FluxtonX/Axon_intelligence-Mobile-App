@@ -7,6 +7,7 @@ import '../bloc/discover_state.dart';
 import '../widgets/search_input_bar.dart';
 import '../widgets/searching_indicator.dart';
 import '../widgets/talent_result_card.dart';
+import '../widgets/filter_bottom_sheet.dart';
 
 class DiscoverPage extends StatelessWidget {
   const DiscoverPage({super.key});
@@ -31,19 +32,30 @@ class _DiscoverView extends StatelessWidget {
         child: Column(
           children: [
             // Top App Bar Area
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+            Container(
+              color: Colors.white,
+              padding: const EdgeInsets.fromLTRB(24, 24, 24, 16),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    'Explore Talent',
-                    style: AppTypography.headingSmall.copyWith(
-                      color: AppColors.textDark,
-                      fontWeight: FontWeight.w800,
-                    ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Discover',
+                        style: AppTypography.headingSmall.copyWith(
+                          color: const Color(0xFF111827),
+                          fontWeight: FontWeight.w800,
+                          fontSize: 28,
+                        ),
+                      ),
+                      const CircleAvatar(
+                        radius: 18,
+                        backgroundImage: NetworkImage('https://i.pravatar.cc/150?img=68'),
+                      )
+                    ],
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 20),
                   BlocBuilder<DiscoverBloc, DiscoverState>(
                     builder: (context, state) {
                       return SearchInputBar(
@@ -56,6 +68,7 @@ class _DiscoverView extends StatelessWidget {
                         onClear: () {
                           context.read<DiscoverBloc>().add(DiscoverSearchCleared());
                         },
+                        onFilter: () => FilterBottomSheet.show(context),
                       );
                     },
                   ),
@@ -68,18 +81,10 @@ class _DiscoverView extends StatelessWidget {
               child: BlocBuilder<DiscoverBloc, DiscoverState>(
                 builder: (context, state) {
                   if (state.status == DiscoverStatus.initial) {
-                    // Empty Initial State
-                    return Center(
-                      child: Text(
-                        'Start typing to search for freelancers.',
-                        style: AppTypography.bodyMedium.copyWith(color: AppColors.textSecondary),
-                      ),
-                    );
+                    return const _DiscoverStorefront();
                   } else if (state.status == DiscoverStatus.searching) {
-                    // Animated Searching State
                     return const SearchingIndicator();
                   } else {
-                    // Results State
                     return _buildResults(context, state.query);
                   }
                 },
@@ -108,7 +113,7 @@ class _DiscoverView extends StatelessWidget {
       ),
       const TalentResultCard(
         name: 'Marcus Williams',
-        title: 'Full-Stack Engineer - AI & Web3 Spec',
+        title: 'Full-Stack Engineer - AI & Web3',
         hourlyRate: 155,
         rating: 4.95,
         reviewCount: 42,
@@ -119,86 +124,32 @@ class _DiscoverView extends StatelessWidget {
         isVerified: true,
         isAvailableNow: true,
       ),
-      const TalentResultCard(
-        name: 'Yuki Tanaka',
-        title: 'Motion Designer & Creative Director',
-        hourlyRate: 110,
-        rating: 4.97,
-        reviewCount: 51,
-        location: 'Tokyo',
-        skills: ['Motion Design', 'After Effects', '3D Animation'],
-        imageUrl: 'https://i.pravatar.cc/150?img=12',
-        matchPercentage: 86,
-        isVerified: true,
-        isAvailableNow: true,
-      ),
-      const TalentResultCard(
-        name: 'Priya Sharma',
-        title: 'Data Scientist & ML Engineer',
-        hourlyRate: 130,
-        rating: 4.94,
-        reviewCount: 28,
-        location: 'Bangalore',
-        skills: ['Python', 'TensorFlow', 'PyTorch'],
-        imageUrl: 'https://i.pravatar.cc/150?img=9',
-        matchPercentage: 74,
-        isVerified: true,
-        isAvailableNow: true,
-      ),
     ];
 
     return Column(
       children: [
-        // Results Header
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
           child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Top results',
-                      style: AppTypography.labelLarge.copyWith(color: AppColors.textDark),
-                    ),
-                    Text(
-                      'AI found ${results.length} matches for "$query"',
-                      style: AppTypography.caption.copyWith(color: AppColors.textSecondary),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ],
+              Text(
+                'Results for "$query"',
+                style: AppTypography.labelLarge.copyWith(
+                  color: const Color(0xFF111827),
+                  fontWeight: FontWeight.bold,
                 ),
               ),
-              // Filter Button
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: const Color(0xFFE5E7EB)),
-                ),
-                child: Row(
-                  children: [
-                    const Icon(Icons.tune_rounded, size: 16, color: AppColors.primary),
-                    const SizedBox(width: 8),
-                    Text(
-                      'Filter',
-                      style: AppTypography.labelMedium.copyWith(color: AppColors.primary),
-                    ),
-                  ],
-                ),
+              const Spacer(),
+              Text(
+                '${results.length} found',
+                style: AppTypography.caption.copyWith(color: const Color(0xFF6B7280)),
               ),
             ],
           ),
         ),
-        
-        // Scrollable List
         Expanded(
           child: ListView.builder(
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+            padding: const EdgeInsets.symmetric(horizontal: 24),
             itemCount: results.length,
             itemBuilder: (context, index) {
               return results[index];
@@ -206,6 +157,135 @@ class _DiscoverView extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+class _DiscoverStorefront extends StatelessWidget {
+  const _DiscoverStorefront();
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView(
+      padding: const EdgeInsets.symmetric(vertical: 16),
+      children: [
+        // Categories
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24),
+          child: Text(
+            'Categories',
+            style: AppTypography.labelLarge.copyWith(
+              color: const Color(0xFF111827),
+              fontWeight: FontWeight.bold,
+              fontSize: 18,
+            ),
+          ),
+        ),
+        const SizedBox(height: 16),
+        SizedBox(
+          height: 40,
+          child: ListView(
+            scrollDirection: Axis.horizontal,
+            padding: const EdgeInsets.symmetric(horizontal: 24),
+            children: const [
+              _CategoryChip(title: 'Design & Creative', isSelected: true),
+              _CategoryChip(title: 'Development & IT', isSelected: false),
+              _CategoryChip(title: 'AI Services', isSelected: false),
+              _CategoryChip(title: 'Marketing', isSelected: false),
+            ],
+          ),
+        ),
+        
+        const SizedBox(height: 32),
+        
+        // Top Rated
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'Top Rated Talent',
+                style: AppTypography.labelLarge.copyWith(
+                  color: const Color(0xFF111827),
+                  fontWeight: FontWeight.bold,
+                  fontSize: 18,
+                ),
+              ),
+              Text(
+                'See all',
+                style: AppTypography.labelMedium.copyWith(
+                  color: AppColors.primary,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 16),
+        const Padding(
+          padding: EdgeInsets.symmetric(horizontal: 24),
+          child: TalentResultCard(
+            name: 'Priya Sharma',
+            title: 'Data Scientist & ML Engineer',
+            hourlyRate: 130,
+            rating: 4.94,
+            reviewCount: 28,
+            location: 'Bangalore',
+            skills: ['Python', 'TensorFlow', 'PyTorch'],
+            imageUrl: 'https://i.pravatar.cc/150?img=9',
+            matchPercentage: 98,
+            isTopRated: true,
+            isVerified: true,
+            isAvailableNow: true,
+          ),
+        ),
+        const Padding(
+          padding: EdgeInsets.symmetric(horizontal: 24),
+          child: TalentResultCard(
+            name: 'Yuki Tanaka',
+            title: 'Motion Designer & Creative Director',
+            hourlyRate: 110,
+            rating: 4.97,
+            reviewCount: 51,
+            location: 'Tokyo',
+            skills: ['Motion Design', 'After Effects', '3D Animation'],
+            imageUrl: 'https://i.pravatar.cc/150?img=12',
+            matchPercentage: 86,
+            isVerified: true,
+            isAvailableNow: true,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _CategoryChip extends StatelessWidget {
+  final String title;
+  final bool isSelected;
+
+  const _CategoryChip({required this.title, required this.isSelected});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.only(right: 12),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      decoration: BoxDecoration(
+        color: isSelected ? const Color(0xFF111827) : Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: isSelected ? const Color(0xFF111827) : const Color(0xFFE5E7EB)),
+      ),
+      alignment: Alignment.center,
+      child: Text(
+        title,
+        style: TextStyle(
+          color: isSelected ? Colors.white : const Color(0xFF4B5563),
+          fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+          fontSize: 14,
+        ),
+      ),
     );
   }
 }

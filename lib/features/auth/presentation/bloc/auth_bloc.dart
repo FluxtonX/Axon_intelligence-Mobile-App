@@ -1,4 +1,4 @@
-import 'package:firebase_auth/firebase_auth.dart';
+
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'auth_event.dart';
@@ -29,7 +29,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         emit(const AuthInitial());
         return;
       }
-      // TODO: Pass Google credentials to Firebase Auth or your backend
+      // Simulate backend authentication with Google credentials
+      await Future.delayed(const Duration(seconds: 1));
       emit(const AuthSuccess());
     } catch (e) {
       emit(AuthError(e.toString()));
@@ -56,7 +57,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     Emitter<AuthState> emit,
   ) async {
     await _googleSignIn.signOut();
-    await FirebaseAuth.instance.signOut();
+
     emit(const AuthUnauthenticated());
   }
 }
