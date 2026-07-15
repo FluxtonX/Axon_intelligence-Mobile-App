@@ -1,6 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'gig_creation_event.dart';
 import 'gig_creation_state.dart';
+import '../../domain/entities/gig_entity.dart';
 
 class GigCreationBloc extends Bloc<GigCreationEvent, GigCreationState> {
   GigCreationBloc() : super(const GigCreationState()) {

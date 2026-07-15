@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/theme/theme.dart';
-import '../../gig_creation/presentation/bloc/gig_creation_bloc.dart';
-import '../../gig_creation/presentation/bloc/gig_creation_state.dart';
-import '../../gig_creation/domain/entities/gig_entity.dart';
+import '../../../gig_creation/presentation/bloc/gig_creation_bloc.dart';
+import '../../../gig_creation/presentation/bloc/gig_creation_state.dart';
+import '../../../gig_creation/domain/entities/gig_entity.dart';
 
 class SellerDashboardPage extends StatelessWidget {
   const SellerDashboardPage({super.key});

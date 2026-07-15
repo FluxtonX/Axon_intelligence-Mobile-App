@@ -4,10 +4,10 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/theme/theme.dart';
 import '../../../../shared/widgets/app_button.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../projects/presentation/bloc/client_projects_bloc.dart';
-import '../../projects/presentation/bloc/client_projects_state.dart';
-import '../../main_shell/presentation/bloc/main_shell_bloc.dart';
-import '../../main_shell/presentation/bloc/main_shell_event.dart';
+import '../../../projects/presentation/bloc/client_projects_bloc.dart';
+import '../../../projects/presentation/bloc/client_projects_state.dart';
+import '../../../main_shell/presentation/bloc/main_shell_bloc.dart';
+import '../../../main_shell/presentation/bloc/main_shell_event.dart';
 
 class ProjectBriefReviewPage extends StatefulWidget {
   const ProjectBriefReviewPage({super.key});
@@ -183,7 +183,7 @@ class _ProjectBriefReviewPageState extends State<ProjectBriefReviewPage> {
                           ),
                         ),
                       );
-                      context.read<MainShellBloc>().add(const TabChanged(1));
+                      context.read<MainShellBloc>().add(TabChanged(1));
                       context.go('/home');
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(content: Text('Your job has been published!')),
