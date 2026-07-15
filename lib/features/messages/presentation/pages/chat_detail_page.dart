@@ -9,10 +9,12 @@ class ChatDetailPage extends StatefulWidget {
     super.key,
     required this.chatId,
     required this.name,
+    this.avatarUrl = 'https://i.pravatar.cc/150?img=5',
   });
 
   final String chatId;
   final String name;
+  final String avatarUrl;
 
   @override
   State<ChatDetailPage> createState() => _ChatDetailPageState();
@@ -40,10 +42,13 @@ class _ChatDetailPageState extends State<ChatDetailPage> {
         ),
         title: Row(
           children: [
-            CircleAvatar(
-              radius: 16,
-              backgroundImage: const NetworkImage('https://i.pravatar.cc/150?img=5'), // Mock avatar based on name usually
-              backgroundColor: const Color(0xFFF3F4F6),
+            Hero(
+              tag: 'avatar_${widget.chatId}',
+              child: CircleAvatar(
+                radius: 16,
+                backgroundImage: NetworkImage(widget.avatarUrl),
+                backgroundColor: const Color(0xFFF3F4F6),
+              ),
             ),
             const SizedBox(width: 12),
             Expanded(

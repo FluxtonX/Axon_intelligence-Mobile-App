@@ -2,8 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/blocs/user_mode_cubit.dart';
 import '../../../../core/theme/theme.dart';
+import '../../../../shared/animations/fade_in_slide.dart';
 import '../widgets/escrow_summary_banner.dart';
 import '../widgets/contract_card.dart';
+import '../bloc/client_projects_bloc.dart';
+import '../bloc/client_projects_state.dart';
 
 class ProjectsPage extends StatelessWidget {
   const ProjectsPage({super.key});
@@ -172,12 +175,17 @@ class _PublishedProjectsTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ListView(
-      padding: const EdgeInsets.all(24),
-      children: [
-        _buildPublishedItem('AI Data Scientist for Model Tuning', '3 Proposals'),
-        _buildPublishedItem('React Native Developer (Senior)', '12 Proposals'),
-      ],
+    return BlocBuilder<ClientProjectsBloc, ClientProjectsState>(
+      builder: (context, state) {
+        return ListView(
+          padding: const EdgeInsets.all(24),
+          children: [
+            ...state.projects.map((project) => _buildPublishedItem(project.title, '0 Proposals')),
+            _buildPublishedItem('AI Data Scientist for Model Tuning', '3 Proposals'),
+            _buildPublishedItem('React Native Developer (Senior)', '12 Proposals'),
+          ],
+        );
+      },
     );
   }
 

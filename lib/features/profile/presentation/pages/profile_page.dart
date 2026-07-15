@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import '../../../../core/theme/theme.dart';
 import '../../../../core/theme/theme.dart';
 import '../../../../core/blocs/user_mode_cubit.dart';
@@ -119,14 +120,14 @@ class ProfilePage extends StatelessWidget {
                     leading: const Icon(Icons.settings_outlined, color: AppColors.textDark),
                     title: Text('Settings', style: AppTypography.bodyMedium.copyWith(color: AppColors.textDark)),
                     trailing: const Icon(Icons.arrow_forward_ios_rounded, size: 16, color: AppColors.textSecondary),
-                    onTap: () {},
+                    onTap: () => context.push('/settings'),
                   ),
                   const Divider(height: 1, indent: 16, endIndent: 16),
                   ListTile(
                     leading: const Icon(Icons.help_outline_rounded, color: AppColors.textDark),
                     title: Text('Help & Support', style: AppTypography.bodyMedium.copyWith(color: AppColors.textDark)),
                     trailing: const Icon(Icons.arrow_forward_ios_rounded, size: 16, color: AppColors.textSecondary),
-                    onTap: () {},
+                    onTap: () => context.push('/help_support'),
                   ),
                   const Divider(height: 1, indent: 16, endIndent: 16),
                   ListTile(

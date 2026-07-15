@@ -6,7 +6,14 @@ import '../widgets/portfolio_gallery.dart';
 import '../widgets/reviews_list.dart';
 
 class FreelancerProfilePage extends StatelessWidget {
-  const FreelancerProfilePage({super.key});
+  final String name;
+  final String imageUrl;
+
+  const FreelancerProfilePage({
+    super.key,
+    this.name = 'Sophia Chen',
+    this.imageUrl = 'https://i.pravatar.cc/150?img=5',
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -38,14 +45,14 @@ class FreelancerProfilePage extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Padding(
-                  padding: EdgeInsets.fromLTRB(24, 8, 24, 0),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(24, 8, 24, 0),
                   child: ProfileHeader(
-                    name: 'Sophia Chen',
+                    name: name,
                     title: 'Product Designer & Brand Strategist',
                     hourlyRate: 120,
                     location: 'San Francisco, CA',
-                    imageUrl: 'https://i.pravatar.cc/150?img=5',
+                    imageUrl: imageUrl,
                     isTopRated: true,
                   ),
                 ),

@@ -5,6 +5,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'core/theme/theme.dart';
 import 'core/router/app_router.dart';
+import 'features/hire/presentation/bloc/hire_bloc.dart';
+import 'features/hire/data/repositories/mock_hire_repository.dart';
+import 'features/proposals/presentation/bloc/proposals_bloc.dart';
+import 'features/gig_creation/presentation/bloc/gig_creation_bloc.dart';
+import 'features/projects/presentation/bloc/client_projects_bloc.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -38,6 +43,18 @@ class AxonIntelligenceApp extends StatelessWidget {
         ),
         BlocProvider<UserModeCubit>(
           create: (context) => UserModeCubit(),
+        ),
+        BlocProvider<HireBloc>(
+          create: (context) => HireBloc(MockHireRepository()),
+        ),
+        BlocProvider<ProposalsBloc>(
+          create: (context) => ProposalsBloc(),
+        ),
+        BlocProvider<GigCreationBloc>(
+          create: (context) => GigCreationBloc(),
+        ),
+        BlocProvider<ClientProjectsBloc>(
+          create: (context) => ClientProjectsBloc(),
         ),
       ],
       child: MaterialApp.router(

@@ -30,16 +30,19 @@ class ProfileHeader extends StatelessWidget {
             // Avatar
             Stack(
               children: [
-                Container(
-                  width: 80,
-                  height: 80,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    image: DecorationImage(
-                      image: NetworkImage(imageUrl),
-                      fit: BoxFit.cover,
+                Hero(
+                  tag: 'avatar_$name',
+                  child: Container(
+                    width: 80,
+                    height: 80,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      image: DecorationImage(
+                        image: NetworkImage(imageUrl),
+                        fit: BoxFit.cover,
+                      ),
+                      border: Border.all(color: const Color(0xFFE5E7EB), width: 3),
                     ),
-                    border: Border.all(color: const Color(0xFFE5E7EB), width: 3),
                   ),
                 ),
                 Positioned(

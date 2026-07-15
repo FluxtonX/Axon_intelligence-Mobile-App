@@ -35,7 +35,10 @@ class TalentResultCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () => context.push('/freelancer-profile'),
+      onTap: () => context.push('/freelancer-profile', extra: {
+        'name': name,
+        'imageUrl': imageUrl,
+      }),
       child: Container(
         margin: const EdgeInsets.only(bottom: 16),
         decoration: BoxDecoration(
@@ -62,16 +65,19 @@ class TalentResultCard extends StatelessWidget {
                 // Avatar
                 Stack(
                   children: [
-                    Container(
-                      width: 56,
-                      height: 56,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        image: DecorationImage(
-                          image: NetworkImage(imageUrl),
-                          fit: BoxFit.cover,
+                    Hero(
+                      tag: 'avatar_$name',
+                      child: Container(
+                        width: 56,
+                        height: 56,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          image: DecorationImage(
+                            image: NetworkImage(imageUrl),
+                            fit: BoxFit.cover,
+                          ),
+                          border: Border.all(color: const Color(0xFFF3F4F6), width: 2),
                         ),
-                        border: Border.all(color: const Color(0xFFF3F4F6), width: 2),
                       ),
                     ),
                     if (isAvailableNow)

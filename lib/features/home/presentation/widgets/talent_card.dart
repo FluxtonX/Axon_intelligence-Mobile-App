@@ -25,7 +25,10 @@ class TalentCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () => context.push('/freelancer-profile'),
+      onTap: () => context.push('/freelancer-profile', extra: {
+        'name': name,
+        'imageUrl': imageUrl,
+      }),
       child: Container(
       width: 240,
       padding: const EdgeInsets.all(20),
@@ -53,9 +56,12 @@ class TalentCard extends StatelessWidget {
             children: [
               Stack(
                 children: [
-                  CircleAvatar(
-                    radius: 24,
-                    backgroundImage: NetworkImage(imageUrl),
+                  Hero(
+                    tag: 'avatar_$name',
+                    child: CircleAvatar(
+                      radius: 24,
+                      backgroundImage: NetworkImage(imageUrl),
+                    ),
                   ),
                   Positioned(
                     bottom: 0,

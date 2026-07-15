@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/theme/theme.dart';
+import '../../../../shared/animations/fade_in_slide.dart';
 import '../bloc/discover_bloc.dart';
 import '../bloc/discover_event.dart';
 import '../bloc/discover_state.dart';

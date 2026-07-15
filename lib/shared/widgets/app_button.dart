@@ -6,7 +6,7 @@ enum AppButtonVariant { primary, secondary, outlined, ghost }
 
 /// Axon Intelligence — Reusable App Button
 /// Use this for all CTA buttons throughout the app.
-class AppButton extends StatelessWidget {
+class AppButton extends StatefulWidget {
   const AppButton({
     super.key,
     required this.label,
@@ -29,46 +29,93 @@ class AppButton extends StatelessWidget {
   final double borderRadius;
 
   @override
+  State<AppButton> createState() => _AppButtonState();
+}
+
+class _AppButtonState extends State<AppButton> with SingleTickerProviderStateMixin {
+  late final AnimationController _scaleController;
+
+  @override
+  void initState() {
+    super.initState();
+    _scaleController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 100),
+      lowerBound: 0.95,
+      upperBound: 1.0,
+      value: 1.0,
+    );
+  }
+
+  @override
+  void dispose() {
+    _scaleController.dispose();
+    super.dispose();
+  }
+
+  void _onPointerDown(PointerDownEvent event) {
+    if (widget.onPressed != null && !widget.isLoading) {
+      _scaleController.reverse();
+    }
+  }
+
+  void _onPointerUp(PointerUpEvent event) {
+    _scaleController.forward();
+  }
+
+  void _onPointerCancel(PointerCancelEvent event) {
+    _scaleController.forward();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return SizedBox(
-      width: isFullWidth ? double.infinity : null,
-      height: height,
-      child: _buildButton(),
+      width: widget.isFullWidth ? double.infinity : null,
+      height: widget.height,
+      child: Listener(
+        onPointerDown: _onPointerDown,
+        onPointerUp: _onPointerUp,
+        onPointerCancel: _onPointerCancel,
+        child: ScaleTransition(
+          scale: _scaleController,
+          child: _buildButton(),
+        ),
+      ),
     );
   }
 
   Widget _buildButton() {
-    switch (variant) {
+    switch (widget.variant) {
       case AppButtonVariant.primary:
         return _PrimaryButton(
-          label: label,
-          onPressed: isLoading ? null : onPressed,
-          isLoading: isLoading,
-          icon: icon,
-          borderRadius: borderRadius,
+          label: widget.label,
+          onPressed: widget.isLoading ? null : widget.onPressed,
+          isLoading: widget.isLoading,
+          icon: widget.icon,
+          borderRadius: widget.borderRadius,
         );
       case AppButtonVariant.secondary:
         return _SecondaryButton(
-          label: label,
-          onPressed: isLoading ? null : onPressed,
-          isLoading: isLoading,
-          icon: icon,
-          borderRadius: borderRadius,
+          label: widget.label,
+          onPressed: widget.isLoading ? null : widget.onPressed,
+          isLoading: widget.isLoading,
+          icon: widget.icon,
+          borderRadius: widget.borderRadius,
         );
       case AppButtonVariant.outlined:
         return _OutlinedButton(
-          label: label,
-          onPressed: isLoading ? null : onPressed,
-          isLoading: isLoading,
-          icon: icon,
-          borderRadius: borderRadius,
+          label: widget.label,
+          onPressed: widget.isLoading ? null : widget.onPressed,
+          isLoading: widget.isLoading,
+          icon: widget.icon,
+          borderRadius: widget.borderRadius,
         );
       case AppButtonVariant.ghost:
         return _GhostButton(
-          label: label,
-          onPressed: isLoading ? null : onPressed,
-          isLoading: isLoading,
-          icon: icon,
+          label: widget.label,
+          onPressed: widget.isLoading ? null : widget.onPressed,
+          isLoading: widget.isLoading,
+          icon: widget.icon,
         );
     }
   }

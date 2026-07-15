@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../../core/theme/theme.dart';
+import '../../../../shared/animations/fade_in_slide.dart';
 import '../widgets/conversation_tile.dart';
 
 class MessagesPage extends StatelessWidget {
@@ -46,25 +47,31 @@ class MessagesPage extends StatelessWidget {
               ),
             ),
           ),
-          ConversationTile(
-            id: 'chat_1',
-            name: 'Sophia Chen',
-            lastMessage: 'I have uploaded the final Figma files for the onboarding flow.',
-            time: '10:42 AM',
-            avatarUrl: 'https://i.pravatar.cc/150?img=5',
-            unreadCount: 2,
-            isOnline: true,
+          FadeInSlide(
+            delay: const Duration(milliseconds: 0),
+            child: ConversationTile(
+              id: 'chat_1',
+              name: 'Sophia Chen',
+              lastMessage: 'I have uploaded the final Figma files for the onboarding flow.',
+              time: '10:42 AM',
+              avatarUrl: 'https://i.pravatar.cc/150?img=5',
+              unreadCount: 2,
+              isOnline: true,
+            ),
           ),
-          ConversationTile(
-            id: 'chat_2',
-            name: 'Marcus Williams',
-            lastMessage: 'Could you review the milestone I just submitted?',
-            time: '9:15 AM',
-            avatarUrl: 'https://i.pravatar.cc/150?img=11',
-            unreadCount: 1,
-            isOnline: false,
+          FadeInSlide(
+            delay: const Duration(milliseconds: 100),
+            child: ConversationTile(
+              id: 'chat_2',
+              name: 'Marcus Williams',
+              lastMessage: 'Could you review the milestone I just submitted?',
+              time: '9:15 AM',
+              avatarUrl: 'https://i.pravatar.cc/150?img=11',
+              unreadCount: 1,
+              isOnline: false,
+            ),
           ),
-          Padding(
+          const Padding(
             padding: EdgeInsets.fromLTRB(24, 24, 24, 16),
             child: Text(
               'All Messages',
@@ -76,29 +83,38 @@ class MessagesPage extends StatelessWidget {
               ),
             ),
           ),
-          ConversationTile(
-            id: 'chat_3',
-            name: 'Yuki Tanaka',
-            lastMessage: 'Thanks! I will get started on the 3D assets tomorrow.',
-            time: 'Yesterday',
-            avatarUrl: 'https://i.pravatar.cc/150?img=12',
-            isOnline: true,
+          FadeInSlide(
+            delay: const Duration(milliseconds: 200),
+            child: ConversationTile(
+              id: 'chat_3',
+              name: 'Yuki Tanaka',
+              lastMessage: 'Thanks! I will get started on the 3D assets tomorrow.',
+              time: 'Yesterday',
+              avatarUrl: 'https://i.pravatar.cc/150?img=12',
+              isOnline: true,
+            ),
           ),
-          ConversationTile(
-            id: 'chat_4',
-            name: 'TechNova Agency',
-            lastMessage: 'The contract has been approved. Funds are in escrow.',
-            time: 'Monday',
-            avatarUrl: 'https://i.pravatar.cc/150?img=3',
-            isOnline: false,
+          FadeInSlide(
+            delay: const Duration(milliseconds: 300),
+            child: ConversationTile(
+              id: 'chat_4',
+              name: 'TechNova Agency',
+              lastMessage: 'The contract has been approved. Funds are in escrow.',
+              time: 'Monday',
+              avatarUrl: 'https://i.pravatar.cc/150?img=3',
+              isOnline: false,
+            ),
           ),
-          ConversationTile(
-            id: 'chat_5',
-            name: 'Emma Watson',
-            lastMessage: 'Are you available for a quick sync later today?',
-            time: 'Jul 10',
-            avatarUrl: 'https://i.pravatar.cc/150?img=9',
-            isOnline: false,
+          FadeInSlide(
+            delay: const Duration(milliseconds: 400),
+            child: ConversationTile(
+              id: 'chat_5',
+              name: 'Emma Watson',
+              lastMessage: 'Are you available for a quick sync later today?',
+              time: 'Jul 10',
+              avatarUrl: 'https://i.pravatar.cc/150?img=9',
+              isOnline: false,
+            ),
           ),
         ],
       ),

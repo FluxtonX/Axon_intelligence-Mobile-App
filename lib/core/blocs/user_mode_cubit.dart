@@ -8,4 +8,8 @@ class UserModeCubit extends Cubit<UserMode> {
   void toggleMode() {
     emit(state == UserMode.client ? UserMode.freelancer : UserMode.client);
   }
+
+  void setMode(UserMode mode) {
+    emit(mode);
+  }
 }

@@ -27,7 +27,10 @@ class ConversationTile extends StatelessWidget {
     final bool hasUnread = unreadCount > 0;
 
     return InkWell(
-      onTap: () => context.push('/chat/$id', extra: name),
+      onTap: () => context.push('/chat/$id', extra: {
+        'name': name,
+        'avatarUrl': avatarUrl,
+      }),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
         child: Row(
@@ -36,10 +39,13 @@ class ConversationTile extends StatelessWidget {
             // Avatar with Online Status
             Stack(
               children: [
-                CircleAvatar(
-                  radius: 28,
-                  backgroundImage: NetworkImage(avatarUrl),
-                  backgroundColor: const Color(0xFFF3F4F6),
+                Hero(
+                  tag: 'avatar_$id',
+                  child: CircleAvatar(
+                    radius: 28,
+                    backgroundImage: NetworkImage(avatarUrl),
+                    backgroundColor: const Color(0xFFF3F4F6),
+                  ),
                 ),
                 if (isOnline)
                   Positioned(
