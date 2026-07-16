@@ -1,11 +1,14 @@
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import '../../data/auth_repository.dart';
 import 'auth_event.dart';
 import 'auth_state.dart';
 
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
-  AuthBloc() : super(const AuthInitial()) {
+  final AuthRepository _authRepository;
+
+  AuthBloc(this._authRepository) : super(const AuthInitial()) {
     on<GoogleSignInRequested>(_onGoogleSignIn);
     on<EmailSignInRequested>(_onEmailSignIn);
     on<GuestBrowsingRequested>(_onGuestBrowsing);
@@ -57,7 +60,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     Emitter<AuthState> emit,
   ) async {
     await _googleSignIn.signOut();
-
+    await _authRepository.logout();
     emit(const AuthUnauthenticated());
   }
 }

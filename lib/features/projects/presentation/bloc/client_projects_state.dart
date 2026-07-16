@@ -1,41 +1,39 @@
 import 'package:equatable/equatable.dart';
+import '../../../../core/models/project_model.dart';
 
-class ClientProjectEntity extends Equatable {
-  final String id;
-  final String title;
-  final String description;
-  final String budget;
-  final String timeline;
-  final DateTime createdAt;
-
-  const ClientProjectEntity({
-    required this.id,
-    required this.title,
-    required this.description,
-    required this.budget,
-    required this.timeline,
-    required this.createdAt,
-  });
-
-  @override
-  List<Object?> get props => [id, title, description, budget, timeline, createdAt];
-}
+enum PublishStatus { initial, loading, success, failure }
 
 class ClientProjectsState extends Equatable {
-  final List<ClientProjectEntity> projects;
+  final List<ProjectModel> projects;
+  final bool isLoading;
+  final String? error;
+  final PublishStatus publishStatus;
+  final String? publishError;
 
   const ClientProjectsState({
     this.projects = const [],
+    this.isLoading = false,
+    this.error,
+    this.publishStatus = PublishStatus.initial,
+    this.publishError,
   });
 
   ClientProjectsState copyWith({
-    List<ClientProjectEntity>? projects,
+    List<ProjectModel>? projects,
+    bool? isLoading,
+    String? error,
+    PublishStatus? publishStatus,
+    String? publishError,
   }) {
     return ClientProjectsState(
       projects: projects ?? this.projects,
+      isLoading: isLoading ?? this.isLoading,
+      error: error,
+      publishStatus: publishStatus ?? this.publishStatus,
+      publishError: publishError,
     );
   }
 
   @override
-  List<Object?> get props => [projects];
+  List<Object?> get props => [projects, isLoading, error, publishStatus, publishError];
 }

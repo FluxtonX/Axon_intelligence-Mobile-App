@@ -7,6 +7,7 @@ import '../widgets/escrow_summary_banner.dart';
 import '../widgets/contract_card.dart';
 import '../bloc/client_projects_bloc.dart';
 import '../bloc/client_projects_state.dart';
+import '../../../../core/models/project_model.dart';
 
 class ProjectsPage extends StatelessWidget {
   const ProjectsPage({super.key});
@@ -177,19 +178,41 @@ class _PublishedProjectsTab extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocBuilder<ClientProjectsBloc, ClientProjectsState>(
       builder: (context, state) {
+        if (state.isLoading) {
+          return const Center(child: CircularProgressIndicator());
+        }
+        
+        if (state.error != null) {
+          return Center(child: Text('Error: ${state.error}'));
+        }
+
+        if (state.projects.isEmpty) {
+          return const Center(child: Text('No published projects yet.'));
+        }
+
         return ListView(
           padding: const EdgeInsets.all(24),
-          children: [
-            ...state.projects.map((project) => _buildPublishedItem(project.title, '0 Proposals')),
-            _buildPublishedItem('AI Data Scientist for Model Tuning', '3 Proposals'),
-            _buildPublishedItem('React Native Developer (Senior)', '12 Proposals'),
-          ],
+          children: state.projects.map((project) {
+            return _buildPublishedItem(project);
+          }).toList(),
         );
       },
     );
   }
 
-  Widget _buildPublishedItem(String title, String proposals) {
+  String _timeAgo(DateTime date) {
+    final difference = DateTime.now().difference(date);
+    if (difference.inDays > 0) return 'Posted ${difference.inDays} day${difference.inDays == 1 ? '' : 's'} ago';
+    if (difference.inHours > 0) return 'Posted ${difference.inHours} hour${difference.inHours == 1 ? '' : 's'} ago';
+    if (difference.inMinutes > 0) return 'Posted ${difference.inMinutes} minute${difference.inMinutes == 1 ? '' : 's'} ago';
+    return 'Posted just now';
+  }
+
+  Widget _buildPublishedItem(ProjectModel project) {
+    final clientName = project.client?['profile']?['firstName'] ?? 'You';
+    final lastName = project.client?['profile']?['lastName'] ?? '';
+    final fullName = lastName.isNotEmpty ? '$clientName $lastName' : clientName;
+
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.all(20),
@@ -198,42 +221,89 @@ class _PublishedProjectsTab extends StatelessWidget {
         borderRadius: BorderRadius.circular(20),
         border: Border.all(color: const Color(0xFFE5E7EB), width: 1.5),
       ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: AppTypography.headingSmall.copyWith(
-                    color: const Color(0xFF111827),
-                    fontSize: 16,
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      project.title,
+                      style: AppTypography.headingSmall.copyWith(
+                        color: const Color(0xFF111827),
+                        fontSize: 16,
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 4,
+                      crossAxisAlignment: WrapCrossAlignment.center,
+                      children: [
+                        Text(
+                          'By $fullName',
+                          style: AppTypography.caption.copyWith(color: AppColors.primary, fontWeight: FontWeight.bold),
+                        ),
+                        Text(
+                          '•',
+                          style: AppTypography.caption.copyWith(color: const Color(0xFF9CA3AF)),
+                        ),
+                        Text(
+                          _timeAgo(project.createdAt),
+                          style: AppTypography.caption.copyWith(color: const Color(0xFF9CA3AF)),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 12),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                decoration: BoxDecoration(
+                  color: AppColors.primary.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Text(
+                  '0 Proposals', // TODO: hook up proposals count
+                  style: AppTypography.caption.copyWith(
+                    color: AppColors.primary,
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
-                const SizedBox(height: 8),
-                Text(
-                  'Posted 2 days ago',
-                  style: AppTypography.caption.copyWith(color: const Color(0xFF9CA3AF)),
-                ),
-              ],
-            ),
-          ),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-            decoration: BoxDecoration(
-              color: AppColors.primary.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Text(
-              proposals,
-              style: AppTypography.caption.copyWith(
-                color: AppColors.primary,
-                fontWeight: FontWeight.bold,
               ),
-            ),
+            ],
           ),
+          const SizedBox(height: 8),
+          Text(
+            'Budget: \$${project.budget.toStringAsFixed(0)} • Timeline: ${project.timeline ?? "Flexible"}',
+            style: AppTypography.caption.copyWith(color: const Color(0xFF6B7280)),
+          ),
+          if (project.skills.isNotEmpty) ...[
+            const SizedBox(height: 12),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: project.skills.map((skill) {
+                return Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFF3F4F6),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Text(
+                    skill,
+                    style: AppTypography.caption.copyWith(color: const Color(0xFF4B5563), fontSize: 11),
+                  ),
+                );
+              }).toList(),
+            ),
+          ],
         ],
       ),
     );

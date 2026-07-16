@@ -31,7 +31,9 @@ class SettingsPage extends StatelessWidget {
           _buildSettingsItem(
             icon: Icons.person_outline_rounded,
             title: 'Personal Information',
-            onTap: () {},
+            onTap: () {
+              context.push('/edit_profile');
+            },
           ),
           _buildSettingsItem(
             icon: Icons.payment_rounded,

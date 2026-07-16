@@ -10,6 +10,7 @@ import '../../features/project_creation/presentation/pages/project_brief_review_
 import '../../features/freelancer_profile/presentation/pages/freelancer_profile_page.dart';
 import '../../features/messages/presentation/pages/chat_detail_page.dart';
 import '../../features/profile/presentation/pages/settings_page.dart';
+import '../../features/profile/presentation/pages/edit_profile_page.dart';
 import '../../features/profile/presentation/pages/help_support_page.dart';
 import '../../features/hire/presentation/pages/create_contract_page.dart';
 import '../../features/hire/presentation/pages/checkout_page.dart';
@@ -92,6 +93,11 @@ final GoRouter appRouter = GoRouter(
       path: '/settings',
       name: 'settings',
       builder: (context, state) => const SettingsPage(),
+    ),
+    GoRoute(
+      path: '/edit_profile',
+      name: 'editProfile',
+      builder: (context, state) => const EditProfilePage(),
     ),
     GoRoute(
       path: '/help_support',

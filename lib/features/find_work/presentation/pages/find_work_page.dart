@@ -1,7 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/theme/theme.dart';
 import '../../../../shared/animations/fade_in_slide.dart';
+import '../bloc/find_work_bloc.dart';
+import '../bloc/find_work_state.dart';
+import '../../../../core/models/project_model.dart';
+import 'package:timeago/timeago.dart' as timeago;
 
 class FindWorkPage extends StatelessWidget {
   const FindWorkPage({super.key});
@@ -76,48 +81,46 @@ class FindWorkPage extends StatelessWidget {
             
             // Job Listings
             Expanded(
-              child: ListView(
-                padding: const EdgeInsets.all(24),
-                children: const [
-                  FadeInSlide(
-                    delay: Duration(milliseconds: 0),
-                    child: _JobPostingCard(
-                      title: 'Senior Flutter Developer for Fintech App',
-                      clientName: 'Meridian Finance',
-                      budget: '\$3,000 - \$5,000',
-                      postedTime: 'Posted 2 hours ago',
-                      description: 'We are looking for an experienced Flutter developer to build our new personal finance application from scratch. Must have experience with complex state management and animations.',
-                      tags: ['Flutter', 'Dart', 'Firebase'],
-                      proposals: '5-10 proposals',
-                    ),
-                  ),
-                  SizedBox(height: 16),
-                  FadeInSlide(
-                    delay: Duration(milliseconds: 100),
-                    child: _JobPostingCard(
-                      title: 'UX/UI Designer for E-commerce Dashboard',
-                      clientName: 'TechStart Inc.',
-                      budget: '\$1,500',
-                      postedTime: 'Posted 5 hours ago',
-                      description: 'Need a complete redesign of our merchant dashboard. The focus should be on clean aesthetics, data visualization, and ease of use.',
-                      tags: ['Figma', 'UI/UX', 'Dashboard'],
-                      proposals: 'Less than 5 proposals',
-                    ),
-                  ),
-                  SizedBox(height: 16),
-                  FadeInSlide(
-                    delay: Duration(milliseconds: 200),
-                    child: _JobPostingCard(
-                      title: 'Backend Node.js API Integration',
-                      clientName: 'Global Solutions',
-                      budget: '\$50/hr',
-                      postedTime: 'Posted 1 day ago',
-                      description: 'Looking for a backend engineer to integrate third-party payment gateways and optimize our existing REST APIs.',
-                      tags: ['Node.js', 'Express', 'API'],
-                      proposals: '15-20 proposals',
-                    ),
-                  ),
-                ],
+              child: BlocBuilder<FindWorkBloc, FindWorkState>(
+                builder: (context, state) {
+                  if (state is FindWorkLoading) {
+                    return const Center(child: CircularProgressIndicator());
+                  } else if (state is FindWorkError) {
+                    return Center(child: Text('Error: ${state.message}', style: const TextStyle(color: Colors.red)));
+                  } else if (state is FindWorkLoaded) {
+                    if (state.projects.isEmpty) {
+                      return const Center(child: Text('No projects available', style: TextStyle(color: Colors.grey)));
+                    }
+                    return RefreshIndicator(
+                      onRefresh: () async {
+                        context.read<FindWorkBloc>().add(LoadProjectsEvent());
+                      },
+                      child: ListView.separated(
+                        padding: const EdgeInsets.all(24),
+                        itemCount: state.projects.length + (state.hasReachedMax ? 0 : 1),
+                        separatorBuilder: (context, index) => const SizedBox(height: 16),
+                        itemBuilder: (context, index) {
+                          if (index >= state.projects.length) {
+                            // Automatically load more when reaching the bottom
+                            context.read<FindWorkBloc>().add(LoadMoreProjectsEvent());
+                            return const Center(child: Padding(
+                              padding: EdgeInsets.all(16.0),
+                              child: CircularProgressIndicator(),
+                            ));
+                          }
+                          final project = state.projects[index];
+                          return FadeInSlide(
+                            delay: Duration(milliseconds: index * 50),
+                            child: _JobPostingCard(
+                              project: project,
+                            ),
+                          );
+                        },
+                      ),
+                    );
+                  }
+                  return const SizedBox.shrink();
+                },
               ),
             ),
           ],
@@ -157,26 +160,16 @@ class _CategoryChip extends StatelessWidget {
 }
 
 class _JobPostingCard extends StatelessWidget {
-  final String title;
-  final String clientName;
-  final String budget;
-  final String postedTime;
-  final String description;
-  final List<String> tags;
-  final String proposals;
+  final ProjectModel project;
 
   const _JobPostingCard({
-    required this.title,
-    required this.clientName,
-    required this.budget,
-    required this.postedTime,
-    required this.description,
-    required this.tags,
-    required this.proposals,
+    required this.project,
   });
 
   @override
   Widget build(BuildContext context) {
+    final clientName = project.client?['profile']?['firstName'] ?? 'Unknown Client';
+    
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -197,12 +190,12 @@ class _JobPostingCard extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(postedTime, style: AppTypography.caption.copyWith(color: const Color(0xFF6B7280))),
+              Text(timeago.format(project.createdAt), style: AppTypography.caption.copyWith(color: const Color(0xFF6B7280))),
               const Icon(Icons.bookmark_border_rounded, color: Color(0xFF6B7280), size: 20),
             ],
           ),
           const SizedBox(height: 8),
-          Text(title, style: AppTypography.headingSmall.copyWith(color: Colors.black, fontSize: 18)),
+          Text(project.title, style: AppTypography.headingSmall.copyWith(color: Colors.black, fontSize: 18)),
           const SizedBox(height: 12),
           Row(
             children: [
@@ -212,7 +205,7 @@ class _JobPostingCard extends StatelessWidget {
                   color: AppColors.primary.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(6),
                 ),
-                child: Text(budget, style: AppTypography.caption.copyWith(color: AppColors.primary, fontWeight: FontWeight.bold)),
+                child: Text('\$${project.budget.toStringAsFixed(0)}', style: AppTypography.caption.copyWith(color: AppColors.primary, fontWeight: FontWeight.bold)),
               ),
               const SizedBox(width: 12),
               Text('•', style: TextStyle(color: Colors.grey.shade400)),
@@ -224,7 +217,7 @@ class _JobPostingCard extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           Text(
-            description,
+            project.description,
             style: AppTypography.bodyMedium.copyWith(color: const Color(0xFF4B5563), height: 1.5),
             maxLines: 3,
             overflow: TextOverflow.ellipsis,
@@ -233,7 +226,7 @@ class _JobPostingCard extends StatelessWidget {
           Wrap(
             spacing: 8,
             runSpacing: 8,
-            children: tags.map((tag) {
+            children: project.skills.map((tag) {
               return Container(
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                 decoration: BoxDecoration(
@@ -250,13 +243,13 @@ class _JobPostingCard extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(proposals, style: AppTypography.caption.copyWith(color: const Color(0xFF6B7280))),
+              Text('Be the first to apply', style: AppTypography.caption.copyWith(color: const Color(0xFF6B7280))),
               ElevatedButton(
                 onPressed: () {
                   context.pushNamed(
                     'submitProposal',
                     extra: {
-                      'jobTitle': title,
+                      'jobTitle': project.title,
                       'clientName': clientName,
                     },
                   );

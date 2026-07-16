@@ -13,13 +13,19 @@ import 'features/hire/data/repositories/mock_hire_repository.dart';
 import 'features/proposals/presentation/bloc/proposals_bloc.dart';
 import 'features/gig_creation/presentation/bloc/gig_creation_bloc.dart';
 import 'features/projects/presentation/bloc/client_projects_bloc.dart';
-
+import 'features/profile/data/repositories/profile_repository.dart';
+import 'features/profile/presentation/bloc/profile_cubit.dart';
+import 'features/projects/data/repositories/project_repository.dart';
+import 'features/find_work/presentation/bloc/find_work_bloc.dart';
+import 'features/find_work/presentation/bloc/find_work_event.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   final localStorage = await LocalStorage.init();
   final apiClient = ApiClient(localStorage);
   final authRepository = AuthRepository(apiClient, localStorage);
+  final profileRepository = ProfileRepository(apiClient);
+  final projectRepository = ProjectRepository(apiClient);
 
   // Lock to portrait orientation
   await SystemChrome.setPreferredOrientations([
@@ -35,22 +41,40 @@ void main() async {
     systemNavigationBarIconBrightness: Brightness.light,
   ));
 
-  runApp(AxonIntelligenceApp(authRepository: authRepository));
+  runApp(AxonIntelligenceApp(
+    authRepository: authRepository, 
+    profileRepository: profileRepository,
+    projectRepository: projectRepository,
+  ));
 }
 
 class AxonIntelligenceApp extends StatelessWidget {
   final AuthRepository authRepository;
+  final ProfileRepository profileRepository;
+  final ProjectRepository projectRepository;
 
-  const AxonIntelligenceApp({super.key, required this.authRepository});
+  const AxonIntelligenceApp({
+    super.key, 
+    required this.authRepository, 
+    required this.profileRepository,
+    required this.projectRepository,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return RepositoryProvider.value(
-      value: authRepository,
+    return MultiRepositoryProvider(
+      providers: [
+        RepositoryProvider.value(value: authRepository),
+        RepositoryProvider.value(value: profileRepository),
+        RepositoryProvider.value(value: projectRepository),
+      ],
       child: MultiBlocProvider(
         providers: [
         BlocProvider<AuthBloc>(
-          create: (context) => AuthBloc(),
+          create: (context) => AuthBloc(authRepository),
+        ),
+        BlocProvider<ProfileCubit>(
+          create: (context) => ProfileCubit(profileRepository)..loadProfile(),
         ),
         BlocProvider<UserModeCubit>(
           create: (context) => UserModeCubit(),
@@ -65,7 +89,10 @@ class AxonIntelligenceApp extends StatelessWidget {
           create: (context) => GigCreationBloc(),
         ),
         BlocProvider<ClientProjectsBloc>(
-          create: (context) => ClientProjectsBloc(),
+          create: (context) => ClientProjectsBloc(projectRepository)..add(LoadClientProjectsEvent()),
+        ),
+        BlocProvider<FindWorkBloc>(
+          create: (context) => FindWorkBloc(projectRepository: projectRepository)..add(LoadProjectsEvent()),
         ),
       ],
       child: MaterialApp.router(

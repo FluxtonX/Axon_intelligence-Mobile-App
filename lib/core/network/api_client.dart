@@ -5,9 +5,8 @@ class ApiClient {
   final Dio _dio;
   final LocalStorage _storage;
 
-  // Use 10.0.2.2 for Android Emulator, localhost for iOS/Web/Windows
-  // Since user might run on Windows/Web, we'll use localhost.
-  static const String baseUrl = 'http://localhost:3000/api';
+  // Use the computer's local Wi-Fi IP address so physical devices over USB can reach the backend.
+  static const String baseUrl = 'http://192.168.1.3:3000/api';
 
   ApiClient(this._storage) : _dio = Dio(BaseOptions(
     baseUrl: baseUrl,

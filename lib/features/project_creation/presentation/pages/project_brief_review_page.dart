@@ -6,8 +6,6 @@ import '../../../../shared/widgets/app_button.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../projects/presentation/bloc/client_projects_bloc.dart';
 import '../../../projects/presentation/bloc/client_projects_state.dart';
-import '../../../main_shell/presentation/bloc/main_shell_bloc.dart';
-import '../../../main_shell/presentation/bloc/main_shell_event.dart';
 
 class ProjectBriefReviewPage extends StatefulWidget {
   const ProjectBriefReviewPage({super.key});
@@ -20,11 +18,17 @@ class _ProjectBriefReviewPageState extends State<ProjectBriefReviewPage> {
   final TextEditingController _titleController = TextEditingController(text: 'E-Commerce Mobile App (Flutter & Firebase)');
   final TextEditingController _descriptionController = TextEditingController(
       text: 'I am looking for an experienced Flutter developer to build a modern e-commerce mobile application. The app should have a sleek, premium UI/UX, user authentication via Firebase, product catalog, shopping cart, and Stripe integration for payments. The ideal candidate has experience with state management (Bloc/Provider) and building scalable architectures.\n\nKey Requirements:\n- Flutter (iOS & Android)\n- Firebase Authentication & Firestore\n- Stripe Payment Integration\n- Push Notifications\n- Clean Architecture');
+  final TextEditingController _budgetController = TextEditingController(text: '2000');
+  final TextEditingController _timelineController = TextEditingController(text: '2 - 4 Weeks');
+  final TextEditingController _skillsController = TextEditingController(text: 'Flutter, Firebase, Stripe API');
 
   @override
   void dispose() {
     _titleController.dispose();
     _descriptionController.dispose();
+    _budgetController.dispose();
+    _timelineController.dispose();
+    _skillsController.dispose();
     super.dispose();
   }
 
@@ -49,9 +53,30 @@ class _ProjectBriefReviewPageState extends State<ProjectBriefReviewPage> {
         ),
         centerTitle: true,
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(24),
-        child: Column(
+      body: BlocConsumer<ClientProjectsBloc, ClientProjectsState>(
+        listener: (context, state) {
+          if (state.publishStatus == PublishStatus.success) {
+            context.read<ClientProjectsBloc>().add(ResetPublishStatusEvent());
+            context.go('/home');
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Your job has been published successfully!'),
+                backgroundColor: Colors.green,
+              ),
+            );
+          } else if (state.publishStatus == PublishStatus.failure) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(state.publishError ?? 'Failed to publish job'),
+                backgroundColor: Colors.red,
+              ),
+            );
+          }
+        },
+        builder: (context, state) {
+          return SingleChildScrollView(
+            padding: const EdgeInsets.all(24),
+            child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // AI Badge
@@ -122,31 +147,89 @@ class _ProjectBriefReviewPageState extends State<ProjectBriefReviewPage> {
             ),
             const SizedBox(height: 24),
 
-            // AI Suggested Tags
+            // Skills Input
             Text(
-              'Suggested Skills',
+              'Required Skills (comma separated)',
               style: AppTypography.labelLarge.copyWith(color: AppColors.textDark, fontWeight: FontWeight.w600),
             ),
-            const SizedBox(height: 12),
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: [
-                _buildSkillChip('Flutter'),
-                _buildSkillChip('Firebase'),
-                _buildSkillChip('Mobile App Development'),
-                _buildSkillChip('UI/UX Design'),
-                _buildSkillChip('Stripe API'),
-              ],
+            const SizedBox(height: 8),
+            Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: const Color(0xFFE5E7EB)),
+              ),
+              child: TextField(
+                controller: _skillsController,
+                style: AppTypography.bodyMedium,
+                decoration: const InputDecoration(
+                  border: InputBorder.none,
+                  contentPadding: EdgeInsets.all(16),
+                  hintText: 'e.g. Flutter, Firebase, Node.js',
+                ),
+              ),
             ),
-            const SizedBox(height: 32),
+            const SizedBox(height: 24),
 
-            // Budget and Timeline
+            // Budget and Timeline Inputs
             Row(
               children: [
-                Expanded(child: _buildEstimateCard('Est. Budget', '\$1,500 - \$3,000', Icons.payments_rounded)),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Budget (\$)',
+                        style: AppTypography.labelLarge.copyWith(color: AppColors.textDark, fontWeight: FontWeight.w600),
+                      ),
+                      const SizedBox(height: 8),
+                      Container(
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: const Color(0xFFE5E7EB)),
+                        ),
+                        child: TextField(
+                          controller: _budgetController,
+                          keyboardType: TextInputType.number,
+                          style: AppTypography.bodyMedium,
+                          decoration: const InputDecoration(
+                            border: InputBorder.none,
+                            contentPadding: EdgeInsets.all(16),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
                 const SizedBox(width: 16),
-                Expanded(child: _buildEstimateCard('Timeline', '2 - 4 Weeks', Icons.schedule_rounded)),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Timeline',
+                        style: AppTypography.labelLarge.copyWith(color: AppColors.textDark, fontWeight: FontWeight.w600),
+                      ),
+                      const SizedBox(height: 8),
+                      Container(
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: const Color(0xFFE5E7EB)),
+                        ),
+                        child: TextField(
+                          controller: _timelineController,
+                          style: AppTypography.bodyMedium,
+                          decoration: const InputDecoration(
+                            border: InputBorder.none,
+                            contentPadding: EdgeInsets.all(16),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               ],
             ),
             const SizedBox(height: 40),
@@ -169,24 +252,23 @@ class _ProjectBriefReviewPageState extends State<ProjectBriefReviewPage> {
                 const SizedBox(width: 16),
                 Expanded(
                   child: AppButton(
-                    label: 'Publish Job',
-                    onPressed: () {
+                    label: state.publishStatus == PublishStatus.loading ? 'Publishing...' : 'Publish Job',
+                    onPressed: state.publishStatus == PublishStatus.loading ? null : () {
+                      final double parsedBudget = double.tryParse(_budgetController.text) ?? 0.0;
+                      final List<String> parsedSkills = _skillsController.text
+                          .split(',')
+                          .map((s) => s.trim())
+                          .where((s) => s.isNotEmpty)
+                          .toList();
+
                       context.read<ClientProjectsBloc>().add(
                         PublishProjectEvent(
-                          ClientProjectEntity(
-                            id: DateTime.now().toString(),
-                            title: _titleController.text,
-                            description: _descriptionController.text,
-                            budget: '\$1,500 - \$3,000',
-                            timeline: '2 - 4 Weeks',
-                            createdAt: DateTime.now(),
-                          ),
+                          title: _titleController.text,
+                          description: _descriptionController.text,
+                          budget: parsedBudget,
+                          timeline: _timelineController.text,
+                          skills: parsedSkills,
                         ),
-                      );
-                      context.read<MainShellBloc>().add(TabChanged(1));
-                      context.go('/home');
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Your job has been published!')),
                       );
                     },
                   ),
@@ -196,7 +278,9 @@ class _ProjectBriefReviewPageState extends State<ProjectBriefReviewPage> {
             const SizedBox(height: 32),
           ],
         ),
-      ),
+      );
+    },
+  ),
     );
   }
 

@@ -6,6 +6,8 @@ import '../../../../core/theme/theme.dart';
 import '../../../../core/blocs/user_mode_cubit.dart';
 import '../../../auth/presentation/bloc/auth_bloc.dart';
 import '../../../auth/presentation/bloc/auth_event.dart';
+import '../bloc/profile_cubit.dart';
+import '../bloc/profile_state.dart';
 
 class ProfilePage extends StatelessWidget {
   const ProfilePage({super.key});
@@ -28,56 +30,74 @@ class ProfilePage extends StatelessWidget {
         child: Column(
           children: [
             // Profile Header
-            Container(
-              padding: const EdgeInsets.all(24),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(20),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.02),
-                    blurRadius: 10,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
-              ),
-              child: Row(
-                children: [
-                  Container(
-                    width: 64,
-                    height: 64,
+            BlocBuilder<ProfileCubit, ProfileState>(
+              builder: (context, state) {
+                if (state is ProfileLoading || state is ProfileInitial) {
+                  return const Center(child: CircularProgressIndicator());
+                } else if (state is ProfileError) {
+                  return Center(child: Text('Error: ${state.message}'));
+                } else if (state is ProfileLoaded) {
+                  final profile = state.user.profile;
+                  final name = profile != null 
+                      ? '${profile.firstName} ${profile.lastName}'.trim() 
+                      : 'Unknown User';
+                  final email = state.user.email;
+                  final avatar = profile?.avatarUrl ?? 'https://ui-avatars.com/api/?name=${Uri.encodeComponent(name)}';
+
+                  return Container(
+                    padding: const EdgeInsets.all(24),
                     decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      image: const DecorationImage(
-                        image: NetworkImage('https://i.pravatar.cc/150?img=11'),
-                        fit: BoxFit.cover,
-                      ),
-                      border: Border.all(color: const Color(0xFFE5E7EB), width: 2),
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(20),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.02),
+                          blurRadius: 10,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
                     ),
-                  ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                    child: Row(
                       children: [
-                        Text(
-                          'Meridian Finance',
-                          style: AppTypography.headingSmall.copyWith(
-                            color: AppColors.textDark,
+                        Container(
+                          width: 64,
+                          height: 64,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            image: DecorationImage(
+                              image: NetworkImage(avatar),
+                              fit: BoxFit.cover,
+                            ),
+                            border: Border.all(color: const Color(0xFFE5E7EB), width: 2),
                           ),
                         ),
-                        const SizedBox(height: 4),
-                        Text(
-                          'meridian@example.com',
-                          style: AppTypography.bodySmall.copyWith(
-                            color: AppColors.textSecondary,
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                name.isEmpty ? 'User' : name,
+                                style: AppTypography.headingSmall.copyWith(
+                                  color: AppColors.textDark,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                email,
+                                style: AppTypography.bodySmall.copyWith(
+                                  color: AppColors.textSecondary,
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                       ],
                     ),
-                  ),
-                ],
-              ),
+                  );
+                }
+                return const SizedBox();
+              }
             ),
             
             const SizedBox(height: 24),
