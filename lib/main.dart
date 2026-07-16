@@ -1,4 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'core/storage/local_storage.dart';
+import 'core/network/api_client.dart';
+import 'features/auth/data/auth_repository.dart';
 import 'core/blocs/user_mode_cubit.dart';
 import 'features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:flutter/material.dart';
@@ -14,6 +17,10 @@ import 'features/projects/presentation/bloc/client_projects_bloc.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
+  final localStorage = await LocalStorage.init();
+  final apiClient = ApiClient(localStorage);
+  final authRepository = AuthRepository(apiClient, localStorage);
+
   // Lock to portrait orientation
   await SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
@@ -28,16 +35,20 @@ void main() async {
     systemNavigationBarIconBrightness: Brightness.light,
   ));
 
-  runApp(const AxonIntelligenceApp());
+  runApp(AxonIntelligenceApp(authRepository: authRepository));
 }
 
 class AxonIntelligenceApp extends StatelessWidget {
-  const AxonIntelligenceApp({super.key});
+  final AuthRepository authRepository;
+
+  const AxonIntelligenceApp({super.key, required this.authRepository});
 
   @override
   Widget build(BuildContext context) {
-    return MultiBlocProvider(
-      providers: [
+    return RepositoryProvider.value(
+      value: authRepository,
+      child: MultiBlocProvider(
+        providers: [
         BlocProvider<AuthBloc>(
           create: (context) => AuthBloc(),
         ),
@@ -63,6 +74,6 @@ class AxonIntelligenceApp extends StatelessWidget {
         theme: AppTheme.darkTheme,
         routerConfig: appRouter,
       ),
-    );
+    ));
   }
 }

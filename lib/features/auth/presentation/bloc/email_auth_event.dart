@@ -27,3 +27,25 @@ class EmailAuthSubmitted extends EmailAuthEvent {
   @override
   List<Object?> get props => [email, password, name];
 }
+
+class EmailAuthForgotPasswordSubmitted extends EmailAuthEvent {
+  const EmailAuthForgotPasswordSubmitted({required this.email});
+  
+  final String email;
+  
+  @override
+  List<Object?> get props => [email];
+}
+
+class EmailAuthResetPasswordSubmitted extends EmailAuthEvent {
+  const EmailAuthResetPasswordSubmitted({
+    required this.token,
+    required this.newPassword,
+  });
+  
+  final String token;
+  final String newPassword;
+  
+  @override
+  List<Object?> get props => [token, newPassword];
+}

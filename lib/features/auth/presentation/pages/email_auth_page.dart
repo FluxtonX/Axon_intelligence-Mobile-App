@@ -7,6 +7,7 @@ import '../../../../shared/widgets/primary_button.dart';
 import '../bloc/email_auth_bloc.dart';
 import '../bloc/email_auth_event.dart';
 import '../bloc/email_auth_state.dart';
+import '../../data/auth_repository.dart';
 
 class EmailAuthPage extends StatelessWidget {
   const EmailAuthPage({super.key});
@@ -14,7 +15,7 @@ class EmailAuthPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (_) => EmailAuthBloc(),
+      create: (context) => EmailAuthBloc(context.read<AuthRepository>()),
       child: const _EmailAuthView(),
     );
   }
@@ -75,11 +76,20 @@ class _EmailAuthViewState extends State<_EmailAuthView> {
               const SnackBar(content: Text('Successfully authenticated!')),
             );
           }
+          if (state.successMessage != null) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(state.successMessage!),
+                backgroundColor: const Color(0xFF10B981), // Green color for success
+                behavior: SnackBarBehavior.floating,
+              ),
+            );
+          }
           if (state.error != null) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(state.error!),
-                backgroundColor: const Color(0xFFEF4444),
+                backgroundColor: const Color(0xFFEF4444), // Red color for errors
                 behavior: SnackBarBehavior.floating,
               ),
             );
@@ -194,9 +204,7 @@ class _EmailAuthViewState extends State<_EmailAuthView> {
                       Align(
                         alignment: Alignment.centerRight,
                         child: TextButton(
-                          onPressed: () {
-                            // TODO: Forgot password flow
-                          },
+                          onPressed: () => _showForgotPasswordDialog(context),
                           child: Text(
                             'Forgot Password?',
                             style: AppTypography.labelMedium.copyWith(
@@ -258,6 +266,115 @@ class _EmailAuthViewState extends State<_EmailAuthView> {
             ),
           );
         },
+      ),
+    );
+  }
+
+  void _showForgotPasswordDialog(BuildContext context) {
+    final bloc = context.read<EmailAuthBloc>();
+    final emailController = TextEditingController(text: _emailController.text);
+    
+    showDialog(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text('Reset Password', style: AppTypography.headingMedium.copyWith(color: AppColors.textDark)),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('Enter your email to receive a reset code.', style: AppTypography.bodyMedium.copyWith(color: AppColors.textSecondary)),
+            const SizedBox(height: 16),
+            TextField(
+              controller: emailController,
+              decoration: InputDecoration(
+                hintText: 'you@example.com',
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary),
+            onPressed: () {
+              if (emailController.text.isNotEmpty) {
+                bloc.add(EmailAuthForgotPasswordSubmitted(email: emailController.text));
+                Navigator.pop(dialogContext); // Close first dialog
+                _showEnterResetCodeDialog(context); // Open second dialog immediately
+              }
+            },
+            child: const Text('Send Reset Code'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showEnterResetCodeDialog(BuildContext context) {
+    final bloc = context.read<EmailAuthBloc>();
+    final codeController = TextEditingController();
+    final newPasswordController = TextEditingController();
+    
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (dialogContext) => AlertDialog(
+        title: Text('Enter Reset Code', style: AppTypography.headingMedium.copyWith(color: AppColors.textDark)),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('We sent a 6-digit code to your email.', style: AppTypography.bodyMedium.copyWith(color: AppColors.textSecondary)),
+            const SizedBox(height: 16),
+            TextField(
+              controller: codeController,
+              keyboardType: TextInputType.number,
+              maxLength: 6,
+              decoration: InputDecoration(
+                hintText: '000000',
+                labelText: '6-Digit Code',
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+              ),
+            ),
+            const SizedBox(height: 16),
+            TextField(
+              controller: newPasswordController,
+              obscureText: true,
+              decoration: InputDecoration(
+                hintText: '••••••••',
+                labelText: 'New Password',
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary),
+            onPressed: () {
+              if (codeController.text.length == 6 && newPasswordController.text.length >= 6) {
+                bloc.add(EmailAuthResetPasswordSubmitted(
+                  token: codeController.text,
+                  newPassword: newPasswordController.text,
+                ));
+                Navigator.pop(dialogContext);
+              } else {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Please enter a valid 6-digit code and a password of at least 6 characters.')),
+                );
+              }
+            },
+            child: const Text('Save New Password'),
+          ),
+        ],
       ),
     );
   }
