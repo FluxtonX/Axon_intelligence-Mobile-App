@@ -149,7 +149,7 @@ class _ProjectProposalsPageState extends State<ProjectProposalsPage> {
   }
 
   Widget _buildProposalCard(ProposalEntity proposal) {
-    final freelancerName = proposal.freelancer?['profile']?['firstName'] ?? 'Freelancer';
+    final freelancerName = proposal.freelancerName;
     
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
@@ -217,7 +217,7 @@ class _ProjectProposalsPageState extends State<ProjectProposalsPage> {
               const Icon(Icons.timer_outlined, size: 16, color: Color(0xFF6B7280)),
               const SizedBox(width: 4),
               Text(
-                '${proposal.deliveryDays} days delivery',
+                '${proposal.estimatedDays} days delivery',
                 style: AppTypography.caption.copyWith(color: const Color(0xFF6B7280)),
               ),
             ],

@@ -236,7 +236,7 @@ class _PublishedProjectsTab extends StatelessWidget {
         return ListView(
           padding: const EdgeInsets.all(24),
           children: state.projects.map((project) {
-            return _buildPublishedItem(project);
+            return _buildPublishedItem(context, project);
           }).toList(),
         );
       },
@@ -251,7 +251,7 @@ class _PublishedProjectsTab extends StatelessWidget {
     return 'Posted just now';
   }
 
-  Widget _buildPublishedItem(ProjectModel project) {
+  Widget _buildPublishedItem(BuildContext context, ProjectModel project) {
     final clientName = project.client?['profile']?['firstName'] ?? 'You';
     final lastName = project.client?['profile']?['lastName'] ?? '';
     final fullName = lastName.isNotEmpty ? '$clientName $lastName' : clientName;
@@ -358,7 +358,7 @@ class _PublishedProjectsTab extends StatelessWidget {
           ],
         ],
       ),
-    );
+    ));
   }
 }
 
