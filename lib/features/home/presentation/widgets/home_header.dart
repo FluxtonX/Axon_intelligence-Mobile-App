@@ -1,43 +1,45 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import '../../../../core/theme/theme.dart';
+import '../../../../core/models/user_model.dart';
 import '../../../auth/presentation/bloc/auth_bloc.dart';
 import '../../../auth/presentation/bloc/auth_event.dart';
+import '../../../profile/presentation/bloc/profile_cubit.dart';
+import '../../../profile/presentation/bloc/profile_state.dart';
 
 class HomeHeader extends StatelessWidget {
   const HomeHeader({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Row(
+    return BlocBuilder<ProfileCubit, ProfileState>(
+      builder: (context, state) {
+        UserModel? user;
+        if (state is ProfileLoaded) {
+          user = state.user;
+        }
+        
+        final avatarUrl = user?.profile?.avatarUrl ?? 'https://i.pravatar.cc/150?img=11';
+        final firstName = user?.profile?.firstName ?? 'User';
+        final lastName = user?.profile?.lastName ?? '';
+        final displayName = '$firstName $lastName'.trim();
+
+        return Row(
       children: [
         // Profile Picture with Sign Out Menu
-        PopupMenuButton<String>(
-          onSelected: (value) {
-            if (value == 'logout') {
-              context.read<AuthBloc>().add(const SignOutRequested());
-            }
+        // Profile Picture directly navigating to Settings
+        GestureDetector(
+          onTap: () {
+            context.push('/settings');
           },
-          offset: const Offset(0, 50),
-          itemBuilder: (context) => [
-            const PopupMenuItem(
-              value: 'logout',
-              child: Row(
-                children: [
-                  Icon(Icons.logout_rounded, color: Colors.redAccent, size: 20),
-                  SizedBox(width: 12),
-                  Text('Sign Out', style: TextStyle(color: Colors.redAccent)),
-                ],
-              ),
-            ),
-          ],
           child: Container(
             width: 48,
             height: 48,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              image: const DecorationImage(
-                image: NetworkImage('https://i.pravatar.cc/150?img=11'),
+              image: DecorationImage(
+                image: NetworkImage(avatarUrl),
                 fit: BoxFit.cover,
               ),
               border: Border.all(color: const Color(0xFFE5E7EB), width: 1.5),
@@ -58,7 +60,7 @@ class HomeHeader extends StatelessWidget {
                 ),
               ),
               Text(
-                'Meridian Finance',
+                displayName,
                 style: AppTypography.headingMedium.copyWith(
                   color: AppColors.textDark,
                   fontSize: 18,
@@ -102,6 +104,8 @@ class HomeHeader extends StatelessWidget {
           ],
         ),
       ],
+    );
+      },
     );
   }
 }

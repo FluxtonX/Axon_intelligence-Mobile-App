@@ -3,6 +3,8 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/theme/theme.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/blocs/user_mode_cubit.dart';
+import '../../../auth/presentation/bloc/auth_bloc.dart';
+import '../../../auth/presentation/bloc/auth_event.dart';
 
 class SettingsPage extends StatelessWidget {
   const SettingsPage({super.key});
@@ -96,6 +98,23 @@ class SettingsPage extends StatelessWidget {
               activeColor: AppColors.primary,
             ),
             onTap: () {},
+          ),
+          const SizedBox(height: 24),
+          
+          // Sign Out Button
+          Container(
+            margin: const EdgeInsets.only(bottom: 24),
+            child: ListTile(
+              leading: const Icon(Icons.logout_rounded, color: Colors.redAccent),
+              title: Text('Sign Out', style: AppTypography.bodyMedium.copyWith(color: Colors.redAccent, fontWeight: FontWeight.w600)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+                side: const BorderSide(color: Colors.redAccent, width: 1.5),
+              ),
+              onTap: () {
+                context.read<AuthBloc>().add(const SignOutRequested());
+              },
+            ),
           ),
         ],
       ),

@@ -1,22 +1,29 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/theme/theme.dart';
+import '../../../../core/models/user_model.dart';
 import '../widgets/profile_header.dart';
 import '../widgets/portfolio_gallery.dart';
 import '../widgets/reviews_list.dart';
 
 class FreelancerProfilePage extends StatelessWidget {
-  final String name;
-  final String imageUrl;
+  final UserModel? user;
 
   const FreelancerProfilePage({
     super.key,
-    this.name = 'Sophia Chen',
-    this.imageUrl = 'https://i.pravatar.cc/150?img=5',
+    this.user,
   });
 
   @override
   Widget build(BuildContext context) {
+    final displayName = user != null ? '${user!.profile?.firstName} ${user!.profile?.lastName}'.trim() : 'Freelancer';
+    final title = user?.profile?.title ?? 'Professional Freelancer';
+    final hourlyRate = user?.profile?.hourlyRate?.toInt() ?? 0;
+    final location = 'Remote'; // From backend later
+    final displayImageUrl = user?.profile?.avatarUrl ?? 'https://i.pravatar.cc/150?img=5';
+    final bio = user?.profile?.bio ?? 'Passionate freelancer ready to work on amazing projects.';
+    final skills = user?.profile?.skills ?? [];
+
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -48,12 +55,12 @@ class FreelancerProfilePage extends StatelessWidget {
                 Padding(
                   padding: const EdgeInsets.fromLTRB(24, 8, 24, 0),
                   child: ProfileHeader(
-                    name: name,
-                    title: 'Product Designer & Brand Strategist',
-                    hourlyRate: 120,
-                    location: 'San Francisco, CA',
-                    imageUrl: imageUrl,
-                    isTopRated: true,
+                    name: displayName.isEmpty ? 'Freelancer' : displayName,
+                    title: title,
+                    hourlyRate: hourlyRate,
+                    location: location,
+                    imageUrl: displayImageUrl,
+                    isTopRated: (user?.profile?.averageRating ?? 0.0) >= 4.8,
                   ),
                 ),
                 const SizedBox(height: 32),
@@ -73,33 +80,34 @@ class FreelancerProfilePage extends StatelessWidget {
                       ),
                       const SizedBox(height: 12),
                       Text(
-                        'I am a senior product designer with 8+ years of experience crafting digital products for top tech companies. Specializing in UI/UX, design systems, and brand identity. I believe in minimal, functional, and highly polished interfaces.',
+                        bio,
                         style: AppTypography.bodyMedium.copyWith(
                           color: const Color(0xFF4B5563),
                           height: 1.6,
                         ),
                       ),
                       const SizedBox(height: 16),
-                      Wrap(
-                        spacing: 8,
-                        runSpacing: 8,
-                        children: ['Product Design', 'Figma', 'UI/UX', 'Design Systems', 'Prototyping'].map((skill) {
-                          return Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                            decoration: BoxDecoration(
-                              color: const Color(0xFFF3F4F6),
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: Text(
-                              skill,
-                              style: AppTypography.caption.copyWith(
-                                color: const Color(0xFF374151),
-                                fontWeight: FontWeight.w600,
+                      if (skills.isNotEmpty)
+                        Wrap(
+                          spacing: 8,
+                          runSpacing: 8,
+                          children: skills.map((skill) {
+                            return Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFF3F4F6),
+                                borderRadius: BorderRadius.circular(12),
                               ),
-                            ),
-                          );
-                        }).toList(),
-                      ),
+                              child: Text(
+                                skill,
+                                style: AppTypography.caption.copyWith(
+                                  color: const Color(0xFF374151),
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            );
+                          }).toList(),
+                        ),
                     ],
                   ),
                 ),
@@ -167,7 +175,7 @@ class FreelancerProfilePage extends StatelessWidget {
                             ),
                           ),
                           child: Text(
-                            'Hire Sophia',
+                            'Hire ${user?.profile?.firstName ?? 'Freelancer'}',
                             style: AppTypography.buttonLarge.copyWith(fontSize: 16),
                           ),
                         ),

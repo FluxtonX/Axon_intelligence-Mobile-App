@@ -160,6 +160,49 @@ class _ContractDetailPageState extends State<ContractDetailPage> {
                   },
                 ),
               ],
+
+              // Leave Review for COMPLETED contracts
+              if (widget.contract.status == 'COMPLETED') ...[
+                const SizedBox(height: 16),
+                Text('Leave a Review', style: AppTypography.headingSmall),
+                const SizedBox(height: 12),
+                TextField(
+                  controller: _submissionController,
+                  maxLines: 3,
+                  decoration: InputDecoration(
+                    hintText: 'Share your experience working with them...',
+                    filled: true,
+                    fillColor: const Color(0xFFF9FAFB),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide(color: const Color(0xFFE5E7EB)),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                BlocBuilder<ContractsBloc, ContractsState>(
+                  builder: (context, state) {
+                    return PrimaryButton(
+                      label: 'Submit Review',
+                      isLoading: state.status == ContractsStatus.approving, // reusing status for now
+                      showIcon: false,
+                      onTap: () {
+                        if (_submissionController.text.trim().isEmpty) return;
+                        
+                        final revieweeId = isClient ? widget.contract.freelancerId : widget.contract.clientId;
+                        
+                        context.read<ContractsBloc>().add(LeaveReview(
+                          contractId: widget.contract.id,
+                          revieweeId: revieweeId,
+                          rating: 5, // Simple mock rating
+                          comment: _submissionController.text,
+                        ));
+                        _submissionController.clear();
+                      },
+                    );
+                  },
+                ),
+              ],
             ],
           ),
         ),

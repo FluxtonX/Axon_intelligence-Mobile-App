@@ -6,7 +6,7 @@ class ApiClient {
   final LocalStorage _storage;
 
   // Use the computer's local Wi-Fi IP address so physical devices over USB can reach the backend.
-  static const String baseUrl = 'http://192.168.1.3:3000/api';
+  static const String baseUrl = 'http://192.168.1.71:3000/api';
 
   ApiClient(this._storage) : _dio = Dio(BaseOptions(
     baseUrl: baseUrl,

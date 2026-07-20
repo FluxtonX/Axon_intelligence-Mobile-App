@@ -33,3 +33,20 @@ class ApproveWork extends ContractsEvent {
   @override
   List<Object?> get props => [contractId];
 }
+
+class LeaveReview extends ContractsEvent {
+  final String contractId;
+  final String revieweeId;
+  final int rating;
+  final String comment;
+
+  const LeaveReview({
+    required this.contractId,
+    required this.revieweeId,
+    required this.rating,
+    required this.comment,
+  });
+
+  @override
+  List<Object?> get props => [contractId, revieweeId, rating, comment];
+}

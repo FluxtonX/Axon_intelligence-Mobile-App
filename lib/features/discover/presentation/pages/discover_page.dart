@@ -9,6 +9,8 @@ import '../widgets/search_input_bar.dart';
 import '../widgets/searching_indicator.dart';
 import '../widgets/talent_result_card.dart';
 import '../widgets/filter_bottom_sheet.dart';
+import '../../data/repositories/discover_repository.dart';
+import '../../../../core/models/user_model.dart';
 
 class DiscoverPage extends StatelessWidget {
   const DiscoverPage({super.key});
@@ -16,7 +18,7 @@ class DiscoverPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (_) => DiscoverBloc(),
+      create: (context) => DiscoverBloc(context.read<DiscoverRepository>())..add(DiscoverStarted()),
       child: const _DiscoverView(),
     );
   }
@@ -82,11 +84,11 @@ class _DiscoverView extends StatelessWidget {
               child: BlocBuilder<DiscoverBloc, DiscoverState>(
                 builder: (context, state) {
                   if (state.status == DiscoverStatus.initial) {
-                    return const _DiscoverStorefront();
+                    return _DiscoverStorefront(topFreelancers: state.topFreelancers);
                   } else if (state.status == DiscoverStatus.searching) {
                     return const SearchingIndicator();
                   } else {
-                    return _buildResults(context, state.query);
+                    return _buildResults(context, state);
                   }
                 },
               ),
@@ -97,35 +99,17 @@ class _DiscoverView extends StatelessWidget {
     );
   }
 
-  Widget _buildResults(BuildContext context, String query) {
-    final results = [
-      const TalentResultCard(
-        name: 'Sophia Chen',
-        title: 'Product Designer & Brand Strategist',
-        hourlyRate: 120,
-        rating: 4.98,
-        reviewCount: 87,
-        location: 'San Francisco',
-        skills: ['Product Design', 'Figma', 'Brand Strategy'],
-        imageUrl: 'https://i.pravatar.cc/150?img=5',
-        matchPercentage: 96,
-        isTopRated: true,
-        isAvailableNow: true,
-      ),
-      const TalentResultCard(
-        name: 'Marcus Williams',
-        title: 'Full-Stack Engineer - AI & Web3',
-        hourlyRate: 155,
-        rating: 4.95,
-        reviewCount: 42,
-        location: 'New York',
-        skills: ['React', 'TypeScript', 'Node.js'],
-        imageUrl: 'https://i.pravatar.cc/150?img=11',
-        matchPercentage: 91,
-        isVerified: true,
-        isAvailableNow: true,
-      ),
-    ];
+  Widget _buildResults(BuildContext context, DiscoverState state) {
+    final results = state.results;
+    
+    if (results.isEmpty) {
+      return Center(
+        child: Text(
+          'No freelancers found for "${state.query}"',
+          style: AppTypography.bodyMedium.copyWith(color: AppColors.textSecondary),
+        ),
+      );
+    }
 
     return Column(
       children: [
@@ -134,7 +118,7 @@ class _DiscoverView extends StatelessWidget {
           child: Row(
             children: [
               Text(
-                'Results for "$query"',
+                'Results for "${state.query}"',
                 style: AppTypography.labelLarge.copyWith(
                   color: const Color(0xFF111827),
                   fontWeight: FontWeight.bold,
@@ -153,7 +137,20 @@ class _DiscoverView extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 24),
             itemCount: results.length,
             itemBuilder: (context, index) {
-              return results[index];
+              final user = results[index];
+              return TalentResultCard(
+                user: user,
+                name: '${user.profile?.firstName} ${user.profile?.lastName}',
+                title: user.profile?.title ?? 'Freelancer',
+                hourlyRate: (user.profile?.hourlyRate?.toInt() ?? 0),
+                rating: user.profile?.averageRating ?? 0.0,
+                reviewCount: user.profile?.totalReviews ?? 0,
+                location: 'Remote', // Could be added to profile later
+                skills: user.profile?.skills ?? [],
+                imageUrl: user.profile?.avatarUrl ?? 'https://i.pravatar.cc/150?img=${index % 70}',
+                matchPercentage: ((user.profile?.averageRating ?? 4.0) * 18 + (user.id.hashCode % 10)).toInt().clamp(70, 99),
+                isVerified: true,
+              );
             },
           ),
         ),
@@ -163,7 +160,9 @@ class _DiscoverView extends StatelessWidget {
 }
 
 class _DiscoverStorefront extends StatelessWidget {
-  const _DiscoverStorefront();
+  final List<UserModel> topFreelancers;
+
+  const _DiscoverStorefront({required this.topFreelancers});
 
   @override
   Widget build(BuildContext context) {
@@ -224,39 +223,32 @@ class _DiscoverStorefront extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 16),
-        const Padding(
-          padding: EdgeInsets.symmetric(horizontal: 24),
-          child: TalentResultCard(
-            name: 'Priya Sharma',
-            title: 'Data Scientist & ML Engineer',
-            hourlyRate: 130,
-            rating: 4.94,
-            reviewCount: 28,
-            location: 'Bangalore',
-            skills: ['Python', 'TensorFlow', 'PyTorch'],
-            imageUrl: 'https://i.pravatar.cc/150?img=9',
-            matchPercentage: 98,
-            isTopRated: true,
-            isVerified: true,
-            isAvailableNow: true,
-          ),
-        ),
-        const Padding(
-          padding: EdgeInsets.symmetric(horizontal: 24),
-          child: TalentResultCard(
-            name: 'Yuki Tanaka',
-            title: 'Motion Designer & Creative Director',
-            hourlyRate: 110,
-            rating: 4.97,
-            reviewCount: 51,
-            location: 'Tokyo',
-            skills: ['Motion Design', 'After Effects', '3D Animation'],
-            imageUrl: 'https://i.pravatar.cc/150?img=12',
-            matchPercentage: 86,
-            isVerified: true,
-            isAvailableNow: true,
-          ),
-        ),
+        if (topFreelancers.isEmpty)
+          const Center(child: Padding(
+            padding: EdgeInsets.all(24.0),
+            child: CircularProgressIndicator(),
+          ))
+        else
+          ...topFreelancers.map((user) {
+            return Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+              child: TalentResultCard(
+                user: user,
+                name: '${user.profile?.firstName} ${user.profile?.lastName}',
+                title: user.profile?.title ?? 'Freelancer',
+                hourlyRate: (user.profile?.hourlyRate?.toInt() ?? 0),
+                rating: user.profile?.averageRating ?? 0.0,
+                reviewCount: user.profile?.totalReviews ?? 0,
+                location: 'Remote',
+                skills: user.profile?.skills ?? [],
+                imageUrl: user.profile?.avatarUrl ?? 'https://i.pravatar.cc/150?img=${user.id.hashCode % 70}',
+                matchPercentage: ((user.profile?.averageRating ?? 4.0) * 19 + (user.id.hashCode % 8)).toInt().clamp(80, 99),
+                isTopRated: true,
+                isVerified: true,
+                isAvailableNow: true,
+              ),
+            );
+          }),
       ],
     );
   }

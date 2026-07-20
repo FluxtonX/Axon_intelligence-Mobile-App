@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import '../../../../core/theme/theme.dart';
 import '../../../../shared/animations/fade_in_slide.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import '../widgets/conversation_tile.dart';
+import '../blocs/conversations_bloc.dart';
+import '../blocs/conversations_state.dart';
 
 class MessagesPage extends StatelessWidget {
   const MessagesPage({super.key});
@@ -33,90 +36,95 @@ class MessagesPage extends StatelessWidget {
           const SizedBox(width: 8),
         ],
       ),
-      body: ListView(
-        children: const [
-          Padding(
-            padding: EdgeInsets.fromLTRB(24, 8, 24, 16),
-            child: Text(
-              'Unread',
-              style: TextStyle(
-                color: Color(0xFF6B7280),
-                fontWeight: FontWeight.bold,
-                fontSize: 12,
-                letterSpacing: 0.5,
-              ),
-            ),
-          ),
-          FadeInSlide(
-            delay: const Duration(milliseconds: 0),
-            child: ConversationTile(
-              id: 'chat_1',
-              name: 'Sophia Chen',
-              lastMessage: 'I have uploaded the final Figma files for the onboarding flow.',
-              time: '10:42 AM',
-              avatarUrl: 'https://i.pravatar.cc/150?img=5',
-              unreadCount: 2,
-              isOnline: true,
-            ),
-          ),
-          FadeInSlide(
-            delay: const Duration(milliseconds: 100),
-            child: ConversationTile(
-              id: 'chat_2',
-              name: 'Marcus Williams',
-              lastMessage: 'Could you review the milestone I just submitted?',
-              time: '9:15 AM',
-              avatarUrl: 'https://i.pravatar.cc/150?img=11',
-              unreadCount: 1,
-              isOnline: false,
-            ),
-          ),
-          const Padding(
-            padding: EdgeInsets.fromLTRB(24, 24, 24, 16),
-            child: Text(
-              'All Messages',
-              style: TextStyle(
-                color: Color(0xFF6B7280),
-                fontWeight: FontWeight.bold,
-                fontSize: 12,
-                letterSpacing: 0.5,
-              ),
-            ),
-          ),
-          FadeInSlide(
-            delay: const Duration(milliseconds: 200),
-            child: ConversationTile(
-              id: 'chat_3',
-              name: 'Yuki Tanaka',
-              lastMessage: 'Thanks! I will get started on the 3D assets tomorrow.',
-              time: 'Yesterday',
-              avatarUrl: 'https://i.pravatar.cc/150?img=12',
-              isOnline: true,
-            ),
-          ),
-          FadeInSlide(
-            delay: const Duration(milliseconds: 300),
-            child: ConversationTile(
-              id: 'chat_4',
-              name: 'TechNova Agency',
-              lastMessage: 'The contract has been approved. Funds are in escrow.',
-              time: 'Monday',
-              avatarUrl: 'https://i.pravatar.cc/150?img=3',
-              isOnline: false,
-            ),
-          ),
-          FadeInSlide(
-            delay: const Duration(milliseconds: 400),
-            child: ConversationTile(
-              id: 'chat_5',
-              name: 'Emma Watson',
-              lastMessage: 'Are you available for a quick sync later today?',
-              time: 'Jul 10',
-              avatarUrl: 'https://i.pravatar.cc/150?img=9',
-              isOnline: false,
-            ),
-          ),
-        ],
+      body: BlocBuilder<ConversationsBloc, ConversationsState>(
+        builder: (context, state) {
+          if (state.status == ConversationsStatus.loading) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          if (state.status == ConversationsStatus.failure) {
+            return Center(child: Text('Failed to load conversations: ${state.errorMessage}'));
+          }
+
+          if (state.conversations.isEmpty) {
+            return const Center(child: Text('No messages yet.'));
+          }
+
+          final unread = state.conversations.where((c) => (c['unreadCount'] as int) > 0).toList();
+          final read = state.conversations.where((c) => (c['unreadCount'] as int) == 0).toList();
+
+          return ListView(
+            children: [
+              if (unread.isNotEmpty) ...[
+                const Padding(
+                  padding: EdgeInsets.fromLTRB(24, 8, 24, 16),
+                  child: Text(
+                    'Unread',
+                    style: TextStyle(
+                      color: Color(0xFF6B7280),
+                      fontWeight: FontWeight.bold,
+                      fontSize: 12,
+                      letterSpacing: 0.5,
+                    ),
+                  ),
+                ),
+                ...unread.asMap().entries.map((entry) {
+                  final index = entry.key;
+                  final chat = entry.value;
+                  final user = chat['user'];
+                  final lastMessage = chat['lastMessage']['content'];
+                  return FadeInSlide(
+                    delay: Duration(milliseconds: index * 100),
+                    child: ConversationTile(
+                      id: user['id'], // use user id as chat id to easily route
+                      name: user['profile'] != null 
+                        ? '${user['profile']['firstName']} ${user['profile']['lastName'] ?? ''}'.trim()
+                        : 'Unknown User',
+                      lastMessage: lastMessage,
+                      time: '', // Format properly if needed
+                      avatarUrl: user['profile']?['avatarUrl'] ?? 'https://i.pravatar.cc/150?u=${user['id']}',
+                      unreadCount: chat['unreadCount'],
+                      isOnline: true, // Mock online
+                    ),
+                  );
+                }),
+              ],
+              if (read.isNotEmpty) ...[
+                const Padding(
+                  padding: EdgeInsets.fromLTRB(24, 24, 24, 16),
+                  child: Text(
+                    'All Messages',
+                    style: TextStyle(
+                      color: Color(0xFF6B7280),
+                      fontWeight: FontWeight.bold,
+                      fontSize: 12,
+                      letterSpacing: 0.5,
+                    ),
+                  ),
+                ),
+                ...read.asMap().entries.map((entry) {
+                  final index = entry.key;
+                  final chat = entry.value;
+                  final user = chat['user'];
+                  final lastMessage = chat['lastMessage']['content'];
+                  return FadeInSlide(
+                    delay: Duration(milliseconds: 200 + (index * 100)),
+                    child: ConversationTile(
+                      id: user['id'],
+                      name: user['profile'] != null 
+                        ? '${user['profile']['firstName']} ${user['profile']['lastName'] ?? ''}'.trim()
+                        : 'Unknown User',
+                      lastMessage: lastMessage,
+                      time: '',
+                      avatarUrl: user['profile']?['avatarUrl'] ?? 'https://i.pravatar.cc/150?u=${user['id']}',
+                      unreadCount: 0,
+                      isOnline: false,
+                    ),
+                  );
+                }),
+              ],
+            ],
+          );
+        },
       ),
     );
   }

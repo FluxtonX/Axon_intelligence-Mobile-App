@@ -9,6 +9,7 @@ class DiscoverState extends Equatable {
   final String? selectedCategory;
   final double? minRating;
   final double? maxBudget;
+  final List<UserModel> topFreelancers;
   final List<UserModel> results;
 
   const DiscoverState({
@@ -17,6 +18,7 @@ class DiscoverState extends Equatable {
     this.selectedCategory,
     this.minRating,
     this.maxBudget,
+    this.topFreelancers = const [],
     this.results = const [],
   });
 
@@ -26,6 +28,7 @@ class DiscoverState extends Equatable {
     String? selectedCategory,
     double? minRating,
     double? maxBudget,
+    List<UserModel>? topFreelancers,
     List<UserModel>? results,
   }) {
     return DiscoverState(
@@ -34,10 +37,11 @@ class DiscoverState extends Equatable {
       selectedCategory: selectedCategory ?? this.selectedCategory,
       minRating: minRating ?? this.minRating,
       maxBudget: maxBudget ?? this.maxBudget,
+      topFreelancers: topFreelancers ?? this.topFreelancers,
       results: results ?? this.results,
     );
   }
 
   @override
-  List<Object?> get props => [status, query, selectedCategory, minRating, maxBudget, results];
+  List<Object?> get props => [status, query, selectedCategory, minRating, maxBudget, topFreelancers, results];
 }

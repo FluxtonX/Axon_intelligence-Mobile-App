@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/theme/theme.dart';
+import '../../../../core/models/user_model.dart';
 
 class TalentResultCard extends StatelessWidget {
+  final UserModel? user;
   final String name;
   final String title;
   final int hourlyRate;
@@ -18,6 +20,7 @@ class TalentResultCard extends StatelessWidget {
 
   const TalentResultCard({
     super.key,
+    this.user,
     required this.name,
     required this.title,
     required this.hourlyRate,
@@ -35,10 +38,7 @@ class TalentResultCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () => context.push('/freelancer-profile', extra: {
-        'name': name,
-        'imageUrl': imageUrl,
-      }),
+      onTap: () => context.push('/freelancer-profile', extra: user),
       child: Container(
         margin: const EdgeInsets.only(bottom: 16),
         decoration: BoxDecoration(

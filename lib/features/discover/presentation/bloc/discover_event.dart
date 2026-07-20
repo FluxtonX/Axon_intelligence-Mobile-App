@@ -7,6 +7,8 @@ abstract class DiscoverEvent extends Equatable {
   List<Object?> get props => [];
 }
 
+class DiscoverStarted extends DiscoverEvent {}
+
 class DiscoverSearchInitiated extends DiscoverEvent {
   final String query;
 

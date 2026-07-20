@@ -1,8 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/theme/theme.dart';
+import '../../../../core/blocs/user_mode_cubit.dart';
 import '../widgets/chat_message_bubble.dart';
 import '../widgets/milestone_action_card.dart';
+import '../blocs/chat_detail_bloc.dart';
+import '../blocs/chat_detail_event.dart';
+import '../blocs/chat_detail_state.dart';
 
 class ChatDetailPage extends StatefulWidget {
   const ChatDetailPage({
@@ -80,47 +85,47 @@ class _ChatDetailPageState extends State<ChatDetailPage> {
         children: [
           // Chat history
           Expanded(
-            child: ListView(
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
-              reverse: true, // typical for chat
-              children: [
-                const ChatMessageBubble(
-                  message: 'I have uploaded the final Figma files for the onboarding flow.',
-                  time: '10:42 AM',
-                  isMe: false,
-                ),
-                const MilestoneActionCard(
-                  title: 'UI Design - Onboarding Flow Delivery',
-                  amount: 450.00,
-                  status: 'Awaiting your approval',
-                  isActionable: true,
-                ),
-                const ChatMessageBubble(
-                  message: 'Sounds great. I will review them and release the milestone shortly.',
-                  time: 'Yesterday 4:15 PM',
-                  isMe: true,
-                ),
-                const ChatMessageBubble(
-                  message: 'Hi! Just letting you know I have completed the first draft of the designs.',
-                  time: 'Yesterday 3:30 PM',
-                  isMe: false,
-                ),
-                Center(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 24.0),
-                    child: Text(
-                      'Yesterday',
-                      style: AppTypography.caption.copyWith(color: const Color(0xFF9CA3AF), fontWeight: FontWeight.bold),
-                    ),
-                  ),
-                ),
-                const MilestoneActionCard(
-                  title: 'Project Kickoff - Contract Signed',
-                  amount: 0.00,
-                  status: 'Active Contract',
-                  isActionable: false,
-                ),
-              ].reversed.toList(),
+            child: BlocBuilder<ChatDetailBloc, ChatDetailState>(
+              builder: (context, state) {
+                if (state.status == ChatDetailStatus.loading) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+                
+                if (state.status == ChatDetailStatus.failure) {
+                  return Center(child: Text('Failed to load messages: ${state.errorMessage}'));
+                }
+                
+                if (state.messages.isEmpty) {
+                  return const Center(child: Text('No messages yet.'));
+                }
+                
+                final userId = context.read<UserModeCubit>().state == UserMode.client 
+                  ? 'client_id_placeholder' // We'd ideally have actual user ID in a real app, assuming simple check for now
+                  : 'freelancer_id_placeholder'; 
+                  
+                // Note: To properly know `isMe`, we need the current user's ID. 
+                // As a simplification without auth state context here, we check `senderId` against `otherUserId`.
+                
+                return ListView.builder(
+                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
+                  reverse: true,
+                  itemCount: state.messages.length,
+                  itemBuilder: (context, index) {
+                    final msg = state.messages[index];
+                    final isMe = msg['senderId'] != widget.chatId;
+                    
+                    // Simple formatting for time
+                    final date = DateTime.parse(msg['createdAt']);
+                    final timeString = '${date.hour}:${date.minute.toString().padLeft(2, '0')}';
+                    
+                    return ChatMessageBubble(
+                      message: msg['content'],
+                      time: timeString,
+                      isMe: isMe,
+                    );
+                  },
+                );
+              },
             ),
           ),
           
@@ -175,7 +180,17 @@ class _ChatDetailPageState extends State<ChatDetailPage> {
                 ),
                 const SizedBox(width: 12),
                 GestureDetector(
-                  onTap: () {},
+                  onTap: () {
+                    if (_textController.text.trim().isNotEmpty) {
+                      context.read<ChatDetailBloc>().add(
+                        SendMessage(
+                          otherUserId: widget.chatId,
+                          content: _textController.text,
+                        ),
+                      );
+                      _textController.clear();
+                    }
+                  },
                   child: Container(
                     width: 44,
                     height: 44,

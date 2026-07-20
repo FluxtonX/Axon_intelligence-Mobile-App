@@ -8,7 +8,12 @@ import '../../features/main_shell/presentation/pages/main_shell_page.dart';
 import '../../features/project_creation/presentation/pages/ai_project_creation_page.dart';
 import '../../features/project_creation/presentation/pages/project_brief_review_page.dart';
 import '../../features/freelancer_profile/presentation/pages/freelancer_profile_page.dart';
+import '../../core/models/user_model.dart';
 import '../../features/messages/presentation/pages/chat_detail_page.dart';
+import '../../features/messages/presentation/blocs/chat_detail_bloc.dart';
+import '../../features/messages/presentation/blocs/chat_detail_event.dart';
+import '../../features/messages/data/repositories/messages_repository.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../features/profile/presentation/pages/settings_page.dart';
 import '../../features/profile/presentation/pages/edit_profile_page.dart';
 import '../../features/profile/presentation/pages/help_support_page.dart';
@@ -66,10 +71,8 @@ final GoRouter appRouter = GoRouter(
       path: '/freelancer-profile',
       name: 'freelancerProfile',
       builder: (context, state) {
-        final extra = state.extra as Map<String, dynamic>? ?? {};
-        final name = extra['name'] as String? ?? 'Sophia Chen';
-        final imageUrl = extra['imageUrl'] as String? ?? 'https://i.pravatar.cc/150?img=5';
-        return FreelancerProfilePage(name: name, imageUrl: imageUrl);
+        final user = state.extra as UserModel?;
+        return FreelancerProfilePage(user: user);
       },
     ),
     GoRoute(
@@ -88,7 +91,12 @@ final GoRouter appRouter = GoRouter(
            name = extra;
         }
 
-        return ChatDetailPage(chatId: id, name: name, avatarUrl: avatarUrl);
+        return BlocProvider(
+          create: (context) => ChatDetailBloc(
+            RepositoryProvider.of<MessagesRepository>(context),
+          )..add(FetchChatHistory(id)),
+          child: ChatDetailPage(chatId: id, name: name, avatarUrl: avatarUrl),
+        );
       },
     ),
     GoRoute(

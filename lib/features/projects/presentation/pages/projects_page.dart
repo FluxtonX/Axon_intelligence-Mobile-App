@@ -412,28 +412,61 @@ class _CompletedProjectsTab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ListView(
-      padding: const EdgeInsets.all(24),
-      children: const [
-        ContractCard(
-          title: 'Brand Identity & Logo Design',
-          freelancerName: 'Yuki Tanaka',
-          avatarUrl: 'https://i.pravatar.cc/150?img=12',
-          status: 'Completed',
-          escrowAmount: 0.00,
-          progress: 1.0,
-          isActive: false,
-        ),
-        ContractCard(
-          title: 'Smart Contract Audit',
-          freelancerName: 'TechNova Agency',
-          avatarUrl: 'https://i.pravatar.cc/150?img=3',
-          status: 'Completed',
-          escrowAmount: 0.00,
-          progress: 1.0,
-          isActive: false,
-        ),
-      ],
+    return BlocBuilder<ContractsBloc, ContractsState>(
+      builder: (context, state) {
+        if (state.status == ContractsStatus.loading) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        if (state.status == ContractsStatus.failure) {
+          return Center(child: Text('Failed to load contracts: ${state.errorMessage}'));
+        }
+
+        final completedContracts = state.contracts
+            .where((c) => c.status == 'COMPLETED')
+            .toList();
+
+        return ListView(
+          padding: const EdgeInsets.all(24),
+          children: [
+            const Text(
+              'Completed Contracts',
+              style: TextStyle(
+                color: Color(0xFF6B7280),
+                fontWeight: FontWeight.bold,
+                fontSize: 12,
+                letterSpacing: 0.5,
+              ),
+            ),
+            const SizedBox(height: 16),
+            if (completedContracts.isEmpty)
+              const Center(child: Text('No completed contracts yet.'))
+            else
+              ...completedContracts.map((contract) {
+                final isClient = context.read<UserModeCubit>().state == UserMode.client;
+                final counterpartyName = isClient
+                    ? (contract.proposal?.freelancerName ?? 'Freelancer')
+                    : (contract.project?.client?['profile']?['firstName'] ?? 'Client');
+                final title = contract.project?.title ?? 'Project';
+
+                return GestureDetector(
+                  onTap: () {
+                    context.pushNamed('contract_detail', extra: {'contract': contract});
+                  },
+                  child: ContractCard(
+                    title: title,
+                    freelancerName: counterpartyName,
+                    avatarUrl: 'https://i.pravatar.cc/150?u=${contract.id}',
+                    status: contract.status,
+                    escrowAmount: contract.amount,
+                    progress: 1.0,
+                    isActive: false,
+                  ),
+                );
+              }),
+          ],
+        );
+      },
     );
   }
 }

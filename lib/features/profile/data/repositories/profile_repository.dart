@@ -1,3 +1,5 @@
+import 'package:dio/dio.dart';
+import 'package:image_picker/image_picker.dart';
 import '../../../../core/models/user_model.dart';
 import '../../../../core/network/api_client.dart';
 
@@ -37,6 +39,29 @@ class ProfileRepository {
       await _apiClient.dio.patch('/users/me/profile', data: data);
     } catch (e) {
       throw Exception('Failed to update profile: $e');
+    }
+  }
+
+  Future<String> uploadAvatar(XFile image) async {
+    try {
+      final fileName = image.name;
+      final bytes = await image.readAsBytes();
+
+      final formData = FormData.fromMap({
+        'file': MultipartFile.fromBytes(
+          bytes,
+          filename: fileName,
+        ),
+      });
+
+      final response = await _apiClient.dio.post(
+        '/uploads/local',
+        data: formData,
+      );
+
+      return response.data['publicUrl'] as String;
+    } catch (e) {
+      throw Exception('Failed to upload avatar locally: $e');
     }
   }
 }

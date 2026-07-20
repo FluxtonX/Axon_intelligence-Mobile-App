@@ -4,6 +4,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/theme/theme.dart';
 import '../../domain/models/chat_message.dart';
+import '../../../../core/network/api_client.dart';
+import '../../data/repositories/ai_project_repository.dart';
 import '../bloc/ai_project_bloc.dart';
 import '../bloc/ai_project_event.dart';
 import '../bloc/ai_project_state.dart';
@@ -17,7 +19,9 @@ class AiProjectCreationPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (_) => AiProjectBloc()..add(const AiProjectStarted()),
+      create: (context) => AiProjectBloc(
+        AiProjectRepository(context.read<ApiClient>()),
+      )..add(const AiProjectStarted()),
       child: const _AiProjectCreationView(),
     );
   }

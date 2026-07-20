@@ -22,6 +22,12 @@ import 'features/proposals/data/repositories/proposal_repository.dart';
 import 'features/proposals/presentation/bloc/submit_proposal_bloc.dart';
 import 'features/contracts/data/repositories/contract_repository.dart';
 import 'features/contracts/presentation/bloc/contracts_bloc.dart';
+import 'features/discover/data/repositories/discover_repository.dart';
+import 'features/messages/data/repositories/messages_repository.dart';
+import 'features/messages/presentation/blocs/conversations_bloc.dart';
+import 'features/messages/presentation/blocs/conversations_event.dart';
+import 'features/contracts/data/repositories/reviews_repository.dart';
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
@@ -32,6 +38,9 @@ void main() async {
   final projectRepository = ProjectRepository(apiClient);
   final proposalRepository = ProposalRepository(apiClient);
   final contractRepository = ContractRepository(apiClient);
+  final discoverRepository = DiscoverRepository(apiClient);
+  final messagesRepository = MessagesRepository(apiClient);
+  final reviewsRepository = ReviewsRepository(apiClient);
 
   // Lock to portrait orientation
   await SystemChrome.setPreferredOrientations([
@@ -53,6 +62,9 @@ void main() async {
     projectRepository: projectRepository,
     proposalRepository: proposalRepository,
     contractRepository: contractRepository,
+    discoverRepository: discoverRepository,
+    messagesRepository: messagesRepository,
+    reviewsRepository: reviewsRepository,
   ));
 }
 
@@ -62,6 +74,9 @@ class AxonIntelligenceApp extends StatelessWidget {
   final ProjectRepository projectRepository;
   final ProposalRepository proposalRepository;
   final ContractRepository contractRepository;
+  final DiscoverRepository discoverRepository;
+  final MessagesRepository messagesRepository;
+  final ReviewsRepository reviewsRepository;
 
   const AxonIntelligenceApp({
     super.key, 
@@ -70,6 +85,9 @@ class AxonIntelligenceApp extends StatelessWidget {
     required this.projectRepository,
     required this.proposalRepository,
     required this.contractRepository,
+    required this.discoverRepository,
+    required this.messagesRepository,
+    required this.reviewsRepository,
   });
 
   @override
@@ -81,6 +99,9 @@ class AxonIntelligenceApp extends StatelessWidget {
         RepositoryProvider.value(value: projectRepository),
         RepositoryProvider.value(value: proposalRepository),
         RepositoryProvider.value(value: contractRepository),
+        RepositoryProvider.value(value: discoverRepository),
+        RepositoryProvider.value(value: messagesRepository),
+        RepositoryProvider.value(value: reviewsRepository),
       ],
       child: MultiBlocProvider(
         providers: [
@@ -103,7 +124,10 @@ class AxonIntelligenceApp extends StatelessWidget {
           create: (context) => SubmitProposalBloc(proposalRepository),
         ),
         BlocProvider<ContractsBloc>(
-          create: (context) => ContractsBloc(contractRepository),
+          create: (context) => ContractsBloc(contractRepository, reviewsRepository),
+        ),
+        BlocProvider<ConversationsBloc>(
+          create: (context) => ConversationsBloc(messagesRepository)..add(const FetchConversations()),
         ),
         BlocProvider<GigCreationBloc>(
           create: (context) => GigCreationBloc(),
