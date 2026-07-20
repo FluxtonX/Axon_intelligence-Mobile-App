@@ -14,6 +14,8 @@ import '../../features/profile/presentation/pages/edit_profile_page.dart';
 import '../../features/profile/presentation/pages/help_support_page.dart';
 import '../../features/hire/presentation/pages/create_contract_page.dart';
 import '../../features/hire/presentation/pages/checkout_page.dart';
+import '../../features/contracts/presentation/pages/contract_detail_page.dart';
+import '../../features/contracts/domain/entities/contract_entity.dart';
 import '../../features/hire/presentation/pages/payment_success_page.dart';
 import '../../features/proposals/presentation/pages/proposals_list_page.dart';
 import '../../features/proposals/presentation/pages/proposal_detail_page.dart';
@@ -109,15 +111,25 @@ final GoRouter appRouter = GoRouter(
       name: 'hire',
       builder: (context, state) {
         final extra = state.extra as Map<String, dynamic>? ?? {};
-        final id = extra['id'] as String? ?? '123';
-        final name = extra['name'] as String? ?? 'Sophia Chen';
-        return CreateContractPage(freelancerId: id, freelancerName: name);
+        final proposal = extra['proposal'];
+        return CreateContractPage(
+          proposal: proposal,
+        );
       },
     ),
     GoRoute(
       path: '/checkout',
       name: 'checkout',
       builder: (context, state) => const CheckoutPage(),
+    ),
+    GoRoute(
+      path: '/contract-detail',
+      name: 'contract_detail',
+      builder: (context, state) {
+        final extra = state.extra as Map<String, dynamic>? ?? {};
+        final contract = extra['contract'] as ContractEntity;
+        return ContractDetailPage(contract: contract);
+      },
     ),
     GoRoute(
       path: '/payment_success',
@@ -155,9 +167,14 @@ final GoRouter appRouter = GoRouter(
       name: 'submitProposal',
       builder: (context, state) {
         final extra = state.extra as Map<String, dynamic>? ?? {};
+        final projectId = extra['projectId'] as String? ?? '123';
         final jobTitle = extra['jobTitle'] as String? ?? 'Project';
         final clientName = extra['clientName'] as String? ?? 'Client';
-        return SubmitProposalPage(jobTitle: jobTitle, clientName: clientName);
+        return SubmitProposalPage(
+          projectId: projectId,
+          jobTitle: jobTitle, 
+          clientName: clientName,
+        );
       },
     ),
   ],

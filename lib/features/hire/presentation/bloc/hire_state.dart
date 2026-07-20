@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 import '../../domain/entities/contract_entity.dart';
+import '../../../proposals/domain/entities/proposal_entity.dart';
 
 enum HireStatus {
   initial,
@@ -12,39 +13,27 @@ enum HireStatus {
 
 class HireState extends Equatable {
   final HireStatus status;
-  final String freelancerName;
-  final String freelancerId;
-  final List<MilestoneEntity> milestones;
-  final ContractEntity? contract;
+  final ProposalEntity? proposal;
+  final String? contractId;
   final String? errorMessage;
 
   const HireState({
     this.status = HireStatus.initial,
-    this.freelancerName = '',
-    this.freelancerId = '',
-    this.milestones = const [],
-    this.contract,
+    this.proposal,
+    this.contractId,
     this.errorMessage,
   });
 
-  double get totalAmount {
-    return milestones.fold(0, (sum, item) => sum + item.amount);
-  }
-
   HireState copyWith({
     HireStatus? status,
-    String? freelancerName,
-    String? freelancerId,
-    List<MilestoneEntity>? milestones,
-    ContractEntity? contract,
+    ProposalEntity? proposal,
+    String? contractId,
     String? errorMessage,
   }) {
     return HireState(
       status: status ?? this.status,
-      freelancerName: freelancerName ?? this.freelancerName,
-      freelancerId: freelancerId ?? this.freelancerId,
-      milestones: milestones ?? this.milestones,
-      contract: contract ?? this.contract,
+      proposal: proposal ?? this.proposal,
+      contractId: contractId ?? this.contractId,
       errorMessage: errorMessage ?? this.errorMessage,
     );
   }
@@ -52,10 +41,8 @@ class HireState extends Equatable {
   @override
   List<Object?> get props => [
         status,
-        freelancerName,
-        freelancerId,
-        milestones,
-        contract,
+        proposal,
+        contractId,
         errorMessage,
       ];
 }

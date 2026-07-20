@@ -5,6 +5,7 @@ import '../../../../core/theme/theme.dart';
 import '../../../../shared/animations/fade_in_slide.dart';
 import '../bloc/find_work_bloc.dart';
 import '../bloc/find_work_state.dart';
+import '../bloc/find_work_event.dart';
 import '../../../../core/models/project_model.dart';
 import 'package:timeago/timeago.dart' as timeago;
 
@@ -249,6 +250,7 @@ class _JobPostingCard extends StatelessWidget {
                   context.pushNamed(
                     'submitProposal',
                     extra: {
+                      'projectId': project.id,
                       'jobTitle': project.title,
                       'clientName': clientName,
                     },

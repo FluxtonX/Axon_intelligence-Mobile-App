@@ -1,87 +1,47 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:injectable/injectable.dart';
-import 'package:uuid/uuid.dart';
-import '../../domain/entities/contract_entity.dart';
-import '../../domain/repositories/hire_repository.dart';
+import '../../../proposals/data/repositories/proposal_repository.dart';
+import '../../../contracts/data/repositories/contract_repository.dart';
 import 'hire_event.dart';
 import 'hire_state.dart';
 
-@injectable
 class HireBloc extends Bloc<HireEvent, HireState> {
-  final HireRepository _repository;
-  final _uuid = const Uuid();
+  final ProposalRepository _proposalRepository;
+  final ContractRepository _contractRepository;
 
-  HireBloc(this._repository) : super(const HireState()) {
+  HireBloc(this._proposalRepository, this._contractRepository) : super(const HireState()) {
     on<HireInitialize>(_onInitialize);
-    on<HireAddMilestone>(_onAddMilestone);
-    on<HireRemoveMilestone>(_onRemoveMilestone);
-    on<HireCreateContract>(_onCreateContract);
+    on<HireAcceptProposal>(_onAcceptProposal);
     on<HireProcessPayment>(_onProcessPayment);
   }
 
   void _onInitialize(HireInitialize event, Emitter<HireState> emit) {
     emit(state.copyWith(
-      freelancerId: event.freelancerId,
-      freelancerName: event.freelancerName,
+      proposal: event.proposal,
       status: HireStatus.initial,
-      milestones: [],
-      contract: null,
+      contractId: null,
+      errorMessage: null,
     ));
   }
 
-  void _onAddMilestone(HireAddMilestone event, Emitter<HireState> emit) {
-    final newMilestone = MilestoneEntity(
-      id: _uuid.v4(),
-      title: event.title,
-      description: event.description,
-      amount: event.amount,
-    );
-
-    final updatedMilestones = List<MilestoneEntity>.from(state.milestones)
-      ..add(newMilestone);
-
-    emit(state.copyWith(milestones: updatedMilestones));
-  }
-
-  void _onRemoveMilestone(HireRemoveMilestone event, Emitter<HireState> emit) {
-    final updatedMilestones = state.milestones
-        .where((m) => m.id != event.milestoneId)
-        .toList();
-
-    emit(state.copyWith(milestones: updatedMilestones));
-  }
-
-  Future<void> _onCreateContract(
-    HireCreateContract event,
+  Future<void> _onAcceptProposal(
+    HireAcceptProposal event,
     Emitter<HireState> emit,
   ) async {
-    if (state.milestones.isEmpty) {
-      emit(state.copyWith(
-        status: HireStatus.error,
-        errorMessage: 'Please add at least one milestone.',
-      ));
-      return;
-    }
+    if (state.proposal == null) return;
 
     emit(state.copyWith(status: HireStatus.loading));
 
     try {
-      final contract = await _repository.createContract(
-        freelancerId: state.freelancerId,
-        buyerId: 'current_buyer_id', // Would come from AuthBloc
-        title: event.title,
-        milestones: state.milestones,
-        totalAmount: state.totalAmount,
-      );
+      final contractId = await _proposalRepository.acceptProposal(state.proposal!.id);
 
       emit(state.copyWith(
         status: HireStatus.contractCreated,
-        contract: contract,
+        contractId: contractId,
       ));
     } catch (e) {
       emit(state.copyWith(
         status: HireStatus.error,
-        errorMessage: 'Failed to create contract. Please try again.',
+        errorMessage: 'Failed to accept proposal and create contract.',
       ));
     }
   }
@@ -90,28 +50,17 @@ class HireBloc extends Bloc<HireEvent, HireState> {
     HireProcessPayment event,
     Emitter<HireState> emit,
   ) async {
-    if (state.contract == null) return;
+    if (state.contractId == null) return;
 
     emit(state.copyWith(status: HireStatus.paymentProcessing));
 
     try {
-      final success = await _repository.processPayment(
-        state.contract!.id,
-        state.totalAmount,
-      );
-
-      if (success) {
-        emit(state.copyWith(status: HireStatus.paymentSuccess));
-      } else {
-        emit(state.copyWith(
-          status: HireStatus.error,
-          errorMessage: 'Payment failed. Please check your card details.',
-        ));
-      }
+      await _contractRepository.fundContract(state.contractId!);
+      emit(state.copyWith(status: HireStatus.paymentSuccess));
     } catch (e) {
       emit(state.copyWith(
         status: HireStatus.error,
-        errorMessage: 'An error occurred during payment.',
+        errorMessage: 'Payment failed. Please check your details.',
       ));
     }
   }

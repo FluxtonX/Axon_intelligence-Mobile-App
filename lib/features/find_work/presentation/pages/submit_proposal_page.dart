@@ -1,14 +1,20 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/theme/theme.dart';
 import '../../../../shared/widgets/primary_button.dart';
+import '../../../proposals/presentation/bloc/submit_proposal_bloc.dart';
+import '../../../proposals/presentation/bloc/submit_proposal_event.dart';
+import '../../../proposals/presentation/bloc/submit_proposal_state.dart';
 
 class SubmitProposalPage extends StatefulWidget {
+  final String projectId;
   final String jobTitle;
   final String clientName;
 
   const SubmitProposalPage({
     super.key,
+    required this.projectId,
     required this.jobTitle,
     required this.clientName,
   });
@@ -31,47 +37,64 @@ class _SubmitProposalPageState extends State<SubmitProposalPage> {
     super.dispose();
   }
 
-  void _submit() async {
-    setState(() {
-      _isSubmitting = true;
-    });
+  void _submit() {
+    final bidAmount = double.tryParse(_bidController.text) ?? 0.0;
+    final deliveryDays = int.tryParse(_daysController.text) ?? 0;
+    final coverLetter = _letterController.text;
 
-    // Simulate network delay
-    await Future.delayed(const Duration(seconds: 2));
+    if (bidAmount <= 0 || deliveryDays <= 0 || coverLetter.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please fill out all fields correctly.')),
+      );
+      return;
+    }
 
-    if (!mounted) return;
-    
-    // Show success snackbar
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: const Text('Proposal submitted successfully!'),
-        backgroundColor: AppColors.primary,
-        behavior: SnackBarBehavior.floating,
-      ),
-    );
-
-    // Pop back to Find Work page
-    context.pop();
+    context.read<SubmitProposalBloc>().add(SubmitProposalRequested(
+      projectId: widget.projectId,
+      bidAmount: bidAmount,
+      deliveryDays: deliveryDays,
+      coverLetter: coverLetter,
+    ));
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new_rounded),
-          onPressed: () => context.pop(),
+    return BlocListener<SubmitProposalBloc, SubmitProposalState>(
+      listener: (context, state) {
+        if (state is SubmitProposalSuccess) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: const Text('Proposal submitted successfully!'),
+              backgroundColor: AppColors.primary,
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+          context.pop();
+        } else if (state is SubmitProposalFailure) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(state.error),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      },
+      child: Scaffold(
+        backgroundColor: Colors.white,
+        appBar: AppBar(
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back_ios_new_rounded),
+            onPressed: () => context.pop(),
+          ),
+          title: Text('Submit Proposal', style: AppTypography.headingSmall.copyWith(fontSize: 20)),
         ),
-        title: Text('Submit Proposal', style: AppTypography.headingSmall.copyWith(fontSize: 20)),
-      ),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Job Info
+        body: SafeArea(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Job Info
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
@@ -146,16 +169,22 @@ class _SubmitProposalPageState extends State<SubmitProposalPage> {
               const SizedBox(height: 40),
 
               // Submit Button
-              PrimaryButton(
-                label: 'Send Proposal',
-                showIcon: false,
-                isLoading: _isSubmitting,
-                onTap: _submit,
+              BlocBuilder<SubmitProposalBloc, SubmitProposalState>(
+                builder: (context, state) {
+                  return PrimaryButton(
+                    label: 'Send Proposal',
+                    showIcon: false,
+                    isLoading: state is SubmitProposalLoading,
+                    onTap: state is SubmitProposalLoading ? () {} : _submit,
+                  );
+                },
               ),
             ],
           ),
         ),
       ),
-    );
-  }
+    ),
+  );
 }
+}
+

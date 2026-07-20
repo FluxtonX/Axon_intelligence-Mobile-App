@@ -41,4 +41,23 @@ class ProposalEntity extends Equatable {
         estimatedDays,
         submittedAt,
       ];
+
+  factory ProposalEntity.fromJson(Map<String, dynamic> json) {
+    final freelancer = json['freelancer'];
+    final profile = freelancer != null ? freelancer['profile'] : null;
+
+    return ProposalEntity(
+      id: json['id'] as String,
+      freelancerId: json['freelancerId'] as String,
+      freelancerName: profile != null ? '${profile['firstName']} ${profile['lastName']}' : 'Unknown',
+      freelancerTitle: profile != null && profile['title'] != null ? profile['title'] as String : 'Freelancer',
+      freelancerImageUrl: profile != null && profile['avatarUrl'] != null ? profile['avatarUrl'] as String : 'https://i.pravatar.cc/150?img=5',
+      freelancerRating: profile != null && profile['averageRating'] != null ? (profile['averageRating'] as num).toDouble() : 0.0,
+      matchPercentage: 90, // Hardcoded for now
+      coverLetter: json['coverLetter'] as String,
+      bidAmount: (json['bidAmount'] as num).toDouble(),
+      estimatedDays: json['deliveryDays'] as int,
+      submittedAt: DateTime.parse(json['createdAt'] as String),
+    );
+  }
 }

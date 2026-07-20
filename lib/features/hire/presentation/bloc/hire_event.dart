@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 import '../../domain/entities/contract_entity.dart';
+import '../../../proposals/domain/entities/proposal_entity.dart';
 
 abstract class HireEvent extends Equatable {
   const HireEvent();
@@ -9,49 +10,18 @@ abstract class HireEvent extends Equatable {
 }
 
 class HireInitialize extends HireEvent {
-  final String freelancerId;
-  final String freelancerName;
+  final ProposalEntity proposal;
 
   const HireInitialize({
-    required this.freelancerId,
-    required this.freelancerName,
+    required this.proposal,
   });
 
   @override
-  List<Object?> get props => [freelancerId, freelancerName];
+  List<Object?> get props => [proposal];
 }
 
-class HireAddMilestone extends HireEvent {
-  final String title;
-  final String description;
-  final double amount;
-
-  const HireAddMilestone({
-    required this.title,
-    required this.description,
-    required this.amount,
-  });
-
-  @override
-  List<Object?> get props => [title, description, amount];
-}
-
-class HireRemoveMilestone extends HireEvent {
-  final String milestoneId;
-
-  const HireRemoveMilestone(this.milestoneId);
-
-  @override
-  List<Object?> get props => [milestoneId];
-}
-
-class HireCreateContract extends HireEvent {
-  final String title;
-
-  const HireCreateContract({required this.title});
-
-  @override
-  List<Object?> get props => [title];
+class HireAcceptProposal extends HireEvent {
+  const HireAcceptProposal();
 }
 
 class HireProcessPayment extends HireEvent {

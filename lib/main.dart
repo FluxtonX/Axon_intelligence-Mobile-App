@@ -18,6 +18,10 @@ import 'features/profile/presentation/bloc/profile_cubit.dart';
 import 'features/projects/data/repositories/project_repository.dart';
 import 'features/find_work/presentation/bloc/find_work_bloc.dart';
 import 'features/find_work/presentation/bloc/find_work_event.dart';
+import 'features/proposals/data/repositories/proposal_repository.dart';
+import 'features/proposals/presentation/bloc/submit_proposal_bloc.dart';
+import 'features/contracts/data/repositories/contract_repository.dart';
+import 'features/contracts/presentation/bloc/contracts_bloc.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
@@ -26,6 +30,8 @@ void main() async {
   final authRepository = AuthRepository(apiClient, localStorage);
   final profileRepository = ProfileRepository(apiClient);
   final projectRepository = ProjectRepository(apiClient);
+  final proposalRepository = ProposalRepository(apiClient);
+  final contractRepository = ContractRepository(apiClient);
 
   // Lock to portrait orientation
   await SystemChrome.setPreferredOrientations([
@@ -45,6 +51,8 @@ void main() async {
     authRepository: authRepository, 
     profileRepository: profileRepository,
     projectRepository: projectRepository,
+    proposalRepository: proposalRepository,
+    contractRepository: contractRepository,
   ));
 }
 
@@ -52,12 +60,16 @@ class AxonIntelligenceApp extends StatelessWidget {
   final AuthRepository authRepository;
   final ProfileRepository profileRepository;
   final ProjectRepository projectRepository;
+  final ProposalRepository proposalRepository;
+  final ContractRepository contractRepository;
 
   const AxonIntelligenceApp({
     super.key, 
     required this.authRepository, 
     required this.profileRepository,
     required this.projectRepository,
+    required this.proposalRepository,
+    required this.contractRepository,
   });
 
   @override
@@ -67,6 +79,8 @@ class AxonIntelligenceApp extends StatelessWidget {
         RepositoryProvider.value(value: authRepository),
         RepositoryProvider.value(value: profileRepository),
         RepositoryProvider.value(value: projectRepository),
+        RepositoryProvider.value(value: proposalRepository),
+        RepositoryProvider.value(value: contractRepository),
       ],
       child: MultiBlocProvider(
         providers: [
@@ -80,10 +94,16 @@ class AxonIntelligenceApp extends StatelessWidget {
           create: (context) => UserModeCubit(),
         ),
         BlocProvider<HireBloc>(
-          create: (context) => HireBloc(MockHireRepository()),
+          create: (context) => HireBloc(proposalRepository, contractRepository),
         ),
         BlocProvider<ProposalsBloc>(
-          create: (context) => ProposalsBloc(),
+          create: (context) => ProposalsBloc(proposalRepository),
+        ),
+        BlocProvider<SubmitProposalBloc>(
+          create: (context) => SubmitProposalBloc(proposalRepository),
+        ),
+        BlocProvider<ContractsBloc>(
+          create: (context) => ContractsBloc(contractRepository),
         ),
         BlocProvider<GigCreationBloc>(
           create: (context) => GigCreationBloc(),

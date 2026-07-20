@@ -23,11 +23,11 @@ class CheckoutPage extends StatelessWidget {
         }
       },
       builder: (context, state) {
-        if (state.contract == null) {
+        if (state.contractId == null || state.proposal == null) {
           return const Scaffold(body: Center(child: Text('No contract found')));
         }
 
-        final subtotal = state.totalAmount;
+        final subtotal = state.proposal!.bidAmount;
         final fee = subtotal * 0.05; // 5% marketplace fee
         final total = subtotal + fee;
 

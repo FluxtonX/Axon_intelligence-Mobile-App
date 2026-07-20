@@ -183,8 +183,7 @@ class ProposalDetailPage extends StatelessWidget {
                       onTap: () {
                         // Go directly to hire contract setup with this freelancer
                         context.pushNamed('hire', extra: {
-                          'id': proposal.freelancerId,
-                          'name': proposal.freelancerName,
+                          'proposal': proposal,
                         });
                       },
                     ),

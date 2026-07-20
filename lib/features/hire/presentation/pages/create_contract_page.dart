@@ -7,14 +7,14 @@ import '../bloc/hire_bloc.dart';
 import '../bloc/hire_event.dart';
 import '../bloc/hire_state.dart';
 
+import '../../../proposals/domain/entities/proposal_entity.dart';
+
 class CreateContractPage extends StatefulWidget {
-  final String freelancerId;
-  final String freelancerName;
+  final ProposalEntity proposal;
 
   const CreateContractPage({
     super.key,
-    required this.freelancerId,
-    required this.freelancerName,
+    required this.proposal,
   });
 
   @override
@@ -31,8 +31,7 @@ class _CreateContractPageState extends State<CreateContractPage> {
     super.initState();
     context.read<HireBloc>().add(
           HireInitialize(
-            freelancerId: widget.freelancerId,
-            freelancerName: widget.freelancerName,
+            proposal: widget.proposal,
           ),
         );
   }
@@ -45,23 +44,8 @@ class _CreateContractPageState extends State<CreateContractPage> {
     super.dispose();
   }
 
-  void _addMilestone() {
-    if (_milestoneTitleController.text.isEmpty ||
-        _milestoneAmountController.text.isEmpty) {
-      return;
-    }
-
-    final amount = double.tryParse(_milestoneAmountController.text) ?? 0.0;
-    if (amount <= 0) return;
-
-    context.read<HireBloc>().add(HireAddMilestone(
-          title: _milestoneTitleController.text,
-          description: '',
-          amount: amount,
-        ));
-
-    _milestoneTitleController.clear();
-    _milestoneAmountController.clear();
+  void _acceptProposal() {
+    context.read<HireBloc>().add(const HireAcceptProposal());
   }
 
   @override
@@ -88,7 +72,7 @@ class _CreateContractPageState extends State<CreateContractPage> {
               onPressed: () => context.pop(),
             ),
             title: Text(
-              'Hire ${widget.freelancerName}',
+              'Hire ${widget.proposal.freelancerName}',
               style: AppTypography.headingMedium.copyWith(fontSize: 18),
             ),
             centerTitle: true,
@@ -117,131 +101,26 @@ class _CreateContractPageState extends State<CreateContractPage> {
                         ),
                       ),
                     ),
-                    const SizedBox(height: 32),
-                    Text(
-                      'Milestones',
-                      style: AppTypography.headingMedium.copyWith(fontSize: 20),
-                    ),
-                    const SizedBox(height: 16),
-                    
-                    // List of current milestones
-                    if (state.milestones.isEmpty)
-                      Container(
-                        width: double.infinity,
-                        padding: const EdgeInsets.all(24),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFF9FAFB),
-                          borderRadius: BorderRadius.circular(16),
-                          border: Border.all(color: const Color(0xFFE5E7EB)),
-                        ),
-                        child: Text(
-                          'No milestones added yet. Add your first milestone below.',
-                          textAlign: TextAlign.center,
-                          style: AppTypography.bodyMedium.copyWith(color: const Color(0xFF6B7280)),
-                        ),
-                      )
-                    else
-                      ListView.separated(
-                        shrinkWrap: true,
-                        physics: const NeverScrollableScrollPhysics(),
-                        itemCount: state.milestones.length,
-                        separatorBuilder: (_, __) => const SizedBox(height: 12),
-                        itemBuilder: (context, index) {
-                          final milestone = state.milestones[index];
-                          return Container(
-                            padding: const EdgeInsets.all(16),
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(12),
-                              border: Border.all(color: const Color(0xFFE5E7EB)),
-                            ),
-                            child: Row(
-                              children: [
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        milestone.title,
-                                        style: AppTypography.labelLarge.copyWith(fontWeight: FontWeight.w600),
-                                      ),
-                                      const SizedBox(height: 4),
-                                      Text(
-                                        '\$${milestone.amount.toStringAsFixed(2)}',
-                                        style: AppTypography.labelMedium.copyWith(color: AppColors.primary),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                IconButton(
-                                  icon: const Icon(Icons.delete_outline, color: Color(0xFFEF4444)),
-                                  onPressed: () => context.read<HireBloc>().add(HireRemoveMilestone(milestone.id)),
-                                ),
-                              ],
-                            ),
-                          );
-                        },
-                      ),
-
-                    const SizedBox(height: 24),
-                    
-                    // Add new milestone form
+                    // Fixed Price Summary
                     Container(
-                      padding: const EdgeInsets.all(16),
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(24),
                       decoration: BoxDecoration(
                         color: const Color(0xFFF9FAFB),
                         borderRadius: BorderRadius.circular(16),
+                        border: Border.all(color: const Color(0xFFE5E7EB)),
                       ),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
+                          Text('Proposal Fixed Bid', style: AppTypography.labelLarge.copyWith(fontWeight: FontWeight.w600)),
+                          const SizedBox(height: 8),
                           Text(
-                            'Add Milestone',
-                            style: AppTypography.labelLarge.copyWith(fontWeight: FontWeight.w600),
+                            '\$${widget.proposal.bidAmount.toStringAsFixed(2)}',
+                            style: AppTypography.headingLarge.copyWith(color: AppColors.primary),
                           ),
-                          const SizedBox(height: 12),
-                          TextField(
-                            controller: _milestoneTitleController,
-                            decoration: InputDecoration(
-                              hintText: 'Task description',
-                              filled: true,
-                              fillColor: Colors.white,
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(8),
-                                borderSide: BorderSide.none,
-                              ),
-                            ),
-                          ),
-                          const SizedBox(height: 12),
-                          Row(
-                            children: [
-                              Expanded(
-                                child: TextField(
-                                  controller: _milestoneAmountController,
-                                  keyboardType: TextInputType.number,
-                                  decoration: InputDecoration(
-                                    hintText: 'Amount (\$)',
-                                    filled: true,
-                                    fillColor: Colors.white,
-                                    border: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(8),
-                                      borderSide: BorderSide.none,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(width: 12),
-                              ElevatedButton(
-                                onPressed: _addMilestone,
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: AppColors.primary,
-                                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
-                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                                ),
-                                child: const Text('Add', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-                              ),
-                            ],
-                          ),
+                          const SizedBox(height: 16),
+                          Text('Delivery Time: ${widget.proposal.estimatedDays} days', style: AppTypography.bodyMedium),
                         ],
                       ),
                     ),
@@ -274,7 +153,7 @@ class _CreateContractPageState extends State<CreateContractPage> {
                         children: [
                           Text('Total Price', style: AppTypography.caption),
                           Text(
-                            '\$${state.totalAmount.toStringAsFixed(2)}',
+                            '\$${widget.proposal.bidAmount.toStringAsFixed(2)}',
                             style: AppTypography.headingMedium.copyWith(color: AppColors.primary),
                           ),
                         ],
@@ -282,12 +161,10 @@ class _CreateContractPageState extends State<CreateContractPage> {
                       const SizedBox(width: 24),
                       Expanded(
                         child: PrimaryButton(
-                          label: 'Continue to Pay',
+                          label: 'Accept & Pay',
                           isLoading: state.status == HireStatus.loading,
                           showIcon: false,
-                          onTap: () {
-                            context.read<HireBloc>().add(HireCreateContract(title: _titleController.text));
-                          },
+                          onTap: _acceptProposal,
                         ),
                       ),
                     ],

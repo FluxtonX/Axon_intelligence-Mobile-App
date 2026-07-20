@@ -7,7 +7,12 @@ import '../widgets/escrow_summary_banner.dart';
 import '../widgets/contract_card.dart';
 import '../bloc/client_projects_bloc.dart';
 import '../bloc/client_projects_state.dart';
+import '../../../contracts/presentation/bloc/contracts_bloc.dart';
+import '../../../contracts/presentation/bloc/contracts_event.dart';
+import '../../../contracts/presentation/bloc/contracts_state.dart';
+import '../../../contracts/domain/entities/contract_entity.dart';
 import '../../../../core/models/project_model.dart';
+import 'package:go_router/go_router.dart';
 
 class ProjectsPage extends StatelessWidget {
   const ProjectsPage({super.key});
@@ -109,43 +114,80 @@ class ProjectsPage extends StatelessWidget {
   }
 }
 
-class _ActiveProjectsTab extends StatelessWidget {
+class _ActiveProjectsTab extends StatefulWidget {
   const _ActiveProjectsTab();
 
   @override
+  State<_ActiveProjectsTab> createState() => _ActiveProjectsTabState();
+}
+
+class _ActiveProjectsTabState extends State<_ActiveProjectsTab> {
+  @override
+  void initState() {
+    super.initState();
+    context.read<ContractsBloc>().add(const FetchMyContracts());
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return ListView(
-      padding: const EdgeInsets.all(24),
-      children: const [
-        EscrowSummaryBanner(totalAmount: 3250.00),
-        SizedBox(height: 32),
-        Text(
-          'Active Contracts',
-          style: TextStyle(
-            color: Color(0xFF6B7280),
-            fontWeight: FontWeight.bold,
-            fontSize: 12,
-            letterSpacing: 0.5,
-          ),
-        ),
-        SizedBox(height: 16),
-        ContractCard(
-          title: 'UI/UX Design for Mobile App',
-          freelancerName: 'Sophia Chen',
-          avatarUrl: 'https://i.pravatar.cc/150?img=5',
-          status: 'Milestone 2/3',
-          escrowAmount: 1500.00,
-          progress: 0.66,
-        ),
-        ContractCard(
-          title: 'Backend API Development - Node.js',
-          freelancerName: 'Marcus Williams',
-          avatarUrl: 'https://i.pravatar.cc/150?img=11',
-          status: 'In Progress',
-          escrowAmount: 1750.00,
-          progress: 0.25,
-        ),
-      ],
+    return BlocBuilder<ContractsBloc, ContractsState>(
+      builder: (context, state) {
+        if (state.status == ContractsStatus.loading) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        if (state.status == ContractsStatus.failure) {
+          return Center(child: Text('Failed to load contracts: ${state.errorMessage}'));
+        }
+
+        final activeContracts = state.contracts
+            .where((c) => c.status == 'ACTIVE' || c.status == 'SUBMITTED')
+            .toList();
+
+        final totalEscrow = activeContracts.fold(0.0, (sum, c) => sum + c.amount);
+
+        return ListView(
+          padding: const EdgeInsets.all(24),
+          children: [
+            EscrowSummaryBanner(totalAmount: totalEscrow),
+            const SizedBox(height: 32),
+            const Text(
+              'Active Contracts',
+              style: TextStyle(
+                color: Color(0xFF6B7280),
+                fontWeight: FontWeight.bold,
+                fontSize: 12,
+                letterSpacing: 0.5,
+              ),
+            ),
+            const SizedBox(height: 16),
+            if (activeContracts.isEmpty)
+              const Center(child: Text('No active contracts right now.'))
+            else
+              ...activeContracts.map((contract) {
+                final isClient = context.read<UserModeCubit>().state == UserMode.client;
+                final counterpartyName = isClient
+                    ? (contract.proposal?.freelancerName ?? 'Freelancer')
+                    : (contract.project?.client?['profile']?['firstName'] ?? 'Client');
+                final title = contract.project?.title ?? 'Project';
+
+                return GestureDetector(
+                  onTap: () {
+                    context.pushNamed('contract_detail', extra: {'contract': contract});
+                  },
+                  child: ContractCard(
+                    title: title,
+                    freelancerName: counterpartyName,
+                    avatarUrl: 'https://i.pravatar.cc/150?u=${contract.id}',
+                    status: contract.status,
+                    escrowAmount: contract.amount,
+                    progress: contract.status == 'SUBMITTED' ? 0.9 : 0.5,
+                  ),
+                );
+              }),
+          ],
+        );
+      },
     );
   }
 }

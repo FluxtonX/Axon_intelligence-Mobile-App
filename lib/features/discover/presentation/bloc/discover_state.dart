@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import '../../../../core/models/user_model.dart';
 
 enum DiscoverStatus { initial, searching, results }
 
@@ -8,6 +9,7 @@ class DiscoverState extends Equatable {
   final String? selectedCategory;
   final double? minRating;
   final double? maxBudget;
+  final List<UserModel> results;
 
   const DiscoverState({
     this.status = DiscoverStatus.initial,
@@ -15,6 +17,7 @@ class DiscoverState extends Equatable {
     this.selectedCategory,
     this.minRating,
     this.maxBudget,
+    this.results = const [],
   });
 
   DiscoverState copyWith({
@@ -23,6 +26,7 @@ class DiscoverState extends Equatable {
     String? selectedCategory,
     double? minRating,
     double? maxBudget,
+    List<UserModel>? results,
   }) {
     return DiscoverState(
       status: status ?? this.status,
@@ -30,9 +34,10 @@ class DiscoverState extends Equatable {
       selectedCategory: selectedCategory ?? this.selectedCategory,
       minRating: minRating ?? this.minRating,
       maxBudget: maxBudget ?? this.maxBudget,
+      results: results ?? this.results,
     );
   }
 
   @override
-  List<Object?> get props => [status, query, selectedCategory, minRating, maxBudget];
+  List<Object?> get props => [status, query, selectedCategory, minRating, maxBudget, results];
 }
