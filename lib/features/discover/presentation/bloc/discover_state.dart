@@ -1,5 +1,5 @@
-import 'package:equatable/equatable.dart';
 import '../../../../core/models/user_model.dart';
+import '../../../../core/models/project_model.dart';
 
 enum DiscoverStatus { initial, searching, results }
 
@@ -11,6 +11,8 @@ class DiscoverState extends Equatable {
   final double? maxBudget;
   final List<UserModel> topFreelancers;
   final List<UserModel> results;
+  final List<ProjectModel> availableProjects;
+  final List<ProjectModel> projectResults;
 
   const DiscoverState({
     this.status = DiscoverStatus.initial,
@@ -20,6 +22,8 @@ class DiscoverState extends Equatable {
     this.maxBudget,
     this.topFreelancers = const [],
     this.results = const [],
+    this.availableProjects = const [],
+    this.projectResults = const [],
   });
 
   DiscoverState copyWith({
@@ -30,6 +34,8 @@ class DiscoverState extends Equatable {
     double? maxBudget,
     List<UserModel>? topFreelancers,
     List<UserModel>? results,
+    List<ProjectModel>? availableProjects,
+    List<ProjectModel>? projectResults,
   }) {
     return DiscoverState(
       status: status ?? this.status,
@@ -39,9 +45,14 @@ class DiscoverState extends Equatable {
       maxBudget: maxBudget ?? this.maxBudget,
       topFreelancers: topFreelancers ?? this.topFreelancers,
       results: results ?? this.results,
+      availableProjects: availableProjects ?? this.availableProjects,
+      projectResults: projectResults ?? this.projectResults,
     );
   }
 
   @override
-  List<Object?> get props => [status, query, selectedCategory, minRating, maxBudget, topFreelancers, results];
+  List<Object?> get props => [
+    status, query, selectedCategory, minRating, maxBudget, 
+    topFreelancers, results, availableProjects, projectResults
+  ];
 }

@@ -12,6 +12,7 @@ import '../../../contracts/presentation/bloc/contracts_event.dart';
 import '../../../contracts/presentation/bloc/contracts_state.dart';
 import '../../../contracts/domain/entities/contract_entity.dart';
 import '../../../../core/models/project_model.dart';
+import '../../../proposals/presentation/pages/project_proposals_page.dart';
 import 'package:go_router/go_router.dart';
 
 class ProjectsPage extends StatelessWidget {
@@ -255,15 +256,24 @@ class _PublishedProjectsTab extends StatelessWidget {
     final lastName = project.client?['profile']?['lastName'] ?? '';
     final fullName = lastName.isNotEmpty ? '$clientName $lastName' : clientName;
 
-    return Container(
-      margin: const EdgeInsets.only(bottom: 16),
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: const Color(0xFFE5E7EB), width: 1.5),
-      ),
-      child: Column(
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => ProjectProposalsPage(project: project),
+          ),
+        );
+      },
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 16),
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: const Color(0xFFE5E7EB), width: 1.5),
+        ),
+        child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
