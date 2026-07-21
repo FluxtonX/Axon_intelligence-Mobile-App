@@ -40,9 +40,13 @@ class _DiscoverView extends StatelessWidget {
     final userMode = context.watch<UserModeCubit>().state;
     return Scaffold(
       backgroundColor: const Color(0xFFF9FAFB),
-      body: SafeArea(
-        child: Column(
-          children: [
+      body: BlocListener<UserModeCubit, UserMode>(
+        listener: (context, mode) {
+          context.read<DiscoverBloc>().add(DiscoverStarted(mode));
+        },
+        child: SafeArea(
+          child: Column(
+            children: [
             // Top App Bar Area
             Container(
               color: Colors.white,
@@ -113,6 +117,7 @@ class _DiscoverView extends StatelessWidget {
             ),
           ],
         ),
+      ),
       ),
     );
   }
@@ -291,7 +296,7 @@ class _DiscoverProjectsStorefront extends StatelessWidget {
         if (projects.isEmpty)
           const Center(child: Padding(
             padding: EdgeInsets.all(24.0),
-            child: CircularProgressIndicator(),
+            child: Text("No projects available at the moment."),
           ))
         else
           ...projects.map((project) {

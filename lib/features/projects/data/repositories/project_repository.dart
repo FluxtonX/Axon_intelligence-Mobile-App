@@ -78,8 +78,12 @@ class ProjectRepository {
       List data = [];
       if (responseData is List) {
         data = responseData;
-      } else if (responseData is Map && responseData['data'] is List) {
-        data = responseData['data'];
+      } else if (responseData is Map) {
+        if (responseData['projects'] is List) {
+          data = responseData['projects'];
+        } else if (responseData['data'] is List) {
+          data = responseData['data'];
+        }
       }
       return data.map((json) => ProjectModel.fromJson(json)).toList();
     } catch (e) {
