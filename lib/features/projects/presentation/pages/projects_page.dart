@@ -327,7 +327,7 @@ class _PublishedProjectsTab extends StatelessWidget {
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Text(
-                  '0 Proposals', // TODO: hook up proposals count
+                  '${project.proposalsCount} Proposals',
                   style: AppTypography.caption.copyWith(
                     color: AppColors.primary,
                     fontWeight: FontWeight.bold,

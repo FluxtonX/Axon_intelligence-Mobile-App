@@ -9,6 +9,7 @@ class ProjectModel {
   final List<String> skills;
   final DateTime createdAt;
   final Map<String, dynamic>? client;
+  final int proposalsCount;
 
   ProjectModel({
     required this.id,
@@ -21,6 +22,7 @@ class ProjectModel {
     this.skills = const [],
     required this.createdAt,
     this.client,
+    this.proposalsCount = 0,
   });
 
   factory ProjectModel.fromJson(Map<String, dynamic> json) {
@@ -35,6 +37,7 @@ class ProjectModel {
       skills: (json['skills'] as List<dynamic>?)?.map((e) => e as String).toList() ?? [],
       createdAt: DateTime.parse(json['createdAt'] as String),
       client: json['client'] as Map<String, dynamic>?,
+      proposalsCount: (json['proposals'] as List?)?.length ?? json['proposalsCount'] as int? ?? 0,
     );
   }
 
@@ -50,6 +53,7 @@ class ProjectModel {
       'skills': skills,
       'createdAt': createdAt.toIso8601String(),
       if (client != null) 'client': client,
+      'proposalsCount': proposalsCount,
     };
   }
 }

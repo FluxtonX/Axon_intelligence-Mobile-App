@@ -35,7 +35,7 @@ class _ProposalsListPageState extends State<ProposalsListPage> {
         ),
         title: Text(
           'Review Proposals',
-          style: AppTypography.headingMedium.copyWith(fontSize: 18),
+          style: AppTypography.headingMedium.copyWith(fontSize: 18, color: const Color(0xFF111827)),
         ),
         centerTitle: true,
       ),
@@ -70,7 +70,7 @@ class _ProposalsListPageState extends State<ProposalsListPage> {
                   children: [
                     Text(
                       '${state.proposals.length} Proposals',
-                      style: AppTypography.labelLarge.copyWith(fontWeight: FontWeight.bold),
+                      style: AppTypography.labelLarge.copyWith(fontWeight: FontWeight.bold, color: const Color(0xFF111827)),
                     ),
                     Text(
                       'Sort by: Best Match',
@@ -124,7 +124,7 @@ class _ProposalsListPageState extends State<ProposalsListPage> {
                                     children: [
                                       Text(
                                         proposal.freelancerName,
-                                        style: AppTypography.labelLarge.copyWith(fontWeight: FontWeight.bold),
+                                        style: AppTypography.labelLarge.copyWith(fontWeight: FontWeight.bold, color: const Color(0xFF111827)),
                                       ),
                                       Text(
                                         proposal.freelancerTitle,

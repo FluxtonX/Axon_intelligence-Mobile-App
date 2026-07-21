@@ -50,7 +50,7 @@ class ProposalDetailPage extends StatelessWidget {
                           children: [
                             Text(
                               proposal.freelancerName,
-                              style: AppTypography.headingMedium.copyWith(fontSize: 22),
+                              style: AppTypography.headingMedium.copyWith(fontSize: 22, color: const Color(0xFF111827)),
                             ),
                             const SizedBox(height: 4),
                             Text(
@@ -64,7 +64,7 @@ class ProposalDetailPage extends StatelessWidget {
                                 const SizedBox(width: 4),
                                 Text(
                                   proposal.freelancerRating.toString(),
-                                  style: AppTypography.labelMedium.copyWith(fontWeight: FontWeight.bold),
+                                  style: AppTypography.labelMedium.copyWith(fontWeight: FontWeight.bold, color: const Color(0xFF111827)),
                                 ),
                                 const SizedBox(width: 16),
                                 Text(
@@ -120,12 +120,12 @@ class ProposalDetailPage extends StatelessWidget {
                     children: [
                       Text(
                         'Cover Letter',
-                        style: AppTypography.headingMedium.copyWith(fontSize: 18),
+                        style: AppTypography.headingMedium.copyWith(fontSize: 18, color: const Color(0xFF111827)),
                       ),
                       const SizedBox(height: 16),
                       Text(
                         proposal.coverLetter,
-                        style: AppTypography.bodyMedium.copyWith(color: const Color(0xFF4B5563), height: 1.6),
+                        style: AppTypography.bodyMedium.copyWith(color: const Color(0xFF111827), height: 1.6),
                       ),
                     ],
                   ),
