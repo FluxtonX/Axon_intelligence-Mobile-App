@@ -37,6 +37,7 @@ class _DiscoverView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final userMode = context.watch<UserModeCubit>().state;
     return Scaffold(
       backgroundColor: const Color(0xFFF9FAFB),
       body: SafeArea(
@@ -53,7 +54,7 @@ class _DiscoverView extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
-                        'Discover',
+                        userMode == UserMode.client ? 'Find Talent' : 'Find Work',
                         style: AppTypography.headingSmall.copyWith(
                           color: const Color(0xFF111827),
                           fontWeight: FontWeight.w800,

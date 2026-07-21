@@ -89,6 +89,42 @@ class _ContractDetailPageState extends State<ContractDetailPage> {
               ),
               const SizedBox(height: 32),
 
+              // Client: Fund Contract
+              if (isClient && (widget.contract.status == 'PENDING_PAYMENT' || widget.contract.status == 'PENDING')) ...[
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFF9FAFB),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: const Color(0xFFE5E7EB)),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('Fund Contract', style: AppTypography.headingSmall),
+                      const SizedBox(height: 8),
+                      Text(
+                        'Fund this contract to move it to ACTIVE status and let the freelancer start working. Funds will be held securely in escrow.',
+                        style: AppTypography.bodyMedium,
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 24),
+                BlocBuilder<ContractsBloc, ContractsState>(
+                  builder: (context, state) {
+                    return PrimaryButton(
+                      label: 'Fund Contract',
+                      isLoading: state.status == ContractsStatus.approving, // reusing approving status for loading
+                      showIcon: false,
+                      onTap: () {
+                        context.read<ContractsBloc>().add(FundContract(widget.contract.id));
+                      },
+                    );
+                  },
+                ),
+              ],
+
               // Freelancer: Submit Work
               if (!isClient && widget.contract.status == 'ACTIVE') ...[
                 Text('Submit Work', style: AppTypography.headingSmall),

@@ -12,6 +12,15 @@ class FetchMyContracts extends ContractsEvent {
   const FetchMyContracts();
 }
 
+class FundContract extends ContractsEvent {
+  final String contractId;
+
+  const FundContract(this.contractId);
+
+  @override
+  List<Object?> get props => [contractId];
+}
+
 class SubmitWork extends ContractsEvent {
   final String contractId;
   final String submissionDetails;

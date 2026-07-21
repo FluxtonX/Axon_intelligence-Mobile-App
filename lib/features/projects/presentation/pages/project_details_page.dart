@@ -5,11 +5,27 @@ import '../../../../core/theme/theme.dart';
 import '../../../../core/models/project_model.dart';
 import '../../../../core/blocs/user_mode_cubit.dart';
 import '../widgets/submit_proposal_bottom_sheet.dart';
-
-class ProjectDetailsPage extends StatelessWidget {
+import 'edit_project_page.dart';
+import '../../../proposals/presentation/pages/project_proposals_page.dart';
+import '../bloc/client_projects_bloc.dart';
+import '../bloc/client_projects_state.dart';
+class ProjectDetailsPage extends StatefulWidget {
   final ProjectModel project;
 
   const ProjectDetailsPage({super.key, required this.project});
+
+  @override
+  State<ProjectDetailsPage> createState() => _ProjectDetailsPageState();
+}
+
+class _ProjectDetailsPageState extends State<ProjectDetailsPage> {
+  late ProjectModel project;
+
+  @override
+  void initState() {
+    super.initState();
+    project = widget.project;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -29,6 +45,32 @@ class ProjectDetailsPage extends StatelessWidget {
             fontSize: 18,
           ),
         ),
+        actions: [
+          BlocBuilder<UserModeCubit, UserMode>(
+            builder: (context, userMode) {
+              if (userMode == UserMode.client) {
+                return IconButton(
+                  icon: const Icon(Icons.edit, color: AppColors.primary),
+                  onPressed: () async {
+                    final updatedProject = await Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => EditProjectPage(project: project),
+                      ),
+                    );
+                    if (updatedProject != null && updatedProject is ProjectModel) {
+                      setState(() {
+                        project = updatedProject;
+                      });
+                      context.read<ClientProjectsBloc>().add(LoadClientProjectsEvent());
+                    }
+                  },
+                );
+              }
+              return const SizedBox.shrink();
+            },
+          ),
+        ],
       ),
       body: SafeArea(
         child: Column(
@@ -103,7 +145,46 @@ class ProjectDetailsPage extends StatelessWidget {
             BlocBuilder<UserModeCubit, UserMode>(
               builder: (context, userMode) {
                 if (userMode == UserMode.client) {
-                  return const SizedBox.shrink(); // Clients don't bid on projects
+                  return Container(
+                    padding: const EdgeInsets.all(24),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.05),
+                          blurRadius: 10,
+                          offset: const Offset(0, -4),
+                        ),
+                      ],
+                    ),
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => ProjectProposalsPage(project: project),
+                          ),
+                        );
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.white,
+                        foregroundColor: AppColors.primary,
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
+                          side: const BorderSide(color: AppColors.primary, width: 1.5),
+                        ),
+                        minimumSize: const Size(double.infinity, 56),
+                      ),
+                      child: Text(
+                        'View Proposals',
+                        style: AppTypography.labelLarge.copyWith(
+                          color: AppColors.primary,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  );
                 }
                 
                 return Container(

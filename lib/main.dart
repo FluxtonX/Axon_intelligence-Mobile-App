@@ -65,6 +65,7 @@ void main() async {
     discoverRepository: discoverRepository,
     messagesRepository: messagesRepository,
     reviewsRepository: reviewsRepository,
+    apiClient: apiClient,
   ));
 }
 
@@ -77,6 +78,7 @@ class AxonIntelligenceApp extends StatelessWidget {
   final DiscoverRepository discoverRepository;
   final MessagesRepository messagesRepository;
   final ReviewsRepository reviewsRepository;
+  final ApiClient apiClient;
 
   const AxonIntelligenceApp({
     super.key, 
@@ -88,6 +90,7 @@ class AxonIntelligenceApp extends StatelessWidget {
     required this.discoverRepository,
     required this.messagesRepository,
     required this.reviewsRepository,
+    required this.apiClient,
   });
 
   @override
@@ -102,6 +105,7 @@ class AxonIntelligenceApp extends StatelessWidget {
         RepositoryProvider.value(value: discoverRepository),
         RepositoryProvider.value(value: messagesRepository),
         RepositoryProvider.value(value: reviewsRepository),
+        RepositoryProvider.value(value: apiClient),
       ],
       child: MultiBlocProvider(
         providers: [

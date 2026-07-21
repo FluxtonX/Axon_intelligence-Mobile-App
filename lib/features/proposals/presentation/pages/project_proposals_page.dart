@@ -5,7 +5,7 @@ import '../../../../core/theme/theme.dart';
 import '../../../../core/models/project_model.dart';
 import '../../domain/entities/proposal_entity.dart';
 import '../../data/repositories/proposal_repository.dart';
-
+import '../../../projects/presentation/pages/project_details_page.dart';
 class ProjectProposalsPage extends StatefulWidget {
   final ProjectModel project;
 
@@ -128,11 +128,47 @@ class _ProjectProposalsPageState extends State<ProjectProposalsPage> {
             const SizedBox(height: 16),
             Expanded(
               child: _isLoading
-                  ? const Center(child: CircularProgressIndicator())
+                  ? const Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          CircularProgressIndicator(),
+                          SizedBox(height: 16),
+                          Text('Loading proposals...', style: TextStyle(color: Color(0xFF6B7280))),
+                        ],
+                      ),
+                    )
                   : _error != null
-                      ? Center(child: Text('Error: $_error'))
+                      ? Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const Icon(Icons.error_outline, color: Colors.redAccent, size: 48),
+                              const SizedBox(height: 16),
+                              Text('Error: $_error', style: const TextStyle(color: Colors.redAccent)),
+                            ],
+                          ),
+                        )
                       : _proposals.isEmpty
-                          ? const Center(child: Text('No proposals yet.'))
+                          ? Center(
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(Icons.inbox_rounded, size: 64, color: Colors.grey.shade300),
+                                  const SizedBox(height: 16),
+                                  Text(
+                                    'No proposals yet',
+                                    style: AppTypography.headingSmall.copyWith(color: AppColors.textDark),
+                                  ),
+                                  const SizedBox(height: 8),
+                                  Text(
+                                    'When freelancers submit their bids, they will appear here.',
+                                    style: AppTypography.bodyMedium.copyWith(color: AppColors.textSecondary),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ],
+                              ),
+                            )
                           : ListView.builder(
                               padding: const EdgeInsets.all(24),
                               itemCount: _proposals.length,

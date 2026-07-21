@@ -13,6 +13,7 @@ import '../../../contracts/presentation/bloc/contracts_state.dart';
 import '../../../contracts/domain/entities/contract_entity.dart';
 import '../../../../core/models/project_model.dart';
 import '../../../proposals/presentation/pages/project_proposals_page.dart';
+import 'project_details_page.dart';
 import 'package:go_router/go_router.dart';
 
 class ProjectsPage extends StatelessWidget {
@@ -142,7 +143,11 @@ class _ActiveProjectsTabState extends State<_ActiveProjectsTab> {
         }
 
         final activeContracts = state.contracts
-            .where((c) => c.status == 'ACTIVE' || c.status == 'SUBMITTED')
+            .where((c) => 
+                c.status == 'ACTIVE' || 
+                c.status == 'SUBMITTED' || 
+                c.status == 'PENDING_PAYMENT' || 
+                c.status == 'PENDING')
             .toList();
 
         final totalEscrow = activeContracts.fold(0.0, (sum, c) => sum + c.amount);
@@ -261,7 +266,7 @@ class _PublishedProjectsTab extends StatelessWidget {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => ProjectProposalsPage(project: project),
+            builder: (context) => ProjectDetailsPage(project: project),
           ),
         );
       },

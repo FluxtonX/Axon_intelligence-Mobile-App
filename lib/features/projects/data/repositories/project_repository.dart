@@ -12,7 +12,13 @@ class ProjectRepository {
         '/projects/me',
         queryParameters: {'page': page, 'limit': limit},
       );
-      final List data = response.data['data'];
+      final responseData = response.data;
+      List data = [];
+      if (responseData is List) {
+        data = responseData;
+      } else if (responseData is Map && responseData['data'] is List) {
+        data = responseData['data'];
+      }
       return data.map((json) => ProjectModel.fromJson(json)).toList();
     } catch (e) {
       throw Exception('Failed to load projects: $e');
@@ -40,13 +46,41 @@ class ProjectRepository {
     }
   }
 
+  Future<ProjectModel> updateProject(String id, {
+    String? title,
+    String? description,
+    double? budget,
+    String? timeline,
+    List<String>? skills,
+  }) async {
+    try {
+      final data = <String, dynamic>{};
+      if (title != null) data['title'] = title;
+      if (description != null) data['description'] = description;
+      if (budget != null) data['budget'] = budget;
+      if (timeline != null) data['timeline'] = timeline;
+      if (skills != null) data['skills'] = skills;
+      
+      final response = await _apiClient.dio.patch('/projects/$id', data: data);
+      return ProjectModel.fromJson(response.data);
+    } catch (e) {
+      throw Exception('Failed to update project: $e');
+    }
+  }
+
   Future<List<ProjectModel>> getAvailableProjects({int page = 1, int limit = 10}) async {
     try {
       final response = await _apiClient.dio.get(
         '/projects',
         queryParameters: {'page': page, 'limit': limit},
       );
-      final List data = response.data['data'];
+      final responseData = response.data;
+      List data = [];
+      if (responseData is List) {
+        data = responseData;
+      } else if (responseData is Map && responseData['data'] is List) {
+        data = responseData['data'];
+      }
       return data.map((json) => ProjectModel.fromJson(json)).toList();
     } catch (e) {
       throw Exception('Failed to load available projects: $e');

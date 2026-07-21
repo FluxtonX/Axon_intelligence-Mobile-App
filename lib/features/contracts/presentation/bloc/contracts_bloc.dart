@@ -10,6 +10,7 @@ class ContractsBloc extends Bloc<ContractsEvent, ContractsState> {
 
   ContractsBloc(this._contractRepository, this._reviewsRepository) : super(const ContractsState()) {
     on<FetchMyContracts>(_onFetchMyContracts);
+    on<FundContract>(_onFundContract);
     on<SubmitWork>(_onSubmitWork);
     on<ApproveWork>(_onApproveWork);
     on<LeaveReview>(_onLeaveReview);
@@ -27,6 +28,23 @@ class ContractsBloc extends Bloc<ContractsEvent, ContractsState> {
       emit(state.copyWith(
         status: ContractsStatus.failure,
         errorMessage: e.toString(),
+      ));
+    }
+  }
+
+  Future<void> _onFundContract(FundContract event, Emitter<ContractsState> emit) async {
+    emit(state.copyWith(status: ContractsStatus.approving, clearMessages: true));
+    try {
+      await _contractRepository.fundContract(event.contractId);
+      emit(state.copyWith(
+        status: ContractsStatus.success,
+        actionSuccessMessage: 'Contract funded successfully! Status is now ACTIVE.',
+      ));
+      add(const FetchMyContracts()); // Refresh list
+    } catch (e) {
+      emit(state.copyWith(
+        status: ContractsStatus.failure,
+        errorMessage: 'Failed to fund contract.',
       ));
     }
   }
