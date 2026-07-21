@@ -15,6 +15,7 @@ import '../bloc/main_shell_event.dart';
 import '../bloc/main_shell_state.dart';
 import '../../../../core/blocs/user_mode_cubit.dart';
 import '../../../seller_dashboard/presentation/pages/seller_dashboard_page.dart';
+import '../../../contracts/presentation/pages/orders_page.dart';
 
 class MainShellPage extends StatelessWidget {
   const MainShellPage({super.key});
@@ -47,7 +48,7 @@ class _MainShellView extends StatelessWidget {
               ? [
                   const SellerDashboardPage(),
                   const FindWorkPage(),
-                  const ProjectsPage(), // Using ProjectsPage for active orders for now
+                  const OrdersPage(),
                   const MessagesPage(),
                   const ProfilePage(),
                 ]

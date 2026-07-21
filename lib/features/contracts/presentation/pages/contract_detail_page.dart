@@ -55,7 +55,7 @@ class _ContractDetailPageState extends State<ContractDetailPage> {
           ),
           title: Text(
             'Contract Details',
-            style: AppTypography.headingMedium.copyWith(fontSize: 18),
+            style: AppTypography.headingMedium.copyWith(fontSize: 18, color: AppColors.textDark),
           ),
           centerTitle: true,
         ),
@@ -64,7 +64,7 @@ class _ContractDetailPageState extends State<ContractDetailPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(widget.contract.project?.title ?? 'Project', style: AppTypography.headingMedium),
+              Text(widget.contract.project?.title ?? 'Project', style: AppTypography.headingMedium.copyWith(color: AppColors.textDark)),
               const SizedBox(height: 8),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
@@ -81,7 +81,7 @@ class _ContractDetailPageState extends State<ContractDetailPage> {
                 ),
               ),
               const SizedBox(height: 24),
-              Text('Amount in Escrow', style: AppTypography.labelLarge),
+              Text('Amount in Escrow', style: AppTypography.labelLarge.copyWith(color: AppColors.textDark)),
               const SizedBox(height: 4),
               Text(
                 '\$${widget.contract.amount.toStringAsFixed(2)}',
@@ -101,11 +101,11 @@ class _ContractDetailPageState extends State<ContractDetailPage> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('Fund Contract', style: AppTypography.headingSmall),
+                      Text('Fund Contract', style: AppTypography.headingSmall.copyWith(color: AppColors.textDark)),
                       const SizedBox(height: 8),
                       Text(
                         'Fund this contract to move it to ACTIVE status and let the freelancer start working. Funds will be held securely in escrow.',
-                        style: AppTypography.bodyMedium,
+                        style: AppTypography.bodyMedium.copyWith(color: const Color(0xFF4B5563)),
                       ),
                     ],
                   ),
@@ -127,7 +127,7 @@ class _ContractDetailPageState extends State<ContractDetailPage> {
 
               // Freelancer: Submit Work
               if (!isClient && widget.contract.status == 'ACTIVE') ...[
-                Text('Submit Work', style: AppTypography.headingSmall),
+                Text('Submit Work', style: AppTypography.headingSmall.copyWith(color: AppColors.textDark)),
                 const SizedBox(height: 12),
                 TextField(
                   controller: _submissionController,
@@ -173,11 +173,11 @@ class _ContractDetailPageState extends State<ContractDetailPage> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('Work Submitted!', style: AppTypography.headingSmall),
+                      Text('Work Submitted!', style: AppTypography.headingSmall.copyWith(color: AppColors.textDark)),
                       const SizedBox(height: 8),
                       Text(
                         'The freelancer has submitted the work for your review. Please review the submission and release the funds if it meets your requirements.',
-                        style: AppTypography.bodyMedium,
+                        style: AppTypography.bodyMedium.copyWith(color: const Color(0xFF4B5563)),
                       ),
                     ],
                   ),
@@ -200,7 +200,7 @@ class _ContractDetailPageState extends State<ContractDetailPage> {
               // Leave Review for COMPLETED contracts
               if (widget.contract.status == 'COMPLETED') ...[
                 const SizedBox(height: 16),
-                Text('Leave a Review', style: AppTypography.headingSmall),
+                Text('Leave a Review', style: AppTypography.headingSmall.copyWith(color: AppColors.textDark)),
                 const SizedBox(height: 12),
                 TextField(
                   controller: _submissionController,

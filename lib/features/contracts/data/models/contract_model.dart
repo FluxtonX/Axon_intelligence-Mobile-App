@@ -1,5 +1,6 @@
 import '../../domain/entities/contract_entity.dart';
 import '../../../../core/models/project_model.dart';
+import '../../../proposals/domain/entities/proposal_entity.dart';
 
 class ContractModel extends ContractEntity {
   const ContractModel({
@@ -26,7 +27,7 @@ class ContractModel extends ContractEntity {
       status: json['status'] as String,
       createdAt: DateTime.parse(json['createdAt'] as String),
       project: json['project'] != null ? ProjectModel.fromJson(json['project']) : null,
-      proposal: null,
+      proposal: json['proposal'] != null ? ProposalEntity.fromJson(json['proposal']) : null,
     );
   }
 
