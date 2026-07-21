@@ -82,11 +82,13 @@ class _SubmitProposalPageState extends State<SubmitProposalPage> {
       child: Scaffold(
         backgroundColor: Colors.white,
         appBar: AppBar(
+          backgroundColor: Colors.white,
+          elevation: 0,
           leading: IconButton(
-            icon: const Icon(Icons.arrow_back_ios_new_rounded),
+            icon: const Icon(Icons.arrow_back_ios_new_rounded, color: Colors.black),
             onPressed: () => context.pop(),
           ),
-          title: Text('Submit Proposal', style: AppTypography.headingSmall.copyWith(fontSize: 20)),
+          title: Text('Submit Proposal', style: AppTypography.headingSmall.copyWith(fontSize: 20, color: Colors.black)),
         ),
         body: SafeArea(
           child: SingleChildScrollView(
@@ -107,22 +109,24 @@ class _SubmitProposalPageState extends State<SubmitProposalPage> {
                   children: [
                     Text('Job Details', style: AppTypography.caption.copyWith(color: const Color(0xFF6B7280))),
                     const SizedBox(height: 8),
-                    Text(widget.jobTitle, style: AppTypography.labelLarge.copyWith(fontWeight: FontWeight.bold)),
+                    Text(widget.jobTitle, style: AppTypography.labelLarge.copyWith(fontWeight: FontWeight.bold, color: Colors.black)),
                     const SizedBox(height: 4),
-                    Text(widget.clientName, style: AppTypography.caption),
+                    Text(widget.clientName, style: AppTypography.caption.copyWith(color: const Color(0xFF4B5563))),
                   ],
                 ),
               ),
               const SizedBox(height: 32),
 
               // Bid Amount
-              Text('Your Bid (\$)', style: AppTypography.labelLarge.copyWith(fontWeight: FontWeight.bold)),
+              Text('Your Bid (\$)', style: AppTypography.labelLarge.copyWith(fontWeight: FontWeight.bold, color: Colors.black)),
               const SizedBox(height: 8),
               TextField(
                 controller: _bidController,
                 style: const TextStyle(color: Colors.black),
                 keyboardType: TextInputType.number,
                 decoration: InputDecoration(
+                  labelText: 'Bid Amount',
+                  labelStyle: const TextStyle(color: Color(0xFF4B5563)),
                   hintText: 'e.g. 500',
                   hintStyle: const TextStyle(color: Color(0xFF9CA3AF)),
                   filled: true,
@@ -134,13 +138,15 @@ class _SubmitProposalPageState extends State<SubmitProposalPage> {
               const SizedBox(height: 24),
 
               // Delivery Time
-              Text('Delivery Time (Days)', style: AppTypography.labelLarge.copyWith(fontWeight: FontWeight.bold)),
+              Text('Delivery Time (Days)', style: AppTypography.labelLarge.copyWith(fontWeight: FontWeight.bold, color: Colors.black)),
               const SizedBox(height: 8),
               TextField(
                 controller: _daysController,
                 style: const TextStyle(color: Colors.black),
                 keyboardType: TextInputType.number,
                 decoration: InputDecoration(
+                  labelText: 'Delivery Time',
+                  labelStyle: const TextStyle(color: Color(0xFF4B5563)),
                   hintText: 'e.g. 14',
                   hintStyle: const TextStyle(color: Color(0xFF9CA3AF)),
                   filled: true,
@@ -152,13 +158,15 @@ class _SubmitProposalPageState extends State<SubmitProposalPage> {
               const SizedBox(height: 24),
 
               // Cover Letter
-              Text('Cover Letter', style: AppTypography.labelLarge.copyWith(fontWeight: FontWeight.bold)),
+              Text('Cover Letter', style: AppTypography.labelLarge.copyWith(fontWeight: FontWeight.bold, color: Colors.black)),
               const SizedBox(height: 8),
               TextField(
                 controller: _letterController,
                 style: const TextStyle(color: Colors.black),
                 maxLines: 6,
                 decoration: InputDecoration(
+                  labelText: 'Cover Letter',
+                  labelStyle: const TextStyle(color: Color(0xFF4B5563)),
                   hintText: 'Why are you the best fit for this project? Provide links to past work...',
                   hintStyle: const TextStyle(color: Color(0xFF9CA3AF)),
                   filled: true,
@@ -181,10 +189,9 @@ class _SubmitProposalPageState extends State<SubmitProposalPage> {
               ),
             ],
           ),
+          ),
         ),
       ),
-    ),
-  );
+    );
+  }
 }
-}
-

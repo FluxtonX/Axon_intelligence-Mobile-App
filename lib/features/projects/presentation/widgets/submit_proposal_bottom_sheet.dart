@@ -79,23 +79,23 @@ class _SubmitProposalBottomSheetState extends State<SubmitProposalBottomSheet> {
     return Container(
       height: MediaQuery.of(context).size.height * 0.85,
       decoration: const BoxDecoration(
-        color: Colors.white,
+        color: AppColors.background,
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
       child: Column(
         children: [
           // Header
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
             decoration: BoxDecoration(
-              border: Border(bottom: BorderSide(color: Colors.grey.shade200)),
+              border: Border(bottom: BorderSide(color: Colors.white.withValues(alpha: 0.1))),
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
                   'Submit Proposal',
-                  style: AppTypography.headingSmall.copyWith(color: AppColors.textDark),
+                  style: AppTypography.headingSmall.copyWith(color: AppColors.textPrimary),
                 ),
                 IconButton(
                   icon: const Icon(Icons.close_rounded, color: AppColors.textSecondary),
@@ -116,7 +116,7 @@ class _SubmitProposalBottomSheetState extends State<SubmitProposalBottomSheet> {
                   children: [
                     Text(
                       'Bid Details',
-                      style: AppTypography.labelLarge.copyWith(fontWeight: FontWeight.bold),
+                      style: AppTypography.labelLarge.copyWith(color: AppColors.textPrimary),
                     ),
                     const SizedBox(height: 16),
                     Row(
@@ -125,14 +125,19 @@ class _SubmitProposalBottomSheetState extends State<SubmitProposalBottomSheet> {
                           child: TextFormField(
                             controller: _bidAmountController,
                             keyboardType: TextInputType.number,
+                            style: const TextStyle(color: AppColors.textPrimary),
                             decoration: InputDecoration(
                               labelText: 'Bid Amount (\$)',
                               hintText: 'e.g. 500',
+                              labelStyle: const TextStyle(color: AppColors.textSecondary),
+                              hintStyle: TextStyle(color: AppColors.textSecondary.withValues(alpha: 0.5)),
+                              filled: true,
+                              fillColor: AppColors.surface,
                               border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(12),
-                                borderSide: BorderSide(color: Colors.grey.shade300),
+                                borderRadius: BorderRadius.circular(16),
+                                borderSide: BorderSide.none,
                               ),
-                              prefixIcon: const Icon(Icons.attach_money_rounded),
+                              prefixIcon: const Icon(Icons.attach_money_rounded, color: AppColors.primary),
                             ),
                             validator: (v) {
                               if (v == null || v.isEmpty) return 'Required';
@@ -146,14 +151,19 @@ class _SubmitProposalBottomSheetState extends State<SubmitProposalBottomSheet> {
                           child: TextFormField(
                             controller: _deliveryDaysController,
                             keyboardType: TextInputType.number,
+                            style: const TextStyle(color: AppColors.textPrimary),
                             decoration: InputDecoration(
                               labelText: 'Delivery (Days)',
                               hintText: 'e.g. 7',
+                              labelStyle: const TextStyle(color: AppColors.textSecondary),
+                              hintStyle: TextStyle(color: AppColors.textSecondary.withValues(alpha: 0.5)),
+                              filled: true,
+                              fillColor: AppColors.surface,
                               border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(12),
-                                borderSide: BorderSide(color: Colors.grey.shade300),
+                                borderRadius: BorderRadius.circular(16),
+                                borderSide: BorderSide.none,
                               ),
-                              prefixIcon: const Icon(Icons.timer_outlined),
+                              prefixIcon: const Icon(Icons.timer_outlined, color: AppColors.primary),
                             ),
                             validator: (v) {
                               if (v == null || v.isEmpty) return 'Required';
@@ -167,17 +177,21 @@ class _SubmitProposalBottomSheetState extends State<SubmitProposalBottomSheet> {
                     const SizedBox(height: 32),
                     Text(
                       'Cover Letter',
-                      style: AppTypography.labelLarge.copyWith(fontWeight: FontWeight.bold),
+                      style: AppTypography.labelLarge.copyWith(color: AppColors.textPrimary),
                     ),
                     const SizedBox(height: 16),
                     TextFormField(
                       controller: _coverLetterController,
                       maxLines: 8,
+                      style: const TextStyle(color: AppColors.textPrimary),
                       decoration: InputDecoration(
                         hintText: 'Explain why you are the best fit for this project...',
+                        hintStyle: TextStyle(color: AppColors.textSecondary.withValues(alpha: 0.5)),
+                        filled: true,
+                        fillColor: AppColors.surface,
                         border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(color: Colors.grey.shade300),
+                          borderRadius: BorderRadius.circular(16),
+                          borderSide: BorderSide.none,
                         ),
                       ),
                       validator: (v) => v == null || v.isEmpty ? 'Required' : null,
@@ -192,14 +206,8 @@ class _SubmitProposalBottomSheetState extends State<SubmitProposalBottomSheet> {
           Container(
             padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
-              color: Colors.white,
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.05),
-                  blurRadius: 10,
-                  offset: const Offset(0, -4),
-                ),
-              ],
+              color: AppColors.background,
+              border: Border(top: BorderSide(color: Colors.white.withValues(alpha: 0.05))),
             ),
             child: ElevatedButton(
               onPressed: _isSubmitting ? null : _submitProposal,

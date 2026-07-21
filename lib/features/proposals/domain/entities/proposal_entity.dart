@@ -13,6 +13,7 @@ class ProposalEntity extends Equatable {
   final int estimatedDays;
   final String status;
   final DateTime submittedAt;
+  final String? projectTitle;
 
   const ProposalEntity({
     required this.id,
@@ -27,6 +28,7 @@ class ProposalEntity extends Equatable {
     required this.estimatedDays,
     required this.status,
     required this.submittedAt,
+    this.projectTitle,
   });
 
   @override
@@ -43,6 +45,7 @@ class ProposalEntity extends Equatable {
         estimatedDays,
         status,
         submittedAt,
+        projectTitle,
       ];
 
   factory ProposalEntity.fromJson(Map<String, dynamic> json) {
@@ -62,6 +65,7 @@ class ProposalEntity extends Equatable {
       estimatedDays: json['deliveryDays'] as int,
       status: json['status'] as String? ?? 'PENDING',
       submittedAt: DateTime.parse(json['createdAt'] as String),
+      projectTitle: json['project'] != null ? json['project']['title'] as String? : null,
     );
   }
 }

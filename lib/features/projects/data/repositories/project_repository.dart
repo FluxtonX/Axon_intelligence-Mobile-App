@@ -68,11 +68,14 @@ class ProjectRepository {
     }
   }
 
-  Future<List<ProjectModel>> getAvailableProjects({int page = 1, int limit = 10}) async {
+  Future<List<ProjectModel>> getAvailableProjects({int page = 1, int limit = 10, String? freelancerId}) async {
     try {
+      final queryParams = <String, dynamic>{'page': page, 'limit': limit};
+      if (freelancerId != null) queryParams['freelancerId'] = freelancerId;
+      
       final response = await _apiClient.dio.get(
         '/projects',
-        queryParameters: {'page': page, 'limit': limit},
+        queryParameters: queryParams,
       );
       final responseData = response.data;
       List data = [];

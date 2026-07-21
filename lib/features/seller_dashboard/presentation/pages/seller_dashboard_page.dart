@@ -57,7 +57,7 @@ class SellerDashboardPage extends StatelessWidget {
               // Earnings Overview
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 24),
-                child: Text('Earnings Overview', style: AppTypography.headingMedium.copyWith(fontSize: 18)),
+                child: Text('Earnings Overview', style: AppTypography.headingMedium.copyWith(fontSize: 18, color: const Color(0xFF111827))),
               ),
               const SizedBox(height: 16),
               SingleChildScrollView(
@@ -102,7 +102,7 @@ class SellerDashboardPage extends StatelessWidget {
                     children: [
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 24),
-                        child: Text('My Services', style: AppTypography.headingMedium.copyWith(fontSize: 18)),
+                        child: Text('My Services', style: AppTypography.headingMedium.copyWith(fontSize: 18, color: const Color(0xFF111827))),
                       ),
                       const SizedBox(height: 16),
                       SizedBox(
@@ -130,7 +130,94 @@ class SellerDashboardPage extends StatelessWidget {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text('Active Orders', style: AppTypography.headingMedium.copyWith(fontSize: 18)),
+                    Text('Submitted Proposals', style: AppTypography.headingMedium.copyWith(fontSize: 18, color: const Color(0xFF111827))),
+                    TextButton(
+                      onPressed: () => context.pushNamed('submittedProposals'),
+                      style: TextButton.styleFrom(
+                        padding: EdgeInsets.zero,
+                        minimumSize: Size.zero,
+                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      ),
+                      child: Text(
+                        'View All',
+                        style: AppTypography.labelMedium.copyWith(color: AppColors.primary, fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 16),
+              
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24),
+                child: GestureDetector(
+                  onTap: () => context.pushNamed('submittedProposals'),
+                  child: Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(20),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: const Color(0xFFE5E7EB)),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.02),
+                          blurRadius: 10,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Row(
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(12),
+                              decoration: BoxDecoration(
+                                color: AppColors.primary.withValues(alpha: 0.1),
+                                shape: BoxShape.circle,
+                              ),
+                              child: const Icon(Icons.assignment_outlined, color: AppColors.primary),
+                            ),
+                            const SizedBox(width: 16),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Track Proposals',
+                                  style: AppTypography.labelLarge.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                    color: const Color(0xFF111827),
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  'Review your active bids',
+                                  style: AppTypography.bodySmall.copyWith(
+                                    color: const Color(0xFF6B7280),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                        const Icon(Icons.arrow_forward_ios_rounded, size: 16, color: Color(0xFF9CA3AF)),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 40),
+
+              // Active Orders
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text('Active Orders', style: AppTypography.headingMedium.copyWith(fontSize: 18, color: const Color(0xFF111827))),
                     Text(
                       'View All',
                       style: AppTypography.labelMedium.copyWith(color: AppColors.primary, fontWeight: FontWeight.bold),
@@ -167,7 +254,7 @@ class SellerDashboardPage extends StatelessWidget {
               // Profile Stats
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 24),
-                child: Text('Performance', style: AppTypography.headingMedium.copyWith(fontSize: 18)),
+                child: Text('Performance', style: AppTypography.headingMedium.copyWith(fontSize: 18, color: const Color(0xFF111827))),
               ),
               const SizedBox(height: 16),
               Padding(

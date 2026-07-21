@@ -40,6 +40,22 @@ class ProposalRepository {
     }
   }
 
+  Future<List<ProposalEntity>> getMyProposals() async {
+    try {
+      final response = await _apiClient.dio.get('/proposals/me');
+      final responseData = response.data;
+      List data = [];
+      if (responseData is List) {
+        data = responseData;
+      } else if (responseData is Map && responseData['data'] is List) {
+        data = responseData['data'];
+      }
+      return data.map((json) => ProposalEntity.fromJson(json)).toList();
+    } catch (e) {
+      throw Exception('Failed to get my proposals: $e');
+    }
+  }
+
   Future<String> acceptProposal(String proposalId) async {
     try {
       final response = await _apiClient.dio.patch('/proposals/$proposalId/accept');
