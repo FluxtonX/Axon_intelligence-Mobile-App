@@ -101,7 +101,7 @@ class _SearchingIndicatorState extends State<SearchingIndicator> with SingleTick
           width: 8,
           height: 8,
           decoration: BoxDecoration(
-            color: AppColors.primary.withOpacity(value),
+            color: AppColors.primary.withValues(alpha: value),
             shape: BoxShape.circle,
           ),
         );

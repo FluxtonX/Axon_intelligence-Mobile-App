@@ -19,9 +19,14 @@ class FetchChatHistory extends ChatDetailEvent {
 class SendMessage extends ChatDetailEvent {
   final String otherUserId;
   final String content;
+  final String senderRole;
 
-  const SendMessage({required this.otherUserId, required this.content});
+  const SendMessage({
+    required this.otherUserId,
+    required this.content,
+    this.senderRole = 'client',
+  });
 
   @override
-  List<Object> get props => [otherUserId, content];
+  List<Object> get props => [otherUserId, content, senderRole];
 }

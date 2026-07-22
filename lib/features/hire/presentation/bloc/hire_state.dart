@@ -16,12 +16,14 @@ class HireState extends Equatable {
   final ProposalEntity? proposal;
   final String? contractId;
   final String? errorMessage;
+  final double? directAmount; // Added for manual contracts
 
   const HireState({
     this.status = HireStatus.initial,
     this.proposal,
     this.contractId,
     this.errorMessage,
+    this.directAmount,
   });
 
   HireState copyWith({
@@ -29,12 +31,14 @@ class HireState extends Equatable {
     ProposalEntity? proposal,
     String? contractId,
     String? errorMessage,
+    double? directAmount,
   }) {
     return HireState(
       status: status ?? this.status,
       proposal: proposal ?? this.proposal,
       contractId: contractId ?? this.contractId,
       errorMessage: errorMessage ?? this.errorMessage,
+      directAmount: directAmount ?? this.directAmount,
     );
   }
 
@@ -44,5 +48,6 @@ class HireState extends Equatable {
         proposal,
         contractId,
         errorMessage,
+        directAmount,
       ];
 }

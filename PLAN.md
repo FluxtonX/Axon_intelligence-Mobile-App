@@ -22,8 +22,8 @@
 | 3 | **Auth Screen** | 🔄 In Progress | Google + Email. No Apple. No role selection. |
 | 4 | Buyer Home Screen | ✅ Done | Project stats, notifications, talent preview |
 | 5 | Freelancer Profile | ✅ Done | Portfolio, ratings, hire button |
-| 6 | Search & Filters | 🔄 In Progress | Category, budget, rating filters |
-| 7 | Chat / Messages | ⏳ Pending | Conversation list + chat screen |
+| 6 | Search & Filters | ✅ Done | Category, budget, rating filters |
+| 7 | Chat / Messages | ✅ Done | Conversation list + chat screen |
 | 8 | Hire / Checkout | ⏳ Pending | Milestone-based payment flow |
 | 9 | Seller Onboarding | ⏳ Pending | "Become a Freelancer" flow |
 | 10 | Seller Dashboard | ⏳ Pending | Earnings, orders, gig management |

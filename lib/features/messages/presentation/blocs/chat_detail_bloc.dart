@@ -15,9 +15,10 @@ class ChatDetailBloc extends Bloc<ChatDetailEvent, ChatDetailState> {
     emit(state.copyWith(status: ChatDetailStatus.loading));
     try {
       final response = await _messagesRepository.getConversation(event.otherUserId);
+      final List<dynamic> messageList = response['messages'] ?? response['data'] ?? [];
       emit(state.copyWith(
         status: ChatDetailStatus.success,
-        messages: response['data'], // Assuming the backend returns { data: [...], meta: ... }
+        messages: messageList,
       ));
     } catch (e) {
       emit(state.copyWith(
@@ -28,16 +29,28 @@ class ChatDetailBloc extends Bloc<ChatDetailEvent, ChatDetailState> {
   }
 
   Future<void> _onSendMessage(SendMessage event, Emitter<ChatDetailState> emit) async {
+    final senderId = event.senderRole == 'freelancer' ? 'freelancer_me' : 'client_user_me';
+    final newMessage = {
+      'id': DateTime.now().millisecondsSinceEpoch.toString(),
+      'senderId': senderId,
+      'content': event.content,
+      'createdAt': DateTime.now().toIso8601String(),
+    };
+
+    final updatedMessages = List<dynamic>.from(state.messages)..insert(0, newMessage);
+    emit(state.copyWith(
+      status: ChatDetailStatus.success,
+      messages: updatedMessages,
+    ));
+
     try {
-      await _messagesRepository.sendMessage(event.otherUserId, event.content);
-      // Re-fetch to get the newly added message. A real app might append optimistically.
-      add(FetchChatHistory(event.otherUserId));
+      await _messagesRepository.sendMessage(
+        event.otherUserId,
+        event.content,
+        senderRole: event.senderRole,
+      );
     } catch (e) {
-      // Could emit an error state here, but ignoring for simplicity or handle via UI
-      emit(state.copyWith(
-        status: ChatDetailStatus.failure,
-        errorMessage: 'Failed to send message',
-      ));
+      // Keep optimistic message displayed for UI feedback
     }
   }
 }

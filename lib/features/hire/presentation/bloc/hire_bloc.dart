@@ -12,6 +12,7 @@ class HireBloc extends Bloc<HireEvent, HireState> {
     on<HireInitialize>(_onInitialize);
     on<HireAcceptProposal>(_onAcceptProposal);
     on<HireProcessPayment>(_onProcessPayment);
+    on<HireCreateDirectContract>(_onCreateDirectContract);
   }
 
   void _onInitialize(HireInitialize event, Emitter<HireState> emit) {
@@ -61,6 +62,33 @@ class HireBloc extends Bloc<HireEvent, HireState> {
       emit(state.copyWith(
         status: HireStatus.error,
         errorMessage: 'Payment failed. Please check your details.',
+      ));
+    }
+  }
+
+  Future<void> _onCreateDirectContract(
+    HireCreateDirectContract event,
+    Emitter<HireState> emit,
+  ) async {
+    emit(state.copyWith(status: HireStatus.loading, directAmount: event.amount));
+
+    try {
+      final contract = await _contractRepository.createDirectContract(
+        freelancerId: event.freelancerId,
+        title: event.title,
+        description: event.description,
+        amount: event.amount,
+        deliveryDays: event.deliveryDays,
+      );
+
+      emit(state.copyWith(
+        status: HireStatus.contractCreated,
+        contractId: contract.id,
+      ));
+    } catch (e) {
+      emit(state.copyWith(
+        status: HireStatus.error,
+        errorMessage: 'Failed to create direct contract.',
       ));
     }
   }

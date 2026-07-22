@@ -15,6 +15,27 @@ class ContractRepository {
     }
   }
 
+  Future<ContractEntity> createDirectContract({
+    required String freelancerId,
+    required String title,
+    required String description,
+    required double amount,
+    required int deliveryDays,
+  }) async {
+    try {
+      final response = await _apiClient.dio.post('/contracts/direct', data: {
+        'freelancerId': freelancerId,
+        'title': title,
+        'description': description,
+        'amount': amount,
+        'deliveryDays': deliveryDays,
+      });
+      return ContractModel.fromJson(response.data);
+    } catch (e) {
+      throw Exception('Failed to create direct contract: $e');
+    }
+  }
+
   Future<List<ContractEntity>> getMyContracts() async {
     try {
       final response = await _apiClient.dio.get('/contracts/me');

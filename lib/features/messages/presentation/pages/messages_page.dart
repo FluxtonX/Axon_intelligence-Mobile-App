@@ -4,6 +4,7 @@ import '../../../../shared/animations/fade_in_slide.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../widgets/conversation_tile.dart';
 import '../blocs/conversations_bloc.dart';
+import '../blocs/conversations_event.dart';
 import '../blocs/conversations_state.dart';
 
 class MessagesPage extends StatelessWidget {
@@ -38,21 +39,38 @@ class MessagesPage extends StatelessWidget {
       ),
       body: BlocBuilder<ConversationsBloc, ConversationsState>(
         builder: (context, state) {
-          if (state.status == ConversationsStatus.loading) {
+          if (state.status == ConversationsStatus.initial) {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              context.read<ConversationsBloc>().add(const FetchConversations());
+            });
             return const Center(child: CircularProgressIndicator());
           }
-          if (state.status == ConversationsStatus.failure) {
-            return Center(child: Text('Failed to load conversations: ${state.errorMessage}'));
+          if (state.status == ConversationsStatus.loading && state.conversations.isEmpty) {
+            return const Center(child: CircularProgressIndicator());
           }
 
-          if (state.conversations.isEmpty) {
-            return const Center(child: Text('No messages yet.'));
+          final conversations = state.conversations;
+          if (conversations.isEmpty) {
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(Icons.chat_bubble_outline_rounded, size: 48, color: Color(0xFF9CA3AF)),
+                  const SizedBox(height: 16),
+                  Text(
+                    'No messages yet',
+                    style: AppTypography.headingSmall.copyWith(color: AppColors.textDark),
+                  ),
+                ],
+              ),
+            );
           }
 
-          final unread = state.conversations.where((c) => (c['unreadCount'] as int) > 0).toList();
-          final read = state.conversations.where((c) => (c['unreadCount'] as int) == 0).toList();
+          final unread = conversations.where((c) => (c['unreadCount'] as int? ?? 0) > 0).toList();
+          final read = conversations.where((c) => (c['unreadCount'] as int? ?? 0) == 0).toList();
 
           return ListView(
+            padding: const EdgeInsets.only(bottom: 24),
             children: [
               if (unread.isNotEmpty) ...[
                 const Padding(
@@ -67,30 +85,25 @@ class MessagesPage extends StatelessWidget {
                     ),
                   ),
                 ),
-                ...unread.asMap().entries.map((entry) {
-                  final index = entry.key;
-                  final chat = entry.value;
+                ...unread.map((chat) {
                   final user = chat['user'];
                   final lastMessage = chat['lastMessage']['content'];
-                  return FadeInSlide(
-                    delay: Duration(milliseconds: index * 100),
-                    child: ConversationTile(
-                      id: user['id'], // use user id as chat id to easily route
-                      name: user['profile'] != null 
-                        ? '${user['profile']['firstName']} ${user['profile']['lastName'] ?? ''}'.trim()
-                        : 'Unknown User',
-                      lastMessage: lastMessage,
-                      time: '', // Format properly if needed
-                      avatarUrl: user['profile']?['avatarUrl'] ?? 'https://i.pravatar.cc/150?u=${user['id']}',
-                      unreadCount: chat['unreadCount'],
-                      isOnline: true, // Mock online
-                    ),
+                  return ConversationTile(
+                    id: user['id'],
+                    name: user['profile'] != null 
+                      ? '${user['profile']['firstName']} ${user['profile']['lastName'] ?? ''}'.trim()
+                      : 'Unknown User',
+                    lastMessage: lastMessage,
+                    time: '15m ago',
+                    avatarUrl: user['profile']?['avatarUrl'] ?? 'https://i.pravatar.cc/150?u=${user['id']}',
+                    unreadCount: chat['unreadCount'],
+                    isOnline: true,
                   );
                 }),
               ],
               if (read.isNotEmpty) ...[
                 const Padding(
-                  padding: EdgeInsets.fromLTRB(24, 24, 24, 16),
+                  padding: EdgeInsets.fromLTRB(24, 16, 24, 16),
                   child: Text(
                     'All Messages',
                     style: TextStyle(
@@ -101,24 +114,19 @@ class MessagesPage extends StatelessWidget {
                     ),
                   ),
                 ),
-                ...read.asMap().entries.map((entry) {
-                  final index = entry.key;
-                  final chat = entry.value;
+                ...read.map((chat) {
                   final user = chat['user'];
                   final lastMessage = chat['lastMessage']['content'];
-                  return FadeInSlide(
-                    delay: Duration(milliseconds: 200 + (index * 100)),
-                    child: ConversationTile(
-                      id: user['id'],
-                      name: user['profile'] != null 
-                        ? '${user['profile']['firstName']} ${user['profile']['lastName'] ?? ''}'.trim()
-                        : 'Unknown User',
-                      lastMessage: lastMessage,
-                      time: '',
-                      avatarUrl: user['profile']?['avatarUrl'] ?? 'https://i.pravatar.cc/150?u=${user['id']}',
-                      unreadCount: 0,
-                      isOnline: false,
-                    ),
+                  return ConversationTile(
+                    id: user['id'],
+                    name: user['profile'] != null 
+                      ? '${user['profile']['firstName']} ${user['profile']['lastName'] ?? ''}'.trim()
+                      : 'Unknown User',
+                    lastMessage: lastMessage,
+                    time: '3h ago',
+                    avatarUrl: user['profile']?['avatarUrl'] ?? 'https://i.pravatar.cc/150?u=${user['id']}',
+                    unreadCount: 0,
+                    isOnline: false,
                   );
                 }),
               ],

@@ -27,3 +27,22 @@ class HireAcceptProposal extends HireEvent {
 class HireProcessPayment extends HireEvent {
   const HireProcessPayment();
 }
+
+class HireCreateDirectContract extends HireEvent {
+  final String freelancerId;
+  final String title;
+  final String description;
+  final double amount;
+  final int deliveryDays;
+
+  const HireCreateDirectContract({
+    required this.freelancerId,
+    required this.title,
+    required this.description,
+    required this.amount,
+    required this.deliveryDays,
+  });
+
+  @override
+  List<Object?> get props => [freelancerId, title, description, amount, deliveryDays];
+}

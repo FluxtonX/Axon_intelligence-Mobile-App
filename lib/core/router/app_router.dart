@@ -22,6 +22,7 @@ import '../../features/hire/presentation/pages/checkout_page.dart';
 import '../../features/contracts/presentation/pages/contract_detail_page.dart';
 import '../../features/contracts/domain/entities/contract_entity.dart';
 import '../../features/hire/presentation/pages/payment_success_page.dart';
+import '../../features/hire/presentation/pages/direct_hire_page.dart';
 import '../../features/proposals/presentation/pages/proposals_list_page.dart';
 import '../../features/proposals/presentation/pages/proposal_detail_page.dart';
 import '../../features/proposals/domain/entities/proposal_entity.dart';
@@ -144,6 +145,19 @@ final GoRouter appRouter = GoRouter(
       path: '/payment_success',
       name: 'paymentSuccess',
       builder: (context, state) => const PaymentSuccessPage(),
+    ),
+    GoRoute(
+      path: '/direct-hire',
+      name: 'directHire',
+      builder: (context, state) {
+        final extra = state.extra as Map<String, dynamic>? ?? {};
+        final freelancerId = extra['freelancerId'] as String;
+        final freelancerName = extra['freelancerName'] as String;
+        return DirectHirePage(
+          freelancerId: freelancerId,
+          freelancerName: freelancerName,
+        );
+      },
     ),
     GoRoute(
       path: '/proposals/:jobId',

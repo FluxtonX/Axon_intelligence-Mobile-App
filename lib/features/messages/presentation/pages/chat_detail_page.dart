@@ -2,13 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/theme/theme.dart';
-import '../../../../core/blocs/user_mode_cubit.dart';
 import '../widgets/chat_message_bubble.dart';
-import '../widgets/milestone_action_card.dart';
 import '../blocs/chat_detail_bloc.dart';
 import '../blocs/chat_detail_event.dart';
 import '../blocs/chat_detail_state.dart';
-
+import '../blocs/conversations_bloc.dart';
+import '../blocs/conversations_event.dart';
+import '../../data/repositories/messages_repository.dart';
+import '../../../../core/blocs/user_mode_cubit.dart';
+import '../../../profile/presentation/bloc/profile_cubit.dart';
+import '../../../profile/presentation/bloc/profile_state.dart';
 class ChatDetailPage extends StatefulWidget {
   const ChatDetailPage({
     super.key,
@@ -43,7 +46,10 @@ class _ChatDetailPageState extends State<ChatDetailPage> {
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_new_rounded, color: AppColors.textDark, size: 20),
-          onPressed: () => context.pop(),
+          onPressed: () {
+            context.read<ConversationsBloc>().add(const FetchConversations());
+            context.pop();
+          },
         ),
         title: Row(
           children: [
@@ -74,6 +80,23 @@ class _ChatDetailPageState extends State<ChatDetailPage> {
           ],
         ),
         actions: [
+          if (context.watch<UserModeCubit>().state == UserMode.client)
+            TextButton.icon(
+              onPressed: () {
+                context.pushNamed(
+                  'directHire',
+                  extra: {
+                    'freelancerId': widget.chatId,
+                    'freelancerName': widget.name,
+                  },
+                );
+              },
+              icon: const Icon(Icons.add_box_rounded, color: AppColors.primary, size: 20),
+              label: Text(
+                'Create Offer',
+                style: AppTypography.labelLarge.copyWith(color: AppColors.primary, fontWeight: FontWeight.bold),
+              ),
+            ),
           IconButton(
             icon: const Icon(Icons.more_vert_rounded, color: AppColors.textDark),
             onPressed: () {},
@@ -98,21 +121,43 @@ class _ChatDetailPageState extends State<ChatDetailPage> {
                 if (state.messages.isEmpty) {
                   return const Center(child: Text('No messages yet.'));
                 }
+
+                final userMode = context.watch<UserModeCubit>().state;
+                final mySenderId = userMode == UserMode.freelancer ? 'freelancer_me' : 'client_user_me';
                 
-                final userId = context.read<UserModeCubit>().state == UserMode.client 
-                  ? 'client_id_placeholder' // We'd ideally have actual user ID in a real app, assuming simple check for now
-                  : 'freelancer_id_placeholder'; 
-                  
-                // Note: To properly know `isMe`, we need the current user's ID. 
-                // As a simplification without auth state context here, we check `senderId` against `otherUserId`.
-                
+                // Get the real backend UUID if logged in
+                final profileState = context.read<ProfileCubit>().state;
+                final String? realCurrentUserId = profileState is ProfileLoaded ? profileState.user.id.toLowerCase() : null;
+
                 return ListView.builder(
                   padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
                   reverse: true,
                   itemCount: state.messages.length,
                   itemBuilder: (context, index) {
                     final msg = state.messages[index];
-                    final isMe = msg['senderId'] != widget.chatId;
+                    final senderId = msg['senderId']?.toString().toLowerCase() ?? msg['sender_id']?.toString().toLowerCase() ?? '';
+                    final chatId = widget.chatId.toLowerCase();
+                    
+                    // Bulletproof Identity Rule:
+                    // 1. If senderId matches real backend logged-in user ID
+                    // 2. Or matches mock active mode ID ('freelancer_me' / 'client_user_me')
+                    // 3. Or it's NOT the opponent's ID and we don't have a real UserID clash.
+                    bool isMe = false;
+                    
+                    if (realCurrentUserId != null && senderId == realCurrentUserId) {
+                       isMe = true;
+                    } else if (senderId == mySenderId || senderId == 'me' || senderId == 'client') {
+                       isMe = true;
+                    } else if (senderId.isNotEmpty && senderId != chatId) {
+                       isMe = true;
+                    }
+
+                    // Special Edge Case: If the user is chatting with THEMSELVES (realCurrentUserId == chatId),
+                    // the API will return identical senderIds. In this case, we have to fallback to the optimistic
+                    // local sender string if available, otherwise it's impossible to tell, so default to right-aligned for all.
+                    if (realCurrentUserId != null && realCurrentUserId == chatId) {
+                        isMe = true; 
+                    }
                     
                     // Simple formatting for time
                     final date = DateTime.parse(msg['createdAt']);
@@ -130,85 +175,148 @@ class _ChatDetailPageState extends State<ChatDetailPage> {
           ),
           
           // Input Area
+          // Clean Modern Floating Input Bar
           Container(
             padding: EdgeInsets.only(
-              left: 24,
-              right: 24,
-              top: 16,
+              left: 16,
+              right: 16,
+              top: 10,
               bottom: MediaQuery.of(context).padding.bottom > 0 
-                  ? MediaQuery.of(context).padding.bottom + 8 
-                  : 24,
+                  ? MediaQuery.of(context).padding.bottom + 6 
+                  : 12,
             ),
-            decoration: BoxDecoration(
+            decoration: const BoxDecoration(
               color: Colors.white,
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.03),
-                  blurRadius: 10,
-                  offset: const Offset(0, -5),
-                ),
-              ],
+              border: Border(
+                top: BorderSide(color: Color(0xFFF3F4F6), width: 1),
+              ),
             ),
             child: Row(
               children: [
-                IconButton(
-                  icon: const Icon(Icons.add_rounded, color: Color(0xFF9CA3AF), size: 28),
-                  padding: EdgeInsets.zero,
-                  constraints: const BoxConstraints(),
-                  onPressed: () {},
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFF9FAFB),
-                      borderRadius: BorderRadius.circular(24),
-                      border: Border.all(color: const Color(0xFFE5E7EB)),
-                    ),
-                    child: TextField(
-                      controller: _textController,
-                      style: AppTypography.bodyMedium,
-                      textInputAction: TextInputAction.send,
-                      decoration: InputDecoration(
-                        hintText: 'Type a message...',
-                        hintStyle: AppTypography.bodyMedium.copyWith(color: const Color(0xFF9CA3AF)),
-                        border: InputBorder.none,
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+                // Plus Attachment Button
+                Material(
+                  color: Colors.transparent,
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(20),
+                    onTap: () {},
+                    child: Container(
+                      width: 40,
+                      height: 40,
+                      decoration: const BoxDecoration(
+                        color: Color(0xFFF3F4F6),
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(
+                        Icons.add_rounded,
+                        color: Color(0xFF4B5563),
+                        size: 22,
                       ),
                     ),
                   ),
                 ),
-                const SizedBox(width: 12),
-                GestureDetector(
-                  onTap: () {
-                    if (_textController.text.trim().isNotEmpty) {
-                      context.read<ChatDetailBloc>().add(
-                        SendMessage(
-                          otherUserId: widget.chatId,
-                          content: _textController.text,
-                        ),
-                      );
-                      _textController.clear();
-                    }
-                  },
+                const SizedBox(width: 10),
+                
+                // Rounded Text Input Field
+                Expanded(
                   child: Container(
-                    width: 44,
-                    height: 44,
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
                     decoration: BoxDecoration(
-                      color: AppColors.primary,
-                      shape: BoxShape.circle,
-                      boxShadow: [
-                        BoxShadow(
-                          color: AppColors.primary.withValues(alpha: 0.3),
-                          blurRadius: 8,
-                          offset: const Offset(0, 4),
-                        ),
-                      ],
+                      color: const Color(0xFFF9FAFB),
+                      borderRadius: BorderRadius.circular(22),
+                      border: Border.all(color: const Color(0xFFE5E7EB), width: 1),
                     ),
-                    child: const Icon(
-                      Icons.send_rounded,
-                      color: Colors.white,
-                      size: 20,
+                    child: Theme(
+                      data: ThemeData.light().copyWith(
+                        primaryColor: AppColors.primary,
+                        scaffoldBackgroundColor: Colors.transparent,
+                        textSelectionTheme: TextSelectionThemeData(
+                          cursorColor: AppColors.primary,
+                          selectionColor: AppColors.primary.withValues(alpha: 0.25),
+                          selectionHandleColor: AppColors.primary,
+                        ),
+                      ),
+                      child: TextField(
+                        controller: _textController,
+                        style: const TextStyle(
+                          color: Color(0xFF111827),
+                          fontSize: 15,
+                          fontWeight: FontWeight.w500,
+                        ),
+                        cursorColor: AppColors.primary,
+                        textInputAction: TextInputAction.send,
+                        onSubmitted: (_) {
+                          if (_textController.text.trim().isNotEmpty) {
+                            final mode = context.read<UserModeCubit>().state;
+                            final role = mode == UserMode.freelancer ? 'freelancer' : 'client';
+                            context.read<ChatDetailBloc>().add(
+                              SendMessage(
+                                otherUserId: widget.chatId,
+                                content: _textController.text,
+                                senderRole: role,
+                              ),
+                            );
+                            _textController.clear();
+                          }
+                        },
+                        decoration: const InputDecoration(
+                          hintText: 'Type a message...',
+                          hintStyle: TextStyle(
+                            color: Color(0xFF9CA3AF),
+                            fontSize: 14,
+                            fontWeight: FontWeight.w400,
+                          ),
+                          fillColor: Colors.transparent,
+                          filled: false,
+                          border: InputBorder.none,
+                          focusedBorder: InputBorder.none,
+                          enabledBorder: InputBorder.none,
+                          isDense: true,
+                          contentPadding: EdgeInsets.symmetric(vertical: 11),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 10),
+
+                // Floating Send Action Button
+                Material(
+                  color: Colors.transparent,
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(22),
+                    onTap: () {
+                      if (_textController.text.trim().isNotEmpty) {
+                        final mode = context.read<UserModeCubit>().state;
+                        final role = mode == UserMode.freelancer ? 'freelancer' : 'client';
+                        context.read<ChatDetailBloc>().add(
+                          SendMessage(
+                            otherUserId: widget.chatId,
+                            content: _textController.text,
+                            senderRole: role,
+                          ),
+                        );
+                        _textController.clear();
+                      }
+                    },
+                    child: Container(
+                      width: 44,
+                      height: 44,
+                      decoration: BoxDecoration(
+                        color: AppColors.primary,
+                        shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            color: AppColors.primary.withValues(alpha: 0.3),
+                            blurRadius: 10,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
+                      ),
+                      child: const Icon(
+                        Icons.send_rounded,
+                        color: Colors.white,
+                        size: 18,
+                      ),
                     ),
                   ),
                 ),

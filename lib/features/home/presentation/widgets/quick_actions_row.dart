@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/theme/theme.dart';
+import '../../../main_shell/presentation/bloc/main_shell_bloc.dart';
+import '../../../main_shell/presentation/bloc/main_shell_event.dart';
 
 class QuickActionsRow extends StatelessWidget {
   const QuickActionsRow({super.key});
@@ -23,7 +26,9 @@ class QuickActionsRow extends StatelessWidget {
             label: 'Find Talent',
             icon: Icons.search_rounded,
             iconColor: const Color(0xFF10B981), // Emerald Green
-            onTap: () {},
+            onTap: () {
+              context.read<MainShellBloc>().add(const TabChanged(2));
+            },
           ),
         ),
         const SizedBox(width: 12),
@@ -32,7 +37,7 @@ class QuickActionsRow extends StatelessWidget {
             label: 'Hire',
             icon: Icons.person_add_alt_1_rounded,
             iconColor: const Color(0xFF8B5CF6), // Purple
-            onTap: () {},
+            onTap: () => context.push('/hire'),
           ),
         ),
       ],

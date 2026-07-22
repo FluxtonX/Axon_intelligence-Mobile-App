@@ -86,8 +86,8 @@ class _OrdersPageState extends State<OrdersPage> {
               return GestureDetector(
                 onTap: () {
                   context.pushNamed(
-                    'contractDetail',
-                    extra: contract,
+                    'contract_detail',
+                    extra: {'contract': contract},
                   );
                 },
                 child: Container(

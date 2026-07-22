@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../../core/theme/theme.dart';
 import '../../../../core/models/project_model.dart';
-import 'package:go_router/go_router.dart';
 
 import '../../../projects/presentation/pages/project_details_page.dart';
 

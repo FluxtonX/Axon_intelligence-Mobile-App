@@ -4,7 +4,6 @@ import '../../../../core/theme/theme.dart';
 import '../../../../shared/widgets/primary_button.dart';
 import '../bloc/discover_bloc.dart';
 import '../bloc/discover_event.dart';
-import '../bloc/discover_state.dart';
 
 class FilterBottomSheet extends StatefulWidget {
   const FilterBottomSheet({super.key});
