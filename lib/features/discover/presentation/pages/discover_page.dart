@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/theme/theme.dart';
 import '../../../../core/blocs/user_mode_cubit.dart';
-import '../../../../shared/animations/fade_in_slide.dart';
 import '../bloc/discover_bloc.dart';
 import '../bloc/discover_event.dart';
 import '../bloc/discover_state.dart';
@@ -15,7 +14,6 @@ import '../../data/repositories/discover_repository.dart';
 import '../../../projects/data/repositories/project_repository.dart';
 import '../../../../core/models/user_model.dart';
 import '../../../../core/models/project_model.dart';
-import 'package:go_router/go_router.dart';
 
 class DiscoverPage extends StatelessWidget {
   const DiscoverPage({super.key});

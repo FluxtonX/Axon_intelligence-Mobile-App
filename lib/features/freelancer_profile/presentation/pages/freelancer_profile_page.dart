@@ -152,19 +152,38 @@ class FreelancerProfilePage extends StatelessWidget {
                   padding: const EdgeInsets.fromLTRB(24, 16, 24, 16),
                   child: Row(
                     children: [
-                      Container(
-                        width: 56,
-                        height: 56,
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFF3F4F6),
-                          borderRadius: BorderRadius.circular(16),
+                      GestureDetector(
+                        onTap: () {
+                          final chatId = user?.id ?? 'freelancer_1';
+                          context.push(
+                            '/chat/$chatId',
+                            extra: {
+                              'name': displayName.isEmpty ? 'Freelancer' : displayName,
+                              'avatarUrl': displayImageUrl,
+                            },
+                          );
+                        },
+                        child: Container(
+                          width: 56,
+                          height: 56,
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFF3F4F6),
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          child: const Icon(Icons.chat_bubble_outline_rounded, color: Color(0xFF374151)),
                         ),
-                        child: const Icon(Icons.chat_bubble_outline_rounded, color: Color(0xFF374151)),
                       ),
                       const SizedBox(width: 16),
                       Expanded(
                         child: ElevatedButton(
-                          onPressed: () {},
+                          onPressed: () {
+                            context.push(
+                              '/hire',
+                              extra: {
+                                'freelancer': user,
+                              },
+                            );
+                          },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: AppColors.primary,
                             foregroundColor: Colors.white,

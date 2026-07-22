@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/theme/theme.dart';
+import '../../../../core/models/user_model.dart';
+import '../../../../core/models/profile_model.dart';
 
 class TalentCard extends StatelessWidget {
   const TalentCard({
@@ -25,10 +27,24 @@ class TalentCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () => context.push('/freelancer-profile', extra: {
-        'name': name,
-        'imageUrl': imageUrl,
-      }),
+      onTap: () => context.push(
+        '/freelancer-profile',
+        extra: UserModel(
+          id: name.toLowerCase().replaceAll(' ', '_'),
+          email: '${name.toLowerCase().replaceAll(' ', '.')}@example.com',
+          role: 'FREELANCER',
+          profile: ProfileModel(
+            id: 'prof_${name.toLowerCase().replaceAll(' ', '_')}',
+            firstName: name.split(' ').first,
+            lastName: name.split(' ').length > 1 ? name.split(' ').sublist(1).join(' ') : '',
+            avatarUrl: imageUrl,
+            title: title,
+            hourlyRate: rate.toDouble(),
+            averageRating: rating,
+            skills: skills,
+          ),
+        ),
+      ),
       child: Container(
       width: 240,
       padding: const EdgeInsets.all(20),
