@@ -7,8 +7,9 @@ import '../../../../core/blocs/user_mode_cubit.dart';
 import '../widgets/submit_proposal_bottom_sheet.dart';
 import 'edit_project_page.dart';
 import '../../../proposals/presentation/pages/project_proposals_page.dart';
-import '../bloc/client_projects_bloc.dart';
 import '../bloc/client_projects_state.dart';
+import '../bloc/client_projects_bloc.dart';
+import '../../../../shared/widgets/auth_guard_dialog.dart';
 class ProjectDetailsPage extends StatefulWidget {
   final ProjectModel project;
 
@@ -201,11 +202,18 @@ class _ProjectDetailsPageState extends State<ProjectDetailsPage> {
                   ),
                   child: ElevatedButton(
                     onPressed: () {
-                      showModalBottomSheet(
-                        context: context,
-                        isScrollControlled: true,
-                        backgroundColor: Colors.transparent,
-                        builder: (context) => SubmitProposalBottomSheet(project: project),
+                      AuthGuard.requireAuth(
+                        context,
+                        title: 'Sign in to Submit Proposal',
+                        subtitle: 'You need a Freelancer account to apply to this project.',
+                        onAuthenticated: () {
+                          showModalBottomSheet(
+                            context: context,
+                            isScrollControlled: true,
+                            backgroundColor: Colors.transparent,
+                            builder: (context) => SubmitProposalBottomSheet(project: project),
+                          );
+                        },
                       );
                     },
                     style: ElevatedButton.styleFrom(

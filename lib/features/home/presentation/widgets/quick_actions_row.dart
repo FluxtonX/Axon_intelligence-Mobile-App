@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/theme/theme.dart';
 import '../../../main_shell/presentation/bloc/main_shell_bloc.dart';
 import '../../../main_shell/presentation/bloc/main_shell_event.dart';
+import '../../../../shared/widgets/auth_guard_dialog.dart';
 
 class QuickActionsRow extends StatelessWidget {
   const QuickActionsRow({super.key});
@@ -17,7 +18,14 @@ class QuickActionsRow extends StatelessWidget {
             label: 'Create Project',
             icon: Icons.add_rounded,
             iconColor: AppColors.primary,
-            onTap: () => context.push('/ai_project_creation'),
+            onTap: () {
+              AuthGuard.requireAuth(
+                context,
+                title: 'Sign in to Create Project',
+                subtitle: 'You need an account to post a project and hire freelancers.',
+                onAuthenticated: () => context.push('/ai_project_creation'),
+              );
+            },
           ),
         ),
         const SizedBox(width: 12),
@@ -37,7 +45,14 @@ class QuickActionsRow extends StatelessWidget {
             label: 'Hire',
             icon: Icons.person_add_alt_1_rounded,
             iconColor: const Color(0xFF8B5CF6), // Purple
-            onTap: () => context.push('/hire'),
+            onTap: () {
+              AuthGuard.requireAuth(
+                context,
+                title: 'Sign in to Hire',
+                subtitle: 'You need an account to securely hire freelancers.',
+                onAuthenticated: () => context.push('/hire'),
+              );
+            },
           ),
         ),
       ],

@@ -38,6 +38,86 @@ class ProfilePage extends StatelessWidget {
             // ── Profile Header Card ─────────────────────────────────────────
             BlocBuilder<ProfileCubit, ProfileState>(
               builder: (context, state) {
+                if (!isLoggedIn) {
+                  // ── Guest Account Display (Not Logged In) ──
+                  return Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
+                    decoration: BoxDecoration(
+                      gradient: const LinearGradient(
+                        colors: [Color(0xFF1E293B), Color(0xFF0F172A)],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                      borderRadius: BorderRadius.circular(24),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.15),
+                          blurRadius: 20,
+                          offset: const Offset(0, 10),
+                        ),
+                      ],
+                    ),
+                    child: Column(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withValues(alpha: 0.1),
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(
+                            Icons.rocket_launch_rounded,
+                            color: Colors.white,
+                            size: 36,
+                          ),
+                        ),
+                        const SizedBox(height: 20),
+                        Text(
+                          'Join Axon Intelligence',
+                          style: AppTypography.headingMedium.copyWith(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                        const SizedBox(height: 12),
+                        Text(
+                          'Sign in to hire top talent, manage your projects, or find premium freelance work.',
+                          style: AppTypography.bodyMedium.copyWith(
+                            color: Colors.white70,
+                            height: 1.5,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                        const SizedBox(height: 28),
+                        SizedBox(
+                          width: double.infinity,
+                          height: 52,
+                          child: ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: AppColors.primary,
+                              foregroundColor: Colors.white,
+                              elevation: 0,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                            ),
+                            onPressed: () => context.go('/auth'),
+                            child: Text(
+                              'Sign In / Register',
+                              style: AppTypography.buttonLarge.copyWith(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                }
+
                 if (state is ProfileLoading) {
                   return Container(
                     padding: const EdgeInsets.all(24),
@@ -166,77 +246,7 @@ class ProfilePage extends StatelessWidget {
                     ),
                   );
                 }
-
-                // Fallback / Guest Account Display
-                return Container(
-                  padding: const EdgeInsets.all(20),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(20),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.04),
-                        blurRadius: 10,
-                        offset: const Offset(0, 4),
-                      ),
-                    ],
-                  ),
-                  child: Row(
-                    children: [
-                      Container(
-                        width: 56,
-                        height: 56,
-                        decoration: const BoxDecoration(
-                          color: Color(0xFFEEF2FF),
-                          shape: BoxShape.circle,
-                        ),
-                        child: const Icon(
-                          Icons.person_outline_rounded,
-                          color: AppColors.primary,
-                          size: 30,
-                        ),
-                      ),
-                      const SizedBox(width: 16),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              isLoggedIn ? 'Authenticated User' : 'Guest Account',
-                              style: AppTypography.headingSmall.copyWith(
-                                color: AppColors.textDark,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              isLoggedIn
-                                  ? 'Connect to server to load full details'
-                                  : 'Sign in to access your dashboard & orders',
-                              style: AppTypography.bodySmall.copyWith(
-                                color: AppColors.textSecondary,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      if (!isLoggedIn)
-                        ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.primary,
-                            foregroundColor: Colors.white,
-                            elevation: 0,
-                            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                          ),
-                          onPressed: () => context.go('/auth'),
-                          child: const Text('Sign In', style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold)),
-                        ),
-                    ],
-                  ),
-                );
+                return const SizedBox.shrink();
               },
             ),
 
@@ -257,12 +267,13 @@ class ProfilePage extends StatelessWidget {
               ),
               child: Column(
                 children: [
-                  // Mode Toggle
-                  BlocBuilder<UserModeCubit, UserMode>(
-                    builder: (context, mode) {
-                      final isClient = mode == UserMode.client;
-                      return ListTile(
-                        leading: Container(
+                  if (isLoggedIn) ...[
+                    // Mode Toggle
+                    BlocBuilder<UserModeCubit, UserMode>(
+                      builder: (context, mode) {
+                        final isClient = mode == UserMode.client;
+                        return ListTile(
+                          leading: Container(
                           padding: const EdgeInsets.all(8),
                           decoration: BoxDecoration(
                             color: AppColors.primary.withValues(alpha: 0.1),
@@ -298,8 +309,9 @@ class ProfilePage extends StatelessWidget {
                     },
                   ),
                   const Divider(height: 1, indent: 16, endIndent: 16, color: Color(0xFFF3F4F6)),
-                  ListTile(
-                    leading: Container(
+                ],
+                ListTile(
+                  leading: Container(
                       padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
                         color: const Color(0xFFF3F4F6),

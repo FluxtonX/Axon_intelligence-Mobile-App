@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import '../../../../core/theme/theme.dart';
 import '../../../../shared/animations/fade_in_slide.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
+import '../../../auth/data/auth_repository.dart';
 import '../widgets/conversation_tile.dart';
 import '../blocs/conversations_bloc.dart';
 import '../blocs/conversations_event.dart';
@@ -37,9 +39,56 @@ class MessagesPage extends StatelessWidget {
           const SizedBox(width: 8),
         ],
       ),
-      body: BlocBuilder<ConversationsBloc, ConversationsState>(
-        builder: (context, state) {
-          if (state.status == ConversationsStatus.initial) {
+      body: Builder(
+        builder: (context) {
+          final authRepo = RepositoryProvider.of<AuthRepository>(context);
+          if (!authRepo.isLoggedIn()) {
+            return Center(
+              child: Padding(
+                padding: const EdgeInsets.all(32.0),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(24),
+                      decoration: BoxDecoration(
+                        color: AppColors.primary.withValues(alpha: 0.1),
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(Icons.chat_bubble_outline_rounded, size: 64, color: AppColors.primary),
+                    ),
+                    const SizedBox(height: 24),
+                    Text(
+                      'Your Messages',
+                      style: AppTypography.headingMedium.copyWith(color: AppColors.textDark),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 12),
+                    Text(
+                      'Sign in to chat with freelancers and clients, discuss projects, and negotiate terms.',
+                      style: AppTypography.bodyMedium.copyWith(color: AppColors.textSecondary),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 32),
+                    ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.primary,
+                        foregroundColor: Colors.white,
+                        minimumSize: const Size(200, 52),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                      ),
+                      onPressed: () => context.go('/auth'),
+                      child: const Text('Sign In / Register', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          }
+
+          return BlocBuilder<ConversationsBloc, ConversationsState>(
+            builder: (context, state) {
+              if (state.status == ConversationsStatus.initial) {
             WidgetsBinding.instance.addPostFrameCallback((_) {
               context.read<ConversationsBloc>().add(const FetchConversations());
             });
@@ -132,6 +181,8 @@ class MessagesPage extends StatelessWidget {
               ],
             ],
           );
+        },
+      );
         },
       ),
     );

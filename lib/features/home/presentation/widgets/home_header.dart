@@ -20,10 +20,11 @@ class HomeHeader extends StatelessWidget {
           user = state.user;
         }
         
-        final avatarUrl = user?.profile?.avatarUrl ?? 'https://i.pravatar.cc/150?img=11';
-        final firstName = user?.profile?.firstName ?? 'User';
+        final bool isGuest = user == null;
+        final avatarUrl = user?.profile?.avatarUrl;
+        final firstName = user?.profile?.firstName ?? 'Guest';
         final lastName = user?.profile?.lastName ?? '';
-        final displayName = '$firstName $lastName'.trim();
+        final displayName = isGuest ? 'Guest User' : '$firstName $lastName'.trim();
 
         return Row(
       children: [
@@ -38,12 +39,16 @@ class HomeHeader extends StatelessWidget {
             height: 48,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              image: DecorationImage(
+              color: isGuest ? const Color(0xFFF3F4F6) : Colors.transparent,
+              image: (!isGuest && avatarUrl != null) ? DecorationImage(
                 image: NetworkImage(avatarUrl),
                 fit: BoxFit.cover,
-              ),
+              ) : null,
               border: Border.all(color: const Color(0xFFE5E7EB), width: 1.5),
             ),
+            child: isGuest || avatarUrl == null
+                ? const Icon(Icons.person_outline_rounded, color: AppColors.textSecondary)
+                : null,
           ),
         ),
         const SizedBox(width: 12),

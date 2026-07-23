@@ -15,7 +15,7 @@ import '../../../../core/models/project_model.dart';
 import '../../../proposals/presentation/pages/project_proposals_page.dart';
 import 'project_details_page.dart';
 import 'package:go_router/go_router.dart';
-
+import '../../../auth/data/auth_repository.dart';
 class ProjectsPage extends StatelessWidget {
   const ProjectsPage({super.key});
 
@@ -23,6 +23,59 @@ class ProjectsPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocBuilder<UserModeCubit, UserMode>(
       builder: (context, userMode) {
+        final authRepo = RepositoryProvider.of<AuthRepository>(context);
+        if (!authRepo.isLoggedIn()) {
+          return Scaffold(
+            backgroundColor: Colors.white,
+            appBar: AppBar(
+              backgroundColor: Colors.white,
+              elevation: 0,
+              title: Text('Projects', style: AppTypography.headingMedium.copyWith(color: AppColors.textDark)),
+            ),
+            body: Center(
+              child: Padding(
+                padding: const EdgeInsets.all(32.0),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(24),
+                      decoration: BoxDecoration(
+                        color: AppColors.primary.withValues(alpha: 0.1),
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(Icons.work_outline_rounded, size: 64, color: AppColors.primary),
+                    ),
+                    const SizedBox(height: 24),
+                    Text(
+                      'Manage Your Projects',
+                      style: AppTypography.headingMedium.copyWith(color: AppColors.textDark),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 12),
+                    Text(
+                      'Sign in to post projects, track milestones, and review submitted work.',
+                      style: AppTypography.bodyMedium.copyWith(color: AppColors.textSecondary),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 32),
+                    ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.primary,
+                        foregroundColor: Colors.white,
+                        minimumSize: const Size(200, 52),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                      ),
+                      onPressed: () => context.go('/auth'),
+                      child: const Text('Sign In / Register', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          );
+        }
+
         final isClient = userMode == UserMode.client;
         
         final List<Tab> tabs = isClient 

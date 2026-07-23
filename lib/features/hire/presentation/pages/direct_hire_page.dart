@@ -6,6 +6,7 @@ import '../../../../shared/widgets/primary_button.dart';
 import '../bloc/hire_bloc.dart';
 import '../bloc/hire_event.dart';
 import '../bloc/hire_state.dart';
+import '../../../../shared/widgets/auth_guard_dialog.dart';
 
 class DirectHirePage extends StatefulWidget {
   final String freelancerId;
@@ -59,13 +60,20 @@ class _DirectHirePageState extends State<DirectHirePage> {
       return;
     }
 
-    context.read<HireBloc>().add(HireCreateDirectContract(
-          freelancerId: widget.freelancerId,
-          title: title,
-          description: description,
-          amount: amount,
-          deliveryDays: days,
-        ));
+    AuthGuard.requireAuth(
+      context,
+      title: 'Sign in to Hire',
+      subtitle: 'You need an account to securely hire freelancers and deposit funds into escrow.',
+      onAuthenticated: () {
+        context.read<HireBloc>().add(HireCreateDirectContract(
+              freelancerId: widget.freelancerId,
+              title: title,
+              description: description,
+              amount: amount,
+              deliveryDays: days,
+            ));
+      },
+    );
   }
 
   @override

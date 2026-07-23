@@ -400,8 +400,10 @@ class _GuestOption extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () =>
-          context.read<AuthBloc>().add(const GuestBrowsingRequested()),
+      onTap: () {
+        context.read<AuthBloc>().add(const GuestBrowsingRequested());
+        context.go('/home');
+      },
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 14),
         child: Text(

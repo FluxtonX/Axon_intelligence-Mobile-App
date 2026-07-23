@@ -12,6 +12,7 @@ import '../widgets/interview_card.dart';
 import '../widgets/project_stats_row.dart';
 import '../widgets/quick_actions_row.dart';
 import '../widgets/talent_card.dart';
+import '../../../auth/data/auth_repository.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
@@ -39,7 +40,9 @@ class _HomeView extends StatelessWidget {
               return const Center(child: CircularProgressIndicator());
             }
 
-            final isActive = state.status == HomeStatus.active;
+            final authRepo = RepositoryProvider.of<AuthRepository>(context);
+            final isLoggedIn = authRepo.isLoggedIn();
+            final isActive = state.status == HomeStatus.active && isLoggedIn;
 
             return RefreshIndicator(
               onRefresh: () async {

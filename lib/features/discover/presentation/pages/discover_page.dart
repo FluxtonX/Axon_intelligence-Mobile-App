@@ -14,6 +14,10 @@ import '../../data/repositories/discover_repository.dart';
 import '../../../projects/data/repositories/project_repository.dart';
 import '../../../../core/models/user_model.dart';
 import '../../../../core/models/project_model.dart';
+import '../../../profile/presentation/bloc/profile_cubit.dart';
+import '../../../profile/presentation/bloc/profile_state.dart';
+import '../../../auth/data/auth_repository.dart';
+import 'package:go_router/go_router.dart';
 
 class DiscoverPage extends StatelessWidget {
   const DiscoverPage({super.key});
@@ -63,10 +67,42 @@ class _DiscoverView extends StatelessWidget {
                           fontSize: 28,
                         ),
                       ),
-                      const CircleAvatar(
-                        radius: 18,
-                        backgroundImage: NetworkImage('https://i.pravatar.cc/150?img=68'),
-                      )
+                      BlocBuilder<ProfileCubit, ProfileState>(
+                        builder: (context, profileState) {
+                          final authRepo = RepositoryProvider.of<AuthRepository>(context);
+                          final isGuest = !authRepo.isLoggedIn();
+                          String? avatarUrl;
+                          if (profileState is ProfileLoaded) {
+                            avatarUrl = profileState.user.profile?.avatarUrl;
+                          }
+                          
+                          return GestureDetector(
+                            onTap: () {
+                              if (isGuest) {
+                                context.go('/auth');
+                              } else {
+                                context.push('/settings');
+                              }
+                            },
+                            child: Container(
+                              width: 36,
+                              height: 36,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: isGuest ? const Color(0xFFF3F4F6) : Colors.transparent,
+                                image: (!isGuest && avatarUrl != null) ? DecorationImage(
+                                  image: NetworkImage(avatarUrl),
+                                  fit: BoxFit.cover,
+                                ) : null,
+                                border: Border.all(color: const Color(0xFFE5E7EB), width: 1.5),
+                              ),
+                              child: isGuest || avatarUrl == null
+                                  ? const Icon(Icons.person_outline_rounded, size: 20, color: AppColors.textSecondary)
+                                  : null,
+                            ),
+                          );
+                        },
+                      ),
                     ],
                   ),
                   const SizedBox(height: 20),
@@ -375,7 +411,7 @@ class _DiscoverStorefront extends StatelessWidget {
         if (topFreelancers.isEmpty)
           const Center(child: Padding(
             padding: EdgeInsets.all(24.0),
-            child: CircularProgressIndicator(),
+            child: Text("No talent found. Please pull to refresh or check back later.", style: TextStyle(color: Colors.grey)),
           ))
         else
           ...topFreelancers.map((user) {

@@ -5,6 +5,7 @@ import '../../../../core/models/user_model.dart';
 import '../widgets/profile_header.dart';
 import '../widgets/portfolio_gallery.dart';
 import '../widgets/reviews_list.dart';
+import '../../../../shared/widgets/auth_guard_dialog.dart';
 
 class FreelancerProfilePage extends StatelessWidget {
   final UserModel? user;
@@ -154,12 +155,19 @@ class FreelancerProfilePage extends StatelessWidget {
                     children: [
                       GestureDetector(
                         onTap: () {
-                          final chatId = user?.id ?? 'freelancer_1';
-                          context.push(
-                            '/chat/$chatId',
-                            extra: {
-                              'name': displayName.isEmpty ? 'Freelancer' : displayName,
-                              'avatarUrl': displayImageUrl,
+                          AuthGuard.requireAuth(
+                            context,
+                            title: 'Sign in to Message',
+                            subtitle: 'You need an account to chat with freelancers.',
+                            onAuthenticated: () {
+                              final chatId = user?.id ?? 'freelancer_1';
+                              context.push(
+                                '/chat/$chatId',
+                                extra: {
+                                  'name': displayName.isEmpty ? 'Freelancer' : displayName,
+                                  'avatarUrl': displayImageUrl,
+                                },
+                              );
                             },
                           );
                         },
@@ -177,10 +185,17 @@ class FreelancerProfilePage extends StatelessWidget {
                       Expanded(
                         child: ElevatedButton(
                           onPressed: () {
-                            context.push(
-                              '/hire',
-                              extra: {
-                                'freelancer': user,
+                            AuthGuard.requireAuth(
+                              context,
+                              title: 'Sign in to Hire',
+                              subtitle: 'You need an account to hire freelancers.',
+                              onAuthenticated: () {
+                                context.push(
+                                  '/hire',
+                                  extra: {
+                                    'freelancer': user,
+                                  },
+                                );
                               },
                             );
                           },
