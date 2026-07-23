@@ -8,6 +8,7 @@ import '../../../../shared/widgets/primary_button.dart';
 import '../bloc/auth_bloc.dart';
 import '../bloc/auth_event.dart';
 import '../bloc/auth_state.dart';
+import '../../../profile/presentation/bloc/profile_cubit.dart';
 
 class AuthPage extends StatelessWidget {
   const AuthPage({super.key});
@@ -31,6 +32,9 @@ class _AuthView extends StatelessWidget {
     return BlocListener<AuthBloc, AuthState>(
       listener: (context, state) {
         if (state is AuthSuccess || state is AuthGuestMode) {
+          if (state is AuthSuccess) {
+            context.read<ProfileCubit>().loadProfile();
+          }
           context.go('/home');
         }
         if (state is AuthEmailFlowStarted) {

@@ -12,8 +12,20 @@ class ProfileRepository {
     try {
       final response = await _apiClient.dio.get('/users/me');
       return UserModel.fromJson(response.data);
+    } on DioException catch (e) {
+      if (e.response?.statusCode == 401) {
+        throw Exception('Please sign in to view your profile details.');
+      }
+      final data = e.response?.data;
+      String errorMessage = 'Unable to connect to backend server.';
+      if (data is Map && data['message'] != null) {
+        errorMessage = data['message'].toString();
+      } else if (data is String && data.isNotEmpty) {
+        errorMessage = data;
+      }
+      throw Exception(errorMessage);
     } catch (e) {
-      throw Exception('Failed to load profile: $e');
+      throw Exception('Unable to load profile.');
     }
   }
 

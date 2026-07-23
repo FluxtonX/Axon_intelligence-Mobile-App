@@ -9,7 +9,6 @@ import 'package:flutter/services.dart';
 import 'core/theme/theme.dart';
 import 'core/router/app_router.dart';
 import 'features/hire/presentation/bloc/hire_bloc.dart';
-import 'features/hire/data/repositories/mock_hire_repository.dart';
 import 'features/proposals/presentation/bloc/proposals_bloc.dart';
 import 'features/gig_creation/presentation/bloc/gig_creation_bloc.dart';
 import 'features/projects/presentation/bloc/client_projects_bloc.dart';

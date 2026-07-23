@@ -32,8 +32,17 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         emit(const AuthInitial());
         return;
       }
-      // Simulate backend authentication with Google credentials
-      await Future.delayed(const Duration(seconds: 1));
+
+      final googleAuth = await account.authentication;
+      final idToken = googleAuth.idToken ?? googleAuth.accessToken ?? 'mock_token';
+
+      await _authRepository.googleLogin(
+        idToken,
+        email: account.email,
+        displayName: account.displayName,
+        photoUrl: account.photoUrl,
+      );
+
       emit(const AuthSuccess());
     } catch (e) {
       emit(AuthError(e.toString()));

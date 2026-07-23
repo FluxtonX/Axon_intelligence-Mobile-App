@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/theme/theme.dart';
+import '../../../auth/data/auth_repository.dart';
 import '../bloc/splash_bloc.dart';
 import '../bloc/splash_event.dart';
 import '../bloc/splash_state.dart';
@@ -13,8 +14,9 @@ class SplashPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final authRepo = RepositoryProvider.of<AuthRepository>(context);
     return BlocProvider(
-      create: (_) => SplashBloc()..add(const SplashStarted()),
+      create: (_) => SplashBloc(authRepo)..add(const SplashStarted()),
       child: const _SplashView(),
     );
   }

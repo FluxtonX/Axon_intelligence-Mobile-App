@@ -85,4 +85,33 @@ class AuthRepository {
   Future<void> logout() async {
     await _storage.clearAll();
   }
+
+  bool isLoggedIn() {
+    final token = _storage.getToken();
+    return token != null && token.isNotEmpty;
+  }
+
+  Future<void> googleLogin(String idToken, {String? email, String? displayName, String? photoUrl}) async {
+    try {
+      final response = await _apiClient.dio.post('/auth/google', data: {
+        'idToken': idToken,
+        'email': email,
+        'displayName': displayName,
+        'photoUrl': photoUrl,
+      });
+
+      final accessToken = response.data['accessToken'];
+      if (accessToken != null) {
+        await _storage.saveToken(accessToken);
+      }
+    } on DioException catch (e) {
+      throw Exception(e.response?.data['message'] ?? 'Google authentication failed on server');
+    } catch (e) {
+      throw Exception('Failed to connect to server during Google login');
+    }
+  }
+
+  Future<void> saveMockToken(String email) async {
+    await _storage.saveToken('mock_google_token_$email');
+  }
 }

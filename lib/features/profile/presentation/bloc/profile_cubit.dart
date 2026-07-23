@@ -14,8 +14,13 @@ class ProfileCubit extends Cubit<ProfileState> {
       final user = await _repository.getCurrentProfile();
       emit(ProfileLoaded(user));
     } catch (e) {
-      emit(ProfileError(e.toString()));
+      final message = e.toString().replaceAll('Exception: ', '');
+      emit(ProfileError(message));
     }
+  }
+
+  void clearProfile() {
+    emit(ProfileInitial());
   }
 
   Future<void> updateProfile({
