@@ -8,6 +8,7 @@ import '../bloc/email_auth_bloc.dart';
 import '../bloc/email_auth_event.dart';
 import '../bloc/email_auth_state.dart';
 import '../../data/auth_repository.dart';
+import '../../../../features/profile/presentation/bloc/profile_cubit.dart';
 
 class EmailAuthPage extends StatelessWidget {
   const EmailAuthPage({super.key});
@@ -71,6 +72,7 @@ class _EmailAuthViewState extends State<_EmailAuthView> {
       body: BlocConsumer<EmailAuthBloc, EmailAuthState>(
         listener: (context, state) {
           if (state.isSuccess) {
+            context.read<ProfileCubit>().loadProfile();
             context.go('/home');
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(content: Text('Successfully authenticated!')),

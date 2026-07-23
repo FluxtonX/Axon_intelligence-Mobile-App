@@ -27,7 +27,7 @@ import '../../features/proposals/presentation/pages/proposals_list_page.dart';
 import '../../features/proposals/presentation/pages/proposal_detail_page.dart';
 import '../../features/proposals/domain/entities/proposal_entity.dart';
 import '../../features/seller_onboarding/presentation/pages/seller_onboarding_page.dart';
-import '../../features/gig_creation/presentation/pages/create_gig_page.dart';
+import '../../features/services/presentation/pages/create_gig_page.dart';
 import '../../features/find_work/presentation/pages/submit_proposal_page.dart';
 import '../../features/proposals/presentation/pages/submitted_proposals_page.dart';
 

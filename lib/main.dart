@@ -27,6 +27,10 @@ import 'features/messages/presentation/blocs/conversations_bloc.dart';
 import 'features/messages/presentation/blocs/conversations_event.dart';
 import 'features/contracts/data/repositories/reviews_repository.dart';
 
+import 'features/services/data/repositories/services_repository.dart';
+import 'features/services/presentation/bloc/services_bloc.dart';
+import 'features/services/presentation/bloc/services_event.dart';
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
@@ -40,6 +44,7 @@ void main() async {
   final discoverRepository = DiscoverRepository(apiClient);
   final messagesRepository = MessagesRepository(apiClient);
   final reviewsRepository = ReviewsRepository(apiClient);
+  final servicesRepository = ServicesRepository(apiClient);
 
   // Lock to portrait orientation
   await SystemChrome.setPreferredOrientations([
@@ -64,6 +69,7 @@ void main() async {
     discoverRepository: discoverRepository,
     messagesRepository: messagesRepository,
     reviewsRepository: reviewsRepository,
+    servicesRepository: servicesRepository,
     apiClient: apiClient,
   ));
 }
@@ -77,6 +83,7 @@ class AxonIntelligenceApp extends StatelessWidget {
   final DiscoverRepository discoverRepository;
   final MessagesRepository messagesRepository;
   final ReviewsRepository reviewsRepository;
+  final ServicesRepository servicesRepository;
   final ApiClient apiClient;
 
   const AxonIntelligenceApp({
@@ -89,6 +96,7 @@ class AxonIntelligenceApp extends StatelessWidget {
     required this.discoverRepository,
     required this.messagesRepository,
     required this.reviewsRepository,
+    required this.servicesRepository,
     required this.apiClient,
   });
 
@@ -104,6 +112,7 @@ class AxonIntelligenceApp extends StatelessWidget {
         RepositoryProvider.value(value: discoverRepository),
         RepositoryProvider.value(value: messagesRepository),
         RepositoryProvider.value(value: reviewsRepository),
+        RepositoryProvider.value(value: servicesRepository),
         RepositoryProvider.value(value: apiClient),
       ],
       child: MultiBlocProvider(
@@ -140,6 +149,9 @@ class AxonIntelligenceApp extends StatelessWidget {
         ),
         BlocProvider<FindWorkBloc>(
           create: (context) => FindWorkBloc(projectRepository: projectRepository)..add(LoadProjectsEvent()),
+        ),
+        BlocProvider<ServicesBloc>(
+          create: (context) => ServicesBloc(servicesRepository)..add(const LoadServices()),
         ),
       ],
       child: MaterialApp.router(
