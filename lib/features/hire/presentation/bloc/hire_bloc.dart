@@ -1,3 +1,4 @@
+import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../proposals/data/repositories/proposal_repository.dart';
 import '../../../contracts/data/repositories/contract_repository.dart';
@@ -56,12 +57,17 @@ class HireBloc extends Bloc<HireEvent, HireState> {
     emit(state.copyWith(status: HireStatus.paymentProcessing));
 
     try {
-      await _contractRepository.fundContract(state.contractId!);
+      final checkoutUrl = await _contractRepository.createCheckoutSession(state.contractId!);
+      final Uri url = Uri.parse(checkoutUrl);
+      
+      await launchUrl(url, mode: LaunchMode.externalApplication);
+      // The user is redirected to the browser. We will assume success for the local state,
+      // but ideally they should be taken to a waiting screen that polls for the contract status.
       emit(state.copyWith(status: HireStatus.paymentSuccess));
     } catch (e) {
       emit(state.copyWith(
         status: HireStatus.error,
-        errorMessage: 'Payment failed. Please check your details.',
+        errorMessage: 'Payment initialization failed: $e',
       ));
     }
   }
@@ -88,7 +94,7 @@ class HireBloc extends Bloc<HireEvent, HireState> {
     } catch (e) {
       emit(state.copyWith(
         status: HireStatus.error,
-        errorMessage: 'Failed to create direct contract.',
+        errorMessage: 'Failed to create direct contract: $e',
       ));
     }
   }

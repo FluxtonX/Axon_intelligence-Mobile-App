@@ -191,9 +191,10 @@ class FreelancerProfilePage extends StatelessWidget {
                               subtitle: 'You need an account to hire freelancers.',
                               onAuthenticated: () {
                                 context.push(
-                                  '/hire',
+                                  '/direct-hire',
                                   extra: {
-                                    'freelancer': user,
+                                    'freelancerId': user?.id ?? 'freelancer_1',
+                                    'freelancerName': user?.profile?.firstName ?? 'Freelancer',
                                   },
                                 );
                               },

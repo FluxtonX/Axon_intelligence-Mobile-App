@@ -38,7 +38,10 @@ class ProfilePage extends StatelessWidget {
             // ── Profile Header Card ─────────────────────────────────────────
             BlocBuilder<ProfileCubit, ProfileState>(
               builder: (context, state) {
-                if (!isLoggedIn) {
+                final isGuestState = !isLoggedIn || 
+                    (state is ProfileError && (state.message.toLowerCase().contains('sign in') || state.message.toLowerCase().contains('unauthorized') || state.message.toLowerCase().contains('token')));
+
+                if (isGuestState) {
                   // ── Guest Account Display (Not Logged In) ──
                   return Container(
                     width: double.infinity,

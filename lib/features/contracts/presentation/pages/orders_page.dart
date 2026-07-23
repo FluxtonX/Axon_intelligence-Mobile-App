@@ -82,6 +82,13 @@ class _OrdersPageState extends State<OrdersPage> {
                   
               final title = contract.project?.title ?? 'Untitled Project';
               final isCompleted = contract.status == 'COMPLETED';
+              final isPending = contract.status == 'PENDING_PAYMENT';
+              
+              Color statusColor = AppColors.primary;
+              if (isCompleted) statusColor = const Color(0xFF10B981);
+              else if (isPending) statusColor = const Color(0xFFF59E0B);
+
+              String displayStatus = contract.status.replaceAll('_', ' ').toUpperCase();
 
               return GestureDetector(
                 onTap: () {
@@ -123,15 +130,13 @@ class _OrdersPageState extends State<OrdersPage> {
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                             decoration: BoxDecoration(
-                              color: isCompleted 
-                                  ? const Color(0xFF10B981).withValues(alpha: 0.1)
-                                  : AppColors.primary.withValues(alpha: 0.1),
+                              color: statusColor.withValues(alpha: 0.1),
                               borderRadius: BorderRadius.circular(20),
                             ),
                             child: Text(
-                              contract.status,
+                              displayStatus,
                               style: AppTypography.labelMedium.copyWith(
-                                color: isCompleted ? const Color(0xFF10B981) : AppColors.primary,
+                                color: statusColor,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),

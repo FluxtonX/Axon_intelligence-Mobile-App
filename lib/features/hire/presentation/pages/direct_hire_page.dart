@@ -82,7 +82,7 @@ class _DirectHirePageState extends State<DirectHirePage> {
       listener: (context, state) {
         if (state.status == HireStatus.error) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(state.errorMessage ?? 'An error occurred')),
+            SnackBar(content: Text(state.errorMessage ?? 'An error occurred', style: const TextStyle(color: Colors.white)), backgroundColor: Colors.red),
           );
         } else if (state.status == HireStatus.contractCreated) {
           context.push('/checkout');
@@ -100,80 +100,94 @@ class _DirectHirePageState extends State<DirectHirePage> {
             ),
             title: Text(
               'Offer for ${widget.freelancerName}',
-              style: AppTypography.headingMedium.copyWith(fontSize: 18),
+              style: AppTypography.headingMedium.copyWith(fontSize: 18, color: const Color(0xFF111827)),
             ),
             centerTitle: true,
           ),
           body: SingleChildScrollView(
-            padding: const EdgeInsets.all(24),
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  'Project Title',
-                  style: AppTypography.labelLarge.copyWith(fontWeight: FontWeight.bold),
+                // Header Banner
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: AppColors.primary.withValues(alpha: 0.05),
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: AppColors.primary.withValues(alpha: 0.1)),
+                  ),
+                  child: Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          shape: BoxShape.circle,
+                          boxShadow: [
+                            BoxShadow(
+                              color: AppColors.primary.withValues(alpha: 0.1),
+                              blurRadius: 8,
+                              offset: const Offset(0, 4),
+                            ),
+                          ],
+                        ),
+                        child: Icon(Icons.handshake_rounded, color: AppColors.primary, size: 24),
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text('Secure Escrow Contract', style: AppTypography.labelLarge.copyWith(fontWeight: FontWeight.bold, color: const Color(0xFF111827))),
+                            const SizedBox(height: 4),
+                            Text('Funds are held securely until you approve the final work.', style: AppTypography.caption.copyWith(color: const Color(0xFF4B5563))),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-                const SizedBox(height: 8),
-                TextField(
+                const SizedBox(height: 32),
+
+                // Form Fields
+                _buildLabel('Project Title'),
+                TextFormField(
                   controller: _titleController,
-                  style: const TextStyle(color: Color(0xFF111827)),
-                  decoration: InputDecoration(
-                    hintText: 'e.g. Build a Custom Logo',
-                    hintStyle: const TextStyle(color: Color(0xFF9CA3AF)),
-                    filled: true,
-                    fillColor: const Color(0xFFF9FAFB),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide.none,
-                    ),
+                  style: const TextStyle(color: Color(0xFF111827), fontSize: 16),
+                  decoration: _inputDecoration(
+                    hint: 'e.g. Build a Custom Logo',
+                    icon: Icons.title_rounded,
                   ),
                 ),
                 const SizedBox(height: 24),
-                Text(
-                  'Requirements',
-                  style: AppTypography.labelLarge.copyWith(fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 8),
-                TextField(
+                
+                _buildLabel('Requirements'),
+                TextFormField(
                   controller: _descriptionController,
                   maxLines: 4,
-                  style: const TextStyle(color: Color(0xFF111827)),
-                  decoration: InputDecoration(
-                    hintText: 'Describe exactly what you need delivered...',
-                    hintStyle: const TextStyle(color: Color(0xFF9CA3AF)),
-                    filled: true,
-                    fillColor: const Color(0xFFF9FAFB),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide.none,
-                    ),
-                  ),
+                  style: const TextStyle(color: Color(0xFF111827), fontSize: 16),
+                  decoration: _inputDecoration(
+                    hint: 'Describe exactly what you need delivered...',
+                    icon: Icons.description_outlined,
+                  ).copyWith(alignLabelWithHint: true),
                 ),
                 const SizedBox(height: 24),
+                
                 Row(
                   children: [
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            'Budget (\$)',
-                            style: AppTypography.labelLarge.copyWith(fontWeight: FontWeight.bold),
-                          ),
-                          const SizedBox(height: 8),
-                          TextField(
+                          _buildLabel('Budget'),
+                          TextFormField(
                             controller: _amountController,
                             keyboardType: TextInputType.number,
-                            style: const TextStyle(color: Color(0xFF111827)),
-                            decoration: InputDecoration(
-                              hintText: '500',
-                              hintStyle: const TextStyle(color: Color(0xFF9CA3AF)),
-                              filled: true,
-                              fillColor: const Color(0xFFF9FAFB),
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(12),
-                                borderSide: BorderSide.none,
-                              ),
+                            style: const TextStyle(color: Color(0xFF111827), fontSize: 16, fontWeight: FontWeight.bold),
+                            decoration: _inputDecoration(
+                              hint: '500',
+                              icon: Icons.attach_money_rounded,
                             ),
                           ),
                         ],
@@ -184,24 +198,15 @@ class _DirectHirePageState extends State<DirectHirePage> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            'Delivery Time (Days)',
-                            style: AppTypography.labelLarge.copyWith(fontWeight: FontWeight.bold),
-                          ),
-                          const SizedBox(height: 8),
-                          TextField(
+                          _buildLabel('Delivery Time'),
+                          TextFormField(
                             controller: _daysController,
                             keyboardType: TextInputType.number,
-                            style: const TextStyle(color: Color(0xFF111827)),
-                            decoration: InputDecoration(
-                              hintText: '7',
-                              hintStyle: const TextStyle(color: Color(0xFF9CA3AF)),
-                              filled: true,
-                              fillColor: const Color(0xFFF9FAFB),
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(12),
-                                borderSide: BorderSide.none,
-                              ),
+                            style: const TextStyle(color: Color(0xFF111827), fontSize: 16, fontWeight: FontWeight.bold),
+                            decoration: _inputDecoration(
+                              hint: '7',
+                              icon: Icons.calendar_today_rounded,
+                              suffix: 'Days',
                             ),
                           ),
                         ],
@@ -210,24 +215,67 @@ class _DirectHirePageState extends State<DirectHirePage> {
                   ],
                 ),
                 const SizedBox(height: 48),
+                
                 PrimaryButton(
                   label: 'Send Offer & Deposit Funds',
                   isLoading: state.status == HireStatus.loading,
-                  showIcon: false,
+                  showIcon: true,
+                  icon: Icons.lock_outline_rounded,
                   onTap: _createOffer,
                 ),
                 const SizedBox(height: 16),
-                Center(
-                  child: Text(
-                    'Your funds will be held securely in Escrow.',
-                    style: AppTypography.caption.copyWith(color: const Color(0xFF6B7280)),
-                  ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(Icons.shield_outlined, color: Color(0xFF10B981), size: 16),
+                    const SizedBox(width: 6),
+                    Text(
+                      'Protected by Axon Escrow',
+                      style: AppTypography.caption.copyWith(color: const Color(0xFF10B981), fontWeight: FontWeight.w600),
+                    ),
+                  ],
                 ),
+                const SizedBox(height: 40),
               ],
             ),
           ),
         );
       },
+    );
+  }
+
+  Widget _buildLabel(String text) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8.0, left: 4.0),
+      child: Text(
+        text,
+        style: AppTypography.labelLarge.copyWith(fontWeight: FontWeight.w600, color: const Color(0xFF374151)),
+      ),
+    );
+  }
+
+  InputDecoration _inputDecoration({required String hint, required IconData icon, String? suffix}) {
+    return InputDecoration(
+      hintText: hint,
+      hintStyle: const TextStyle(color: Color(0xFF9CA3AF), fontWeight: FontWeight.normal),
+      filled: true,
+      fillColor: Colors.white,
+      prefixIcon: Icon(icon, color: const Color(0xFF9CA3AF), size: 22),
+      suffixText: suffix,
+      suffixStyle: const TextStyle(color: Color(0xFF6B7280), fontWeight: FontWeight.w500),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(16),
+        borderSide: const BorderSide(color: Color(0xFFE5E7EB), width: 1.5),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(16),
+        borderSide: BorderSide(color: AppColors.primary, width: 2),
+      ),
+      errorBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(16),
+        borderSide: const BorderSide(color: Colors.red, width: 1.5),
+      ),
     );
   }
 }

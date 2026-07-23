@@ -7,11 +7,12 @@ class ContractRepository {
 
   ContractRepository(this._apiClient);
 
-  Future<void> fundContract(String contractId) async {
+  Future<String> createCheckoutSession(String contractId) async {
     try {
-      await _apiClient.dio.post('/contracts/$contractId/fund');
+      final response = await _apiClient.dio.post('/contracts/$contractId/checkout');
+      return response.data['url'] as String;
     } catch (e) {
-      throw Exception('Failed to fund contract: $e');
+      throw Exception('Failed to generate checkout session: $e');
     }
   }
 

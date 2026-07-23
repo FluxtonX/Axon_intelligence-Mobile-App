@@ -1,4 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../data/repositories/contract_repository.dart';
 import '../../data/repositories/reviews_repository.dart';
 import 'contracts_event.dart';
@@ -35,16 +36,24 @@ class ContractsBloc extends Bloc<ContractsEvent, ContractsState> {
   Future<void> _onFundContract(FundContract event, Emitter<ContractsState> emit) async {
     emit(state.copyWith(status: ContractsStatus.approving, clearMessages: true));
     try {
-      await _contractRepository.fundContract(event.contractId);
-      emit(state.copyWith(
-        status: ContractsStatus.success,
-        actionSuccessMessage: 'Contract funded successfully! Status is now ACTIVE.',
-      ));
-      add(const FetchMyContracts()); // Refresh list
+      final checkoutUrl = await _contractRepository.createCheckoutSession(event.contractId);
+      final Uri url = Uri.parse(checkoutUrl);
+      if (await canLaunchUrl(url)) {
+        await launchUrl(url, mode: LaunchMode.externalApplication);
+        emit(state.copyWith(
+          status: ContractsStatus.success,
+          actionSuccessMessage: 'Redirecting to secure payment...',
+        ));
+        // Note: The app should ideally poll for status or rely on webhook, 
+        // but for now we just refresh the list.
+        add(const FetchMyContracts()); 
+      } else {
+        throw Exception('Could not launch Stripe Checkout URL');
+      }
     } catch (e) {
       emit(state.copyWith(
         status: ContractsStatus.failure,
-        errorMessage: 'Failed to fund contract.',
+        errorMessage: 'Failed to initiate funding: ${e.toString()}',
       ));
     }
   }

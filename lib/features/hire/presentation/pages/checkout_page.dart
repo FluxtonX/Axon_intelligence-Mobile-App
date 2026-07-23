@@ -16,79 +16,84 @@ class CheckoutPage extends StatelessWidget {
       listener: (context, state) {
         if (state.status == HireStatus.error) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(state.errorMessage ?? 'Payment failed')),
+            SnackBar(content: Text(state.errorMessage ?? 'Payment failed', style: const TextStyle(color: Colors.white)), backgroundColor: Colors.red),
           );
         } else if (state.status == HireStatus.paymentSuccess) {
           context.go('/payment_success');
         }
       },
       builder: (context, state) {
-        if (state.contractId == null || state.proposal == null) {
-          return const Scaffold(body: Center(child: Text('No contract found')));
+        if (state.contractId == null) {
+          return const Scaffold(body: Center(child: Text('No contract found', style: TextStyle(color: Color(0xFF111827)))));
         }
 
-        final subtotal = state.proposal!.bidAmount;
+        final subtotal = state.proposal?.bidAmount ?? state.directAmount;
+
+        if (subtotal == null) {
+          return const Scaffold(body: Center(child: Text('Invalid contract amount', style: TextStyle(color: Color(0xFF111827)))));
+        }
+
         final fee = subtotal * 0.05; // 5% marketplace fee
         final total = subtotal + fee;
 
         return Scaffold(
-          backgroundColor: const Color(0xFFF9FAFB),
+          backgroundColor: const Color(0xFFF3F4F6),
           appBar: AppBar(
-            backgroundColor: const Color(0xFFF9FAFB),
-            elevation: 0,
+            backgroundColor: Colors.white,
+            elevation: 0.5,
             leading: IconButton(
               icon: const Icon(Icons.arrow_back_rounded, color: Color(0xFF111827)),
               onPressed: () => context.pop(),
             ),
             title: Text(
               'Checkout',
-              style: AppTypography.headingMedium.copyWith(fontSize: 18),
+              style: AppTypography.headingMedium.copyWith(fontSize: 18, color: const Color(0xFF111827)),
             ),
             centerTitle: true,
           ),
           body: Stack(
             children: [
               SingleChildScrollView(
-                padding: const EdgeInsets.only(left: 24, right: 24, bottom: 120, top: 16),
+                padding: const EdgeInsets.only(left: 20, right: 20, bottom: 120, top: 24),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Order Summary
+                    // Order Summary Label
+                    Padding(
+                      padding: const EdgeInsets.only(left: 4, bottom: 12),
+                      child: Text(
+                        'Order Summary',
+                        style: AppTypography.headingSmall.copyWith(color: const Color(0xFF111827), fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                    // Order Summary Card
                     Container(
-                      padding: const EdgeInsets.all(20),
+                      padding: const EdgeInsets.all(24),
                       decoration: BoxDecoration(
                         color: Colors.white,
-                        borderRadius: BorderRadius.circular(16),
-                        border: Border.all(color: const Color(0xFFE5E7EB)),
+                        borderRadius: BorderRadius.circular(20),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.04),
+                            blurRadius: 10,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
                       ),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text('Order Summary', style: AppTypography.headingMedium.copyWith(fontSize: 18)),
+                          _buildSummaryRow('Subtotal', subtotal),
                           const SizedBox(height: 16),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text('Subtotal', style: AppTypography.bodyMedium),
-                              Text('\$${subtotal.toStringAsFixed(2)}', style: AppTypography.labelLarge),
-                            ],
-                          ),
-                          const SizedBox(height: 8),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text('Marketplace Fee (5%)', style: AppTypography.bodyMedium),
-                              Text('\$${fee.toStringAsFixed(2)}', style: AppTypography.labelLarge),
-                            ],
-                          ),
+                          _buildSummaryRow('Marketplace Fee (5%)', fee),
                           const Padding(
-                            padding: EdgeInsets.symmetric(vertical: 16),
-                            child: Divider(color: Color(0xFFE5E7EB)),
+                            padding: EdgeInsets.symmetric(vertical: 20),
+                            child: Divider(color: Color(0xFFE5E7EB), height: 1),
                           ),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              Text('Total', style: AppTypography.labelLarge.copyWith(fontWeight: FontWeight.bold)),
+                              Text('Total Payment', style: AppTypography.headingSmall.copyWith(color: const Color(0xFF111827))),
                               Text('\$${total.toStringAsFixed(2)}', style: AppTypography.headingMedium.copyWith(color: AppColors.primary)),
                             ],
                           ),
@@ -97,49 +102,89 @@ class CheckoutPage extends StatelessWidget {
                     ),
                     const SizedBox(height: 32),
 
-                    // Payment Method (Mock)
-                    Text('Payment Method', style: AppTypography.headingMedium.copyWith(fontSize: 18)),
-                    const SizedBox(height: 16),
+                    // Payment Method Label
+                    Padding(
+                      padding: const EdgeInsets.only(left: 4, bottom: 12),
+                      child: Text(
+                        'Payment Method',
+                        style: AppTypography.headingSmall.copyWith(color: const Color(0xFF111827), fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                    // Payment Method Card
                     Container(
-                      padding: const EdgeInsets.all(16),
+                      padding: const EdgeInsets.all(20),
                       decoration: BoxDecoration(
                         color: Colors.white,
-                        borderRadius: BorderRadius.circular(16),
-                        border: Border.all(color: AppColors.primary),
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(color: AppColors.primary.withValues(alpha: 0.3), width: 1.5),
+                        boxShadow: [
+                          BoxShadow(
+                            color: AppColors.primary.withValues(alpha: 0.05),
+                            blurRadius: 10,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
                       ),
                       child: Row(
                         children: [
-                          const Icon(Icons.credit_card, color: Color(0xFF4B5563)),
-                          const SizedBox(width: 12),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text('•••• •••• •••• 4242', style: AppTypography.labelLarge),
-                              Text('Expires 12/26', style: AppTypography.caption),
-                            ],
+                          Container(
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFF3F4F6),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: const Icon(Icons.credit_card_rounded, color: Color(0xFF374151), size: 28),
                           ),
-                          const Spacer(),
-                          Icon(Icons.check_circle_rounded, color: AppColors.primary),
+                          const SizedBox(width: 16),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text('Stripe Secure Checkout', style: AppTypography.labelLarge.copyWith(color: const Color(0xFF111827), fontWeight: FontWeight.bold)),
+                                const SizedBox(height: 4),
+                                Text('Credit Card, Apple Pay, Google Pay', style: AppTypography.caption.copyWith(color: const Color(0xFF6B7280))),
+                              ],
+                            ),
+                          ),
+                          const Icon(Icons.check_circle_rounded, color: AppColors.primary, size: 24),
                         ],
                       ),
                     ),
                     
-                    const SizedBox(height: 24),
+                    const SizedBox(height: 32),
                     // Escrow Notice
                     Container(
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
                         color: const Color(0xFFEFF6FF),
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(color: const Color(0xFFBFDBFE)),
                       ),
                       child: Row(
                         children: [
-                          const Icon(Icons.security, color: Color(0xFF3B82F6)),
-                          const SizedBox(width: 12),
+                          Container(
+                            padding: const EdgeInsets.all(8),
+                            decoration: const BoxDecoration(
+                              color: Colors.white,
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Icon(Icons.lock_outline_rounded, color: Color(0xFF2563EB), size: 20),
+                          ),
+                          const SizedBox(width: 16),
                           Expanded(
-                            child: Text(
-                              'Your payment is held securely in escrow until you approve the delivered work.',
-                              style: AppTypography.caption.copyWith(color: const Color(0xFF1D4ED8)),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Secure Escrow Payment',
+                                  style: AppTypography.labelLarge.copyWith(color: const Color(0xFF1E3A8A), fontWeight: FontWeight.bold),
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  'Funds are held securely by Axon Intelligence and are only released when you approve the delivered work.',
+                                  style: AppTypography.caption.copyWith(color: const Color(0xFF1E40AF), height: 1.4),
+                                ),
+                              ],
                             ),
                           ),
                         ],
@@ -167,9 +212,10 @@ class CheckoutPage extends StatelessWidget {
                     ],
                   ),
                   child: PrimaryButton(
-                    label: 'Pay \$${total.toStringAsFixed(2)}',
+                    label: 'Pay \$${total.toStringAsFixed(2)} Securely',
                     isLoading: state.status == HireStatus.paymentProcessing,
-                    showIcon: false,
+                    showIcon: true,
+                    icon: Icons.open_in_new_rounded,
                     onTap: () {
                       context.read<HireBloc>().add(const HireProcessPayment());
                     },
@@ -180,6 +226,16 @@ class CheckoutPage extends StatelessWidget {
           ),
         );
       },
+    );
+  }
+
+  Widget _buildSummaryRow(String label, double amount) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(label, style: AppTypography.bodyMedium.copyWith(color: const Color(0xFF4B5563), fontSize: 16)),
+        Text('\$${amount.toStringAsFixed(2)}', style: AppTypography.labelLarge.copyWith(color: const Color(0xFF111827), fontSize: 16, fontWeight: FontWeight.w600)),
+      ],
     );
   }
 }
