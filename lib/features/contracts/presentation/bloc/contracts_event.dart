@@ -24,14 +24,18 @@ class FundContract extends ContractsEvent {
 class SubmitWork extends ContractsEvent {
   final String contractId;
   final String submissionDetails;
+  final List<int>? fileBytes;
+  final String? fileName;
 
   const SubmitWork({
     required this.contractId,
     required this.submissionDetails,
+    this.fileBytes,
+    this.fileName,
   });
 
   @override
-  List<Object?> get props => [contractId, submissionDetails];
+  List<Object?> get props => [contractId, submissionDetails, fileBytes, fileName];
 }
 
 class ApproveWork extends ContractsEvent {

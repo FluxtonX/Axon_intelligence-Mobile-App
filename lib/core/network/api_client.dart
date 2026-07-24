@@ -1,15 +1,14 @@
 import 'package:dio/dio.dart';
-import '../storage/local_storage.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import '../storage/secure_storage.dart';
+import 'dart:developer';
 
 class ApiClient {
   final Dio _dio;
-  final LocalStorage _storage;
-
-  // Use the computer's local Wi-Fi IP address so physical devices over USB can reach the backend.
-  static const String baseUrl = 'http://192.168.1.71:3000/api';
+  final SecureStorage _storage;
 
   ApiClient(this._storage) : _dio = Dio(BaseOptions(
-    baseUrl: baseUrl,
+    baseUrl: dotenv.env['API_BASE_URL'] ?? 'http://127.0.0.1:3000/api',
     connectTimeout: const Duration(seconds: 10),
     receiveTimeout: const Duration(seconds: 10),
     headers: {
@@ -30,10 +29,21 @@ class ApiClient {
           if (token != null) {
             options.headers['Authorization'] = 'Bearer $token';
           }
+          log('API Request: ${options.method} ${options.uri}');
           return handler.next(options);
         },
-        onError: (DioException e, handler) {
-          // Can handle global 401 refresh token logic here if needed
+        onResponse: (response, handler) {
+          log('API Response: ${response.statusCode} ${response.requestOptions.uri}');
+          return handler.next(response);
+        },
+        onError: (DioException e, handler) async {
+          log('API Error: ${e.response?.statusCode} ${e.requestOptions.uri}', error: e);
+          
+          if (e.response?.statusCode == 401) {
+            // Unauthorized - clear token
+            await _storage.clearAll();
+          }
+          
           return handler.next(e);
         },
       ),

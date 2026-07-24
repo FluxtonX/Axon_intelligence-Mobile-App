@@ -30,6 +30,7 @@ class MockHireRepository implements HireRepository {
     );
   }
 
+
   @override
   Future<bool> processPayment(String contractId, double amount) async {
     // Simulate payment processing delay (calling Stripe/Escrow)

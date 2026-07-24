@@ -183,8 +183,10 @@ class _ContractDetailPageState extends State<ContractDetailPage> {
                       TextField(
                         controller: _submissionController,
                         maxLines: 3,
+                        style: const TextStyle(color: Color(0xFF111827)),
                         decoration: InputDecoration(
                           hintText: 'Share your experience...',
+                          hintStyle: const TextStyle(color: Color(0xFF9CA3AF)),
                           filled: true,
                           fillColor: const Color(0xFFF9FAFB),
                           border: OutlineInputBorder(

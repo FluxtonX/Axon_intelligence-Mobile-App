@@ -45,7 +45,7 @@ class ClientReviewCard extends StatelessWidget {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Work Delivered', style: AppTypography.headingMedium.copyWith(fontSize: 18)),
+                  Text('Work Delivered', style: AppTypography.headingMedium.copyWith(fontSize: 18, color: const Color(0xFF111827))),
                   Text(
                     'Review the files before approving.',
                     style: AppTypography.caption.copyWith(color: const Color(0xFF6B7280)),
@@ -68,7 +68,7 @@ class ClientReviewCard extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Freelancer\'s Message:', style: AppTypography.labelLarge.copyWith(fontWeight: FontWeight.bold)),
+                Text('Freelancer\'s Message:', style: AppTypography.labelLarge.copyWith(fontWeight: FontWeight.bold, color: const Color(0xFF111827))),
                 const SizedBox(height: 8),
                 Text(
                   contract.status == 'SUBMITTED' ? 'Here is the final delivery as requested! Let me know if you need any adjustments.' : 'Delivery approved.',
@@ -83,7 +83,7 @@ class ClientReviewCard extends StatelessWidget {
                     const Icon(Icons.insert_drive_file_rounded, color: Color(0xFF9CA3AF)),
                     const SizedBox(width: 12),
                     Expanded(
-                      child: Text('deliverable.zip', style: AppTypography.labelLarge),
+                      child: Text('deliverable.zip', style: AppTypography.labelLarge.copyWith(color: const Color(0xFF111827))),
                     ),
                     const Icon(Icons.download_rounded, color: AppColors.primary),
                   ],

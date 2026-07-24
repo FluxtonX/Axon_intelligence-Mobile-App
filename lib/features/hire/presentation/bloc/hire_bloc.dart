@@ -1,4 +1,4 @@
-import 'package:url_launcher/url_launcher.dart';
+import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../proposals/data/repositories/proposal_repository.dart';
 import '../../../contracts/data/repositories/contract_repository.dart';
@@ -57,17 +57,25 @@ class HireBloc extends Bloc<HireEvent, HireState> {
     emit(state.copyWith(status: HireStatus.paymentProcessing));
 
     try {
-      final checkoutUrl = await _contractRepository.createCheckoutSession(state.contractId!);
-      final Uri url = Uri.parse(checkoutUrl);
+      final clientSecret = await _contractRepository.createPaymentIntent(state.contractId!);
       
-      await launchUrl(url, mode: LaunchMode.externalApplication);
-      // The user is redirected to the browser. We will assume success for the local state,
-      // but ideally they should be taken to a waiting screen that polls for the contract status.
+      await Stripe.instance.initPaymentSheet(
+        paymentSheetParameters: SetupPaymentSheetParameters(
+          paymentIntentClientSecret: clientSecret,
+          merchantDisplayName: 'Axon Intelligence',
+        ),
+      );
+
+      await Stripe.instance.presentPaymentSheet();
+      
+      // Since local webhooks aren't running, we manually notify the backend
+      await _contractRepository.fundContract(state.contractId!);
+
       emit(state.copyWith(status: HireStatus.paymentSuccess));
     } catch (e) {
       emit(state.copyWith(
         status: HireStatus.error,
-        errorMessage: 'Payment initialization failed: $e',
+        errorMessage: 'Payment cancelled or failed.',
       ));
     }
   }

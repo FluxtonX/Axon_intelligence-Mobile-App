@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:file_selector/file_selector.dart';
 import '../../../../core/theme/theme.dart';
 import '../../../../shared/widgets/primary_button.dart';
 import '../bloc/contracts_bloc.dart';
@@ -17,7 +18,7 @@ class DeliveryUploadForm extends StatefulWidget {
 
 class _DeliveryUploadFormState extends State<DeliveryUploadForm> {
   final _messageController = TextEditingController();
-  bool _hasFile = false; // Mock file state since file_picker implementation can be complex on emulators
+  XFile? _selectedFile;
 
   @override
   void dispose() {
@@ -25,14 +26,17 @@ class _DeliveryUploadFormState extends State<DeliveryUploadForm> {
     super.dispose();
   }
 
-  void _pickMockFile() {
-    setState(() {
-      _hasFile = !_hasFile;
-    });
+  Future<void> _pickFile() async {
+    final XFile? result = await openFile();
+    if (result != null) {
+      setState(() {
+        _selectedFile = result;
+      });
+    }
   }
 
-  void _deliverWork() {
-    if (_messageController.text.trim().isEmpty && !_hasFile) {
+  Future<void> _deliverWork() async {
+    if (_messageController.text.trim().isEmpty && _selectedFile == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Please add a message or attach a file to deliver.')),
       );
@@ -40,11 +44,20 @@ class _DeliveryUploadFormState extends State<DeliveryUploadForm> {
     }
 
     final submissionText = _messageController.text.trim();
-    final details = _hasFile ? '[File Attached] $submissionText' : submissionText;
+    final details = _selectedFile != null ? '[File Attached] $submissionText' : submissionText;
+
+    List<int>? fileBytes;
+    if (_selectedFile != null) {
+      fileBytes = await _selectedFile!.readAsBytes();
+    }
+
+    if (!mounted) return;
 
     context.read<ContractsBloc>().add(SubmitWork(
       contractId: widget.contractId,
       submissionDetails: details,
+      fileBytes: fileBytes,
+      fileName: _selectedFile?.name,
     ));
   }
 
@@ -77,15 +90,15 @@ class _DeliveryUploadFormState extends State<DeliveryUploadForm> {
           
           // File Upload Zone
           GestureDetector(
-            onTap: _pickMockFile,
+            onTap: _pickFile,
             child: Container(
               width: double.infinity,
               padding: const EdgeInsets.symmetric(vertical: 32),
               decoration: BoxDecoration(
-                color: _hasFile ? const Color(0xFFF0FDF4) : const Color(0xFFF9FAFB),
+                color: _selectedFile != null ? const Color(0xFFF0FDF4) : const Color(0xFFF9FAFB),
                 borderRadius: BorderRadius.circular(16),
                 border: Border.all(
-                  color: _hasFile ? const Color(0xFF10B981) : const Color(0xFFE5E7EB),
+                  color: _selectedFile != null ? const Color(0xFF10B981) : const Color(0xFFE5E7EB),
                   style: BorderStyle.solid,
                   width: 2,
                 ),
@@ -93,19 +106,19 @@ class _DeliveryUploadFormState extends State<DeliveryUploadForm> {
               child: Column(
                 children: [
                   Icon(
-                    _hasFile ? Icons.task_rounded : Icons.cloud_upload_rounded,
+                    _selectedFile != null ? Icons.task_rounded : Icons.cloud_upload_rounded,
                     size: 48,
-                    color: _hasFile ? const Color(0xFF10B981) : const Color(0xFF9CA3AF),
+                    color: _selectedFile != null ? const Color(0xFF10B981) : const Color(0xFF9CA3AF),
                   ),
                   const SizedBox(height: 16),
                   Text(
-                    _hasFile ? 'deliverable.zip (24 MB)' : 'Tap to upload files',
+                    _selectedFile != null ? _selectedFile!.name : 'Tap to upload files',
                     style: AppTypography.labelLarge.copyWith(
-                      color: _hasFile ? const Color(0xFF111827) : const Color(0xFF6B7280),
-                      fontWeight: _hasFile ? FontWeight.bold : FontWeight.normal,
+                      color: _selectedFile != null ? const Color(0xFF111827) : const Color(0xFF6B7280),
+                      fontWeight: _selectedFile != null ? FontWeight.bold : FontWeight.normal,
                     ),
                   ),
-                  if (!_hasFile) ...[
+                  if (_selectedFile == null) ...[
                     const SizedBox(height: 4),
                     Text('Max file size 1GB', style: AppTypography.caption.copyWith(color: const Color(0xFF9CA3AF))),
                   ]

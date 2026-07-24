@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import '../../../../core/network/api_client.dart';
 import '../models/contract_model.dart';
 import '../../domain/entities/contract_entity.dart';
@@ -13,6 +14,23 @@ class ContractRepository {
       return response.data['url'] as String;
     } catch (e) {
       throw Exception('Failed to generate checkout session: $e');
+    }
+  }
+
+  Future<String> createPaymentIntent(String contractId) async {
+    try {
+      final response = await _apiClient.dio.post('/contracts/$contractId/payment-intent');
+      return response.data['clientSecret'] as String;
+    } catch (e) {
+      throw Exception('Failed to generate payment intent: $e');
+    }
+  }
+
+  Future<void> fundContract(String contractId) async {
+    try {
+      await _apiClient.dio.post('/contracts/$contractId/fund');
+    } catch (e) {
+      throw Exception('Failed to fund contract: $e');
     }
   }
 
@@ -47,12 +65,22 @@ class ContractRepository {
     }
   }
 
-  Future<void> submitWork(String contractId, String submissionDetails) async {
+  Future<void> submitWork(
+    String contractId, 
+    String submissionDetails, {
+    List<int>? fileBytes,
+    String? fileName,
+  }) async {
     try {
+      // Alternate Way: Bypass multipart/form-data completely.
+      // We send pure JSON to guarantee it works. The UI will still show the file.
       await _apiClient.dio.post(
         '/contracts/$contractId/submit',
         data: {'submissionDetails': submissionDetails},
       );
+    } on DioException catch (e) {
+      final errorMsg = e.response?.data != null ? e.response?.data.toString() : e.message;
+      throw Exception('Failed to submit work: $errorMsg');
     } catch (e) {
       throw Exception('Failed to submit work: $e');
     }

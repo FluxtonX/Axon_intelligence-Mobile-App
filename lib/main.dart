@@ -1,11 +1,13 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'core/storage/local_storage.dart';
+import 'core/storage/secure_storage.dart';
 import 'core/network/api_client.dart';
 import 'features/auth/data/auth_repository.dart';
 import 'core/blocs/user_mode_cubit.dart';
 import 'features/auth/presentation/bloc/auth_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter_stripe/flutter_stripe.dart';
 import 'core/theme/theme.dart';
 import 'core/router/app_router.dart';
 import 'features/hire/presentation/bloc/hire_bloc.dart';
@@ -33,10 +35,14 @@ import 'features/services/presentation/bloc/services_event.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await dotenv.load(fileName: ".env.development"); // Default environment
 
-  final localStorage = await LocalStorage.init();
-  final apiClient = ApiClient(localStorage);
-  final authRepository = AuthRepository(apiClient, localStorage);
+  Stripe.publishableKey = dotenv.env['STRIPE_PUBLISHABLE_KEY'] ?? 'pk_test_placeholder';
+  await Stripe.instance.applySettings();
+
+  final secureStorage = await SecureStorage.init();
+  final apiClient = ApiClient(secureStorage);
+  final authRepository = AuthRepository(apiClient, secureStorage);
   final profileRepository = ProfileRepository(apiClient);
   final projectRepository = ProjectRepository(apiClient);
   final proposalRepository = ProposalRepository(apiClient);

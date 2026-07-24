@@ -1,10 +1,10 @@
 import 'package:dio/dio.dart';
 import '../../../../core/network/api_client.dart';
-import '../../../../core/storage/local_storage.dart';
+import '../../../../core/storage/secure_storage.dart';
 
 class AuthRepository {
   final ApiClient _apiClient;
-  final LocalStorage _storage;
+  final SecureStorage _storage;
 
   AuthRepository(this._apiClient, this._storage);
 
