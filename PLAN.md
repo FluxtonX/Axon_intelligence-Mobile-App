@@ -24,12 +24,12 @@
 | 5 | Freelancer Profile | ✅ Done | Portfolio, ratings, hire button |
 | 6 | Search & Filters | ✅ Done | Category, budget, rating filters |
 | 7 | Chat / Messages | ✅ Done | Conversation list + chat screen |
-| 8 | Hire / Checkout | ⏳ Pending | Milestone-based payment flow |
+| 8 | Hire / Checkout | ✅ Done | Milestone-based payment flow, Stripe integration |
 | 9 | Seller Onboarding | ⏳ Pending | "Become a Freelancer" flow |
 | 10 | Seller Dashboard | ⏳ Pending | Earnings, orders, gig management |
 | 11 | Create Gig | ⏳ Pending | Multi-step gig creation |
-| 12 | Order Management | ⏳ Pending | Buyer & seller order tracking |
-| 13 | Reviews & Ratings | ⏳ Pending | Post-delivery review flow |
+| 12 | Order Management | ✅ Done | Buyer & seller order tracking, file delivery |
+| 13 | Reviews & Ratings | ✅ Done | Post-delivery review flow |
 | 14 | Notifications | ⏳ Pending | In-app + push notifications |
 | 15 | Settings & Profile | ⏳ Pending | Account, payments, preferences |
 

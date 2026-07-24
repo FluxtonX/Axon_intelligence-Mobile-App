@@ -27,6 +27,7 @@ import '../../features/proposals/presentation/pages/proposals_list_page.dart';
 import '../../features/proposals/presentation/pages/proposal_detail_page.dart';
 import '../../features/proposals/domain/entities/proposal_entity.dart';
 import '../../features/seller_onboarding/presentation/pages/seller_onboarding_page.dart';
+import '../../features/seller_onboarding/presentation/pages/become_freelancer_page.dart';
 import '../../features/services/presentation/pages/create_gig_page.dart';
 import '../../features/find_work/presentation/pages/submit_proposal_page.dart';
 import '../../features/proposals/presentation/pages/submitted_proposals_page.dart';
@@ -179,6 +180,11 @@ final GoRouter appRouter = GoRouter(
       path: '/seller_onboarding',
       name: 'sellerOnboarding',
       builder: (context, state) => const SellerOnboardingPage(),
+    ),
+    GoRoute(
+      path: '/become_freelancer',
+      name: 'becomeFreelancer',
+      builder: (context, state) => const BecomeFreelancerPage(),
     ),
     GoRoute(
       path: '/create_gig',
