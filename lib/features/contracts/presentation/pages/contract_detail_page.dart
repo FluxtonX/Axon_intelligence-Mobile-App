@@ -213,7 +213,6 @@ class _ContractDetailPageState extends State<ContractDetailPage> {
                                 rating: 5,
                                 comment: _submissionController.text,
                               ));
-                              _submissionController.clear();
                             },
                           );
                         },

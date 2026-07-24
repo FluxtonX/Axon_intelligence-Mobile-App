@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import '../../../../core/network/api_client.dart';
 
 class ReviewsRepository {
@@ -16,6 +17,9 @@ class ReviewsRepository {
           'comment': comment,
         },
       );
+    } on DioException catch (e) {
+      final errorMsg = e.response?.data != null ? e.response?.data.toString() : e.message;
+      throw Exception('Failed to create review: $errorMsg');
     } catch (e) {
       throw Exception('Failed to create review: $e');
     }
