@@ -1,9 +1,62 @@
 import '../../../../core/network/api_client.dart';
+import '../../../../core/network/socket_client.dart';
+import '../../../../core/storage/secure_storage.dart';
+import 'dart:async';
+import 'dart:convert';
 
 class MessagesRepository {
   final ApiClient _apiClient;
+  final SocketClient _socketClient;
+  final SecureStorage _storage;
+  
+  final _messageStreamController = StreamController<Map<String, dynamic>>.broadcast();
+  Stream<Map<String, dynamic>> get incomingMessages => _messageStreamController.stream;
 
-  MessagesRepository(this._apiClient);
+  MessagesRepository(this._apiClient, this._socketClient, this._storage);
+
+  /// Decodes JWT to get the user ID
+  String? _getUserIdFromToken() {
+    final token = _storage.getToken();
+    if (token == null) return null;
+    try {
+      final parts = token.split('.');
+      if (parts.length != 3) return null;
+      final payload = utf8.decode(base64Url.decode(base64Url.normalize(parts[1])));
+      final data = json.decode(payload);
+      return data['sub']; // userId
+    } catch (e) {
+      return null;
+    }
+  }
+
+  void initializeSocket() {
+    final userId = _getUserIdFromToken();
+    if (userId != null) {
+      _socketClient.connect(userId);
+      
+      // Listen for real-time messages from the backend
+      _socketClient.on('messageToUser-$userId', (data) {
+        if (data != null) {
+          final message = Map<String, dynamic>.from(data);
+          
+          // Add to in-memory store for immediate display
+          final senderId = message['senderId'];
+          if (_inMemoryMessages.containsKey(senderId)) {
+            _inMemoryMessages[senderId]!.insert(0, message);
+          } else {
+            _inMemoryMessages[senderId] = [message];
+          }
+
+          // Broadcast to the UI Blocs
+          _messageStreamController.add(message);
+        }
+      });
+    }
+  }
+
+  void dispose() {
+    _messageStreamController.close();
+  }
 
   /// Global current user ID in client mode
   static const String currentUserId = 'client_user_me';

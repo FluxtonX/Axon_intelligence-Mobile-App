@@ -4,7 +4,10 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/theme/theme.dart';
 import '../../../../shared/widgets/primary_button.dart';
 import '../../../../core/blocs/user_mode_cubit.dart';
-
+import '../../../profile/data/repositories/profile_repository.dart';
+import '../../../profile/presentation/bloc/profile_cubit.dart';
+import '../../../main_shell/presentation/bloc/main_shell_bloc.dart';
+import '../../../main_shell/presentation/bloc/main_shell_event.dart';
 class SellerOnboardingPage extends StatefulWidget {
   const SellerOnboardingPage({super.key});
 
@@ -31,15 +34,42 @@ class _SellerOnboardingPageState extends State<SellerOnboardingPage> {
   }
 
   void _completeOnboarding() async {
+    if (_titleController.text.trim().isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please enter a Professional Title')),
+      );
+      return;
+    }
+
     setState(() => _isLoading = true);
     
-    // Simulate API save
-    await Future.delayed(const Duration(seconds: 2));
+    try {
+      final repo = context.read<ProfileRepository>();
+      await repo.updateProfile(
+        title: _titleController.text.trim(),
+        hourlyRate: double.tryParse(_rateController.text.trim()) ?? 0,
+        bio: _bioController.text.trim(),
+        skills: _skills,
+      );
+      if (mounted) await context.read<ProfileCubit>().loadProfile();
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _isLoading = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(e.toString().replaceAll('Exception: ', ''))),
+      );
+      return; // Stop flow if API fails
+    }
 
     if (!mounted) return;
     
+    setState(() => _isLoading = false);
+
     // Switch app mode to freelancer
     context.read<UserModeCubit>().setMode(UserMode.freelancer);
+    
+    // Reset bottom navigation to Dashboard (index 0)
+    context.read<MainShellBloc>().add(const TabChanged(0));
     
     // Go to Home (which will now show the dashboard)
     context.go('/home');

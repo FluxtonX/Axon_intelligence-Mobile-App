@@ -26,9 +26,18 @@ class HomeHeader extends StatelessWidget {
         final lastName = user?.profile?.lastName ?? '';
         final displayName = isGuest ? 'Guest User' : '$firstName $lastName'.trim();
 
+        String finalAvatarUrl = 'https://ui-avatars.com/api/?name=U&background=3B6EF5&color=fff';
+        if (!isGuest) {
+          if (avatarUrl != null && avatarUrl.isNotEmpty) {
+            finalAvatarUrl = avatarUrl;
+          } else {
+            final name = user?.profile != null ? '${user!.profile!.firstName} ${user.profile!.lastName}'.trim() : 'U';
+            finalAvatarUrl = 'https://ui-avatars.com/api/?name=${Uri.encodeComponent(name.isEmpty ? 'U' : name)}&background=3B6EF5&color=fff';
+          }
+        }
+
         return Row(
       children: [
-        // Profile Picture with Sign Out Menu
         // Profile Picture directly navigating to Settings
         GestureDetector(
           onTap: () {
@@ -40,13 +49,13 @@ class HomeHeader extends StatelessWidget {
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               color: isGuest ? const Color(0xFFF3F4F6) : Colors.transparent,
-              image: (!isGuest && avatarUrl != null) ? DecorationImage(
-                image: NetworkImage(avatarUrl),
+              image: !isGuest ? DecorationImage(
+                image: NetworkImage(finalAvatarUrl),
                 fit: BoxFit.cover,
               ) : null,
               border: Border.all(color: const Color(0xFFE5E7EB), width: 1.5),
             ),
-            child: isGuest || avatarUrl == null
+            child: isGuest
                 ? const Icon(Icons.person_outline_rounded, color: AppColors.textSecondary)
                 : null,
           ),

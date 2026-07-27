@@ -5,6 +5,8 @@ import '../../../../core/theme/theme.dart';
 import '../../../gig_creation/presentation/bloc/gig_creation_bloc.dart';
 import '../../../gig_creation/presentation/bloc/gig_creation_state.dart';
 import '../../../gig_creation/domain/entities/gig_entity.dart';
+import '../../../profile/presentation/bloc/profile_cubit.dart';
+import '../../../profile/presentation/bloc/profile_state.dart';
 
 class SellerDashboardPage extends StatelessWidget {
   const SellerDashboardPage({super.key});
@@ -44,9 +46,24 @@ class SellerDashboardPage extends StatelessWidget {
                         ),
                       ],
                     ),
-                    const CircleAvatar(
-                      radius: 20,
-                      backgroundImage: NetworkImage('https://i.pravatar.cc/150?img=68'),
+                    BlocBuilder<ProfileCubit, ProfileState>(
+                      builder: (context, state) {
+                        String avatarUrl = 'https://ui-avatars.com/api/?name=U&background=3B6EF5&color=fff';
+                        if (state is ProfileLoaded) {
+                          final profile = state.user.profile;
+                          if (profile?.avatarUrl != null && profile!.avatarUrl!.isNotEmpty) {
+                            avatarUrl = profile.avatarUrl!;
+                          } else {
+                            final name = profile != null ? '${profile.firstName} ${profile.lastName}'.trim() : 'U';
+                            avatarUrl = 'https://ui-avatars.com/api/?name=${Uri.encodeComponent(name.isEmpty ? 'U' : name)}&background=3B6EF5&color=fff';
+                          }
+                        }
+                        return CircleAvatar(
+                          radius: 20,
+                          backgroundColor: const Color(0xFFEEF2FF),
+                          backgroundImage: NetworkImage(avatarUrl),
+                        );
+                      },
                     )
                   ],
                 ),

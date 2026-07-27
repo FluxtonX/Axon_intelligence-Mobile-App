@@ -273,87 +273,89 @@ class ProfilePage extends StatelessWidget {
                     // Mode Toggle / Become Freelancer
                     BlocBuilder<UserModeCubit, UserMode>(
                       builder: (context, mode) {
-                        final isClient = mode == UserMode.client;
-                        
-                        // Check if they have a freelancer profile
-                        bool hasFreelancerProfile = false;
-                        final profileState = context.read<ProfileCubit>().state;
-                        if (profileState is ProfileLoaded) {
-                           final p = profileState.user.profile;
-                           if (p != null && p.title != null && p.title!.isNotEmpty) {
-                             hasFreelancerProfile = true;
-                           }
-                        }
+                        return BlocBuilder<ProfileCubit, ProfileState>(
+                          builder: (context, profileState) {
+                            final isClient = mode == UserMode.client;
+                            
+                            // Check if they have a freelancer profile
+                            bool hasFreelancerProfile = false;
+                            if (profileState is ProfileLoaded) {
+                               final p = profileState.user.profile;
+                               if (p != null && p.title != null && p.title!.isNotEmpty) {
+                                 hasFreelancerProfile = true;
+                               }
+                            }
 
-                        if (!hasFreelancerProfile) {
-                          // They are not a freelancer yet
-                          return ListTile(
-                            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                            leading: Container(
+                            if (!hasFreelancerProfile && isClient) {
+                              // They are a client and not a freelancer yet
+                              return ListTile(
+                                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                                leading: Container(
+                                  padding: const EdgeInsets.all(8),
+                                  decoration: BoxDecoration(
+                                    color: AppColors.primary.withOpacity(0.1),
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                  child: const Icon(
+                                    Icons.rocket_launch_rounded,
+                                    color: AppColors.primary,
+                                    size: 20,
+                                  ),
+                                ),
+                                title: Text(
+                                  'Become a Freelancer',
+                                  style: AppTypography.bodyMedium.copyWith(
+                                    color: AppColors.primary,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                subtitle: Text(
+                                  'Set up your profile and start earning',
+                                  style: AppTypography.caption,
+                                ),
+                                trailing: const Icon(Icons.chevron_right_rounded, color: AppColors.primary),
+                                onTap: () => context.push('/become_freelancer'),
+                              );
+                            }
+
+                            // They ARE a freelancer (or currently in freelancer mode), show toggle
+                            return ListTile(
+                              leading: Container(
                               padding: const EdgeInsets.all(8),
                               decoration: BoxDecoration(
                                 color: AppColors.primary.withOpacity(0.1),
                                 borderRadius: BorderRadius.circular(10),
                               ),
                               child: const Icon(
-                                Icons.rocket_launch_rounded,
+                                Icons.swap_horiz_rounded,
                                 color: AppColors.primary,
                                 size: 20,
                               ),
                             ),
                             title: Text(
-                              'Become a Freelancer',
+                              isClient
+                                  ? 'Switch to Freelancer Mode'
+                                  : 'Switch to Client Mode',
                               style: AppTypography.bodyMedium.copyWith(
                                 color: AppColors.primary,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
-                            subtitle: Text(
-                              'Set up your profile and start earning',
-                              style: AppTypography.caption,
-                            ),
-                            trailing: const Icon(Icons.chevron_right_rounded, color: AppColors.primary),
-                            onTap: () => context.push('/become_freelancer'),
+                            onTap: () {
+                              context.read<UserModeCubit>().toggleMode();
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(
+                                    'Switched to ${isClient ? 'Freelancer' : 'Client'} Mode',
+                                  ),
+                                  behavior: SnackBarBehavior.floating,
+                                ),
+                              );
+                            },
                           );
-                        }
-
-                        // They ARE a freelancer, show toggle
-                        return ListTile(
-                          leading: Container(
-                          padding: const EdgeInsets.all(8),
-                          decoration: BoxDecoration(
-                            color: AppColors.primary.withOpacity(0.1),
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          child: const Icon(
-                            Icons.swap_horiz_rounded,
-                            color: AppColors.primary,
-                            size: 20,
-                          ),
-                        ),
-                        title: Text(
-                          isClient
-                              ? 'Switch to Freelancer Mode'
-                              : 'Switch to Client Mode',
-                          style: AppTypography.bodyMedium.copyWith(
-                            color: AppColors.primary,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        onTap: () {
-                          context.read<UserModeCubit>().toggleMode();
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(
-                                'Switched to ${isClient ? 'Freelancer' : 'Client'} Mode',
-                              ),
-                              behavior: SnackBarBehavior.floating,
-                            ),
-                          );
-                        },
-                      );
-                    },
-                  ),
+                        });
+                      },
+                    ),
                   const Divider(height: 1, indent: 16, endIndent: 16, color: Color(0xFFF3F4F6)),
                 ],
                 ListTile(

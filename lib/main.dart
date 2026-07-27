@@ -1,6 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'core/storage/secure_storage.dart';
 import 'core/network/api_client.dart';
+import 'core/network/socket_client.dart';
 import 'features/auth/data/auth_repository.dart';
 import 'core/blocs/user_mode_cubit.dart';
 import 'features/auth/presentation/bloc/auth_bloc.dart';
@@ -42,13 +43,17 @@ void main() async {
 
   final secureStorage = await SecureStorage.init();
   final apiClient = ApiClient(secureStorage);
+  
+  final baseUrl = dotenv.env['API_BASE_URL'] ?? 'http://127.0.0.1:3000/api';
+  final socketClient = SocketClient(baseUrl);
+  
   final authRepository = AuthRepository(apiClient, secureStorage);
   final profileRepository = ProfileRepository(apiClient);
   final projectRepository = ProjectRepository(apiClient);
   final proposalRepository = ProposalRepository(apiClient);
   final contractRepository = ContractRepository(apiClient);
   final discoverRepository = DiscoverRepository(apiClient);
-  final messagesRepository = MessagesRepository(apiClient);
+  final messagesRepository = MessagesRepository(apiClient, socketClient, secureStorage);
   final reviewsRepository = ReviewsRepository(apiClient);
   final servicesRepository = ServicesRepository(apiClient);
 
@@ -77,6 +82,7 @@ void main() async {
     reviewsRepository: reviewsRepository,
     servicesRepository: servicesRepository,
     apiClient: apiClient,
+    socketClient: socketClient,
   ));
 }
 
@@ -91,6 +97,7 @@ class AxonIntelligenceApp extends StatelessWidget {
   final ReviewsRepository reviewsRepository;
   final ServicesRepository servicesRepository;
   final ApiClient apiClient;
+  final SocketClient socketClient;
 
   const AxonIntelligenceApp({
     super.key, 
@@ -104,6 +111,7 @@ class AxonIntelligenceApp extends StatelessWidget {
     required this.reviewsRepository,
     required this.servicesRepository,
     required this.apiClient,
+    required this.socketClient,
   });
 
   @override
@@ -120,6 +128,7 @@ class AxonIntelligenceApp extends StatelessWidget {
         RepositoryProvider.value(value: reviewsRepository),
         RepositoryProvider.value(value: servicesRepository),
         RepositoryProvider.value(value: apiClient),
+        RepositoryProvider.value(value: socketClient),
       ],
       child: MultiBlocProvider(
         providers: [
