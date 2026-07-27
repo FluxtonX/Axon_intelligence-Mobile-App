@@ -23,9 +23,9 @@ class AuthRepository {
       if (e.response?.statusCode == 401) {
         throw Exception('Invalid credentials');
       }
-      throw Exception(e.response?.data['message'] ?? 'An error occurred during login');
+      throw Exception('DioError: ${e.message} - ${e.error} - ${e.response?.data}');
     } catch (e) {
-      throw Exception('Failed to connect to server');
+      throw Exception('Exception: $e');
     }
   }
 
