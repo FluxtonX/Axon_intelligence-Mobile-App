@@ -34,6 +34,8 @@ import 'features/services/data/repositories/services_repository.dart';
 import 'features/services/presentation/bloc/services_bloc.dart';
 import 'features/services/presentation/bloc/services_event.dart';
 
+import 'core/services/push_notification_service.dart';
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await dotenv.load(fileName: ".env.development"); // Default environment
@@ -47,7 +49,14 @@ void main() async {
   final baseUrl = dotenv.env['API_BASE_URL'] ?? 'http://127.0.0.1:3000/api';
   final socketClient = SocketClient(baseUrl);
   
-  final authRepository = AuthRepository(apiClient, secureStorage);
+  final pushNotificationService = PushNotificationService();
+  await pushNotificationService.initialize();
+
+  final authRepository = AuthRepository(apiClient, secureStorage, pushNotificationService);
+  if (authRepository.isLoggedIn()) {
+    authRepository.syncDeviceToken();
+  }
+
   final profileRepository = ProfileRepository(apiClient);
   final projectRepository = ProjectRepository(apiClient);
   final proposalRepository = ProposalRepository(apiClient);

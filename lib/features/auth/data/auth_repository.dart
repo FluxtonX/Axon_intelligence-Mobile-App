@@ -2,11 +2,14 @@ import 'package:dio/dio.dart';
 import '../../../../core/network/api_client.dart';
 import '../../../../core/storage/secure_storage.dart';
 
+import '../../../../core/services/push_notification_service.dart';
+
 class AuthRepository {
   final ApiClient _apiClient;
   final SecureStorage _storage;
+  final PushNotificationService? _pushNotificationService;
 
-  AuthRepository(this._apiClient, this._storage);
+  AuthRepository(this._apiClient, this._storage, [this._pushNotificationService]);
 
   Future<void> login(String email, String password) async {
     try {
@@ -18,6 +21,7 @@ class AuthRepository {
       final accessToken = response.data['accessToken'];
       if (accessToken != null) {
         await _storage.saveToken(accessToken);
+        await syncDeviceToken();
       }
     } on DioException catch (e) {
       if (e.response?.statusCode == 401) {
@@ -45,6 +49,7 @@ class AuthRepository {
       final accessToken = response.data['accessToken'];
       if (accessToken != null) {
         await _storage.saveToken(accessToken);
+        await syncDeviceToken();
       }
     } on DioException catch (e) {
       if (e.response?.statusCode == 409) {
@@ -103,6 +108,7 @@ class AuthRepository {
       final accessToken = response.data['accessToken'];
       if (accessToken != null) {
         await _storage.saveToken(accessToken);
+        await syncDeviceToken();
       }
     } on DioException catch (e) {
       throw Exception(e.response?.data['message'] ?? 'Google authentication failed on server');
@@ -113,5 +119,18 @@ class AuthRepository {
 
   Future<void> saveMockToken(String email) async {
     await _storage.saveToken('mock_google_token_$email');
+  }
+
+  Future<void> syncDeviceToken() async {
+    if (_pushNotificationService != null) {
+      final token = await _pushNotificationService?.getToken();
+      if (token != null) {
+        try {
+          await _apiClient.dio.patch('/users/me/device-token', data: {'token': token});
+        } catch (e) {
+          print('Failed to upload device token: $e');
+        }
+      }
+    }
   }
 }

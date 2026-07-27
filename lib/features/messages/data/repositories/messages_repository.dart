@@ -132,8 +132,8 @@ class MessagesRepository {
             'id': chatId,
             'email': '$chatId@example.com',
             'profile': {
-              'firstName': chatId.split('_').first.toUpperCase(),
-              'lastName': chatId.contains('_') ? chatId.split('_').last.toUpperCase() : '',
+              'firstName': 'Unknown',
+              'lastName': 'User',
               'avatarUrl': 'https://i.pravatar.cc/150?img=12',
               'title': 'Freelance Expert',
             }
