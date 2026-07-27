@@ -6,6 +6,8 @@ import '../../../../core/blocs/user_mode_cubit.dart';
 import '../../../auth/data/auth_repository.dart';
 import '../../../auth/presentation/bloc/auth_bloc.dart';
 import '../../../auth/presentation/bloc/auth_event.dart';
+import '../../../messages/presentation/blocs/conversations_bloc.dart';
+import '../../../messages/presentation/blocs/conversations_event.dart';
 import '../bloc/profile_cubit.dart';
 import '../bloc/profile_state.dart';
 
@@ -436,7 +438,9 @@ class ProfilePage extends StatelessWidget {
                       if (isLoggedIn) {
                         context.read<ProfileCubit>().clearProfile();
                         context.read<AuthBloc>().add(const SignOutRequested());
+                        context.read<ConversationsBloc>().add(const ClearConversations());
                       } else {
+
                         context.go('/auth');
                       }
                     },

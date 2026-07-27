@@ -10,13 +10,21 @@ class ConversationsBloc extends Bloc<ConversationsEvent, ConversationsState> {
 
   ConversationsBloc(this._messagesRepository) : super(const ConversationsState()) {
     on<FetchConversations>(_onFetchConversations);
-    
+    on<ClearConversations>(_onClearConversations);
+
     // Initialize socket connection and listen to incoming real-time messages
     _messagesRepository.initializeSocket();
     _messageSubscription = _messagesRepository.incomingMessages.listen((message) {
       // Refresh the conversations list when a new message arrives
       add(const FetchConversations());
     });
+  }
+
+  void _onClearConversations(
+    ClearConversations event,
+    Emitter<ConversationsState> emit,
+  ) {
+    emit(const ConversationsState()); // Reset to initial state
   }
 
   Future<void> _onFetchConversations(FetchConversations event, Emitter<ConversationsState> emit) async {

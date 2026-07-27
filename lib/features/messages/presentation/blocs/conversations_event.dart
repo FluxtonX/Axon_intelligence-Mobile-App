@@ -10,3 +10,7 @@ abstract class ConversationsEvent extends Equatable {
 class FetchConversations extends ConversationsEvent {
   const FetchConversations();
 }
+
+class ClearConversations extends ConversationsEvent {
+  const ClearConversations();
+}

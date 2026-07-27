@@ -117,8 +117,10 @@ class MessagesRepository {
   Future<List<dynamic>> getConversations() async {
     try {
       final response = await _apiClient.dio.get('/messages');
+      print('GET CONVERSATIONS SUCCESS: ${response.data}');
       return response.data;
     } catch (e) {
+      print('ERROR GETTING CONVERSATIONS FROM BACKEND: $e');
       // Build dynamic Fiverr-style conversation list from active memory store
       final List<dynamic> conversations = [];
 
@@ -212,7 +214,9 @@ class MessagesRepository {
         '/messages',
         data: {'receiverId': receiverId, 'content': content},
       );
+      print('MESSAGE SENT TO BACKEND SUCCESSFULLY');
     } catch (e) {
+      print('ERROR SENDING MESSAGE TO BACKEND: $e');
       // Mock sent response retained in memory
     }
   }
