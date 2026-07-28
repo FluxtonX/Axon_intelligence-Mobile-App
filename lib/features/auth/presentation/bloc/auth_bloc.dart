@@ -34,7 +34,10 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       }
 
       final googleAuth = await account.authentication;
-      final idToken = googleAuth.idToken ?? googleAuth.accessToken ?? 'mock_token';
+      final idToken = googleAuth.idToken ?? googleAuth.accessToken;
+      if (idToken == null) {
+        throw Exception('Failed to retrieve authentication token from Google.');
+      }
 
       await _authRepository.googleLogin(
         idToken,

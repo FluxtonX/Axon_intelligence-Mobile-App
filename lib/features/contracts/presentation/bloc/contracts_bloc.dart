@@ -105,11 +105,7 @@ class ContractsBloc extends Bloc<ContractsEvent, ContractsState> {
   Future<void> _onLeaveReview(LeaveReview event, Emitter<ContractsState> emit) async {
     emit(state.copyWith(status: ContractsStatus.approving, clearMessages: true)); // reusing approving status for loading
     try {
-      // Alternate Way: Bypassing the backend entirely because it's blocking your testing flow
-      // (Likely throwing 'You have already reviewed this contract' due to shared demo IDs)
-      // await _reviewsRepository.createReview(event.contractId, event.revieweeId, event.rating, event.comment);
-      
-      await Future.delayed(const Duration(seconds: 1)); // Simulate network
+      await _reviewsRepository.createReview(event.contractId, event.revieweeId, event.rating, event.comment);
 
       emit(state.copyWith(
         status: ContractsStatus.success,

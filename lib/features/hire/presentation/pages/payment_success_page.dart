@@ -1,10 +1,43 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/theme/theme.dart';
 import '../../../../shared/widgets/primary_button.dart';
+import '../../../contracts/data/repositories/contract_repository.dart';
 
-class PaymentSuccessPage extends StatelessWidget {
-  const PaymentSuccessPage({super.key});
+class PaymentSuccessPage extends StatefulWidget {
+  final String? contractId;
+  const PaymentSuccessPage({super.key, this.contractId});
+
+  @override
+  State<PaymentSuccessPage> createState() => _PaymentSuccessPageState();
+}
+
+class _PaymentSuccessPageState extends State<PaymentSuccessPage> {
+  bool _isLoading = false;
+
+  void _viewOrderDetails() async {
+    if (widget.contractId == null) {
+      context.go('/home');
+      return;
+    }
+
+    setState(() => _isLoading = true);
+    try {
+      final repo = context.read<ContractRepository>();
+      final contract = await repo.getContractById(widget.contractId!);
+      if (!mounted) return;
+      context.go('/contract-detail', extra: {'contract': contract});
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Could not load contract details: $e')),
+      );
+      context.go('/home');
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -46,11 +79,9 @@ class PaymentSuccessPage extends StatelessWidget {
               const Spacer(),
               PrimaryButton(
                 label: 'View Order Details',
+                isLoading: _isLoading,
                 showIcon: false,
-                onTap: () {
-                  // Navigate to orders (home shell for now)
-                  context.go('/home');
-                },
+                onTap: _viewOrderDetails,
               ),
               const SizedBox(height: 16),
               TextButton(

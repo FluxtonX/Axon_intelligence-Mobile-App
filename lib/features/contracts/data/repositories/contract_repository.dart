@@ -65,6 +65,15 @@ class ContractRepository {
     }
   }
 
+  Future<ContractEntity> getContractById(String id) async {
+    try {
+      final response = await _apiClient.dio.get('/contracts/$id');
+      return ContractModel.fromJson(response.data);
+    } catch (e) {
+      throw Exception('Failed to fetch contract by ID: $e');
+    }
+  }
+
   Future<void> submitWork(
     String contractId, 
     String submissionDetails, {

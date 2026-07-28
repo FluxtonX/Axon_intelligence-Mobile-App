@@ -117,9 +117,7 @@ class AuthRepository {
     }
   }
 
-  Future<void> saveMockToken(String email) async {
-    await _storage.saveToken('mock_google_token_$email');
-  }
+
 
   Future<void> syncDeviceToken() async {
     if (_pushNotificationService != null) {

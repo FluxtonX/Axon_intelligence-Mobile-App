@@ -145,7 +145,10 @@ final GoRouter appRouter = GoRouter(
     GoRoute(
       path: '/payment_success',
       name: 'paymentSuccess',
-      builder: (context, state) => const PaymentSuccessPage(),
+      builder: (context, state) {
+        final contractId = state.extra as String?;
+        return PaymentSuccessPage(contractId: contractId);
+      },
     ),
     GoRoute(
       path: '/direct-hire',

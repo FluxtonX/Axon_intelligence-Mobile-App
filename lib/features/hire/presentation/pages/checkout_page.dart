@@ -19,7 +19,7 @@ class CheckoutPage extends StatelessWidget {
             SnackBar(content: Text(state.errorMessage ?? 'Payment failed', style: const TextStyle(color: Colors.white)), backgroundColor: Colors.red),
           );
         } else if (state.status == HireStatus.paymentSuccess) {
-          context.go('/payment_success');
+          context.go('/payment_success', extra: state.contractId);
         }
       },
       builder: (context, state) {

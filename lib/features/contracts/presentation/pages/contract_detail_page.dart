@@ -54,7 +54,13 @@ class _ContractDetailPageState extends State<ContractDetailPage> {
           elevation: 0,
           leading: IconButton(
             icon: const Icon(Icons.arrow_back_ios_new, color: AppColors.textDark, size: 20),
-            onPressed: () => context.pop(),
+            onPressed: () {
+              if (context.canPop()) {
+                context.pop();
+              } else {
+                context.go('/home');
+              }
+            },
           ),
           title: Text(
             'Contract Details',
