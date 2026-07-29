@@ -1,7 +1,9 @@
+import 'dart:convert';
 import 'dart:developer';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import '../network/socket_client.dart';
 
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
@@ -13,7 +15,7 @@ class PushNotificationService {
   late final FirebaseMessaging _firebaseMessaging;
   final FlutterLocalNotificationsPlugin _localNotificationsPlugin = FlutterLocalNotificationsPlugin();
 
-  Future<void> initialize() async {
+  Future<void> initialize({SocketClient? socketClient}) async {
     await Firebase.initializeApp();
     _firebaseMessaging = FirebaseMessaging.instance;
 
@@ -45,6 +47,11 @@ class PushNotificationService {
     );
 
     log('User granted permission: ${settings.authorizationStatus}');
+
+    // Explicitly request Android 13+ permission using flutter_local_notifications
+    await _localNotificationsPlugin
+        .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()
+        ?.requestNotificationsPermission();
 
     // Force Firebase to show foreground notifications on iOS
     await FirebaseMessaging.instance.setForegroundNotificationPresentationOptions(
@@ -78,14 +85,44 @@ class PushNotificationService {
       }
     });
 
+    // Setup Custom WebSocket Listener
+    if (socketClient != null) {
+      socketClient.on('new_notification', (data) {
+        log('Custom WebSocket Notification Received: $data');
+        if (data != null) {
+          final title = data['title'] ?? 'New Notification';
+          final body = data['body'] ?? '';
+          
+          _localNotificationsPlugin.show(
+            id: DateTime.now().millisecond,
+            title: title,
+            body: body,
+            notificationDetails: NotificationDetails(
+              android: AndroidNotificationDetails(
+                channel.id,
+                channel.name,
+                channelDescription: channel.description,
+                icon: '@mipmap/ic_launcher',
+                importance: Importance.max,
+                priority: Priority.high,
+              ),
+            ),
+          );
+        }
+      });
+    }
+
     // Register background handler
     FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+    
+    // Fetch and print token for debugging
+    await getToken();
   }
 
   Future<String?> getToken() async {
     try {
       String? token = await _firebaseMessaging.getToken();
-      log("FCM Token: $token");
+      print("FCM Token: $token");
       return token;
     } catch (e) {
       log("Error getting FCM token: $e");

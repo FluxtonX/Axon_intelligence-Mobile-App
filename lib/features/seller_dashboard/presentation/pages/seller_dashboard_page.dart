@@ -2,14 +2,26 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/theme/theme.dart';
-import '../../../gig_creation/presentation/bloc/gig_creation_bloc.dart';
-import '../../../gig_creation/presentation/bloc/gig_creation_state.dart';
-import '../../../gig_creation/domain/entities/gig_entity.dart';
+import '../../../services/presentation/bloc/services_bloc.dart';
+import '../../../services/presentation/bloc/services_event.dart';
+import '../../../services/presentation/bloc/services_state.dart';
+import '../../../services/domain/entities/service_entity.dart';
 import '../../../profile/presentation/bloc/profile_cubit.dart';
 import '../../../profile/presentation/bloc/profile_state.dart';
 
-class SellerDashboardPage extends StatelessWidget {
+class SellerDashboardPage extends StatefulWidget {
   const SellerDashboardPage({super.key});
+
+  @override
+  State<SellerDashboardPage> createState() => _SellerDashboardPageState();
+}
+
+class _SellerDashboardPageState extends State<SellerDashboardPage> {
+  @override
+  void initState() {
+    super.initState();
+    context.read<ServicesBloc>().add(LoadMyServices());
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -109,35 +121,43 @@ class SellerDashboardPage extends StatelessWidget {
               const SizedBox(height: 40),
 
               // My Services
-              BlocBuilder<GigCreationBloc, GigCreationState>(
+              BlocBuilder<ServicesBloc, ServicesState>(
                 builder: (context, state) {
-                  if (state.gigs.isEmpty) {
-                    return const SizedBox.shrink(); // Hide if no services
+                  if (state is ServicesLoading) {
+                    return const Center(child: Padding(
+                      padding: EdgeInsets.all(24.0),
+                      child: CircularProgressIndicator(),
+                    ));
                   }
-                  return Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 24),
-                        child: Text('My Services', style: AppTypography.headingMedium.copyWith(fontSize: 18, color: const Color(0xFF111827))),
-                      ),
-                      const SizedBox(height: 16),
-                      SizedBox(
-                        height: 240,
-                        child: ListView.separated(
+                  
+                  if (state is ServicesLoaded && state.services.isNotEmpty) {
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 24),
-                          scrollDirection: Axis.horizontal,
-                          itemCount: state.gigs.length,
-                          separatorBuilder: (context, index) => const SizedBox(width: 16),
-                          itemBuilder: (context, index) {
-                            final gig = state.gigs[index];
-                            return _ServiceCard(gig: gig);
-                          },
+                          child: Text('My Services', style: AppTypography.headingMedium.copyWith(fontSize: 18, color: const Color(0xFF111827))),
                         ),
-                      ),
-                      const SizedBox(height: 40),
-                    ],
-                  );
+                        const SizedBox(height: 16),
+                        SizedBox(
+                          height: 240,
+                          child: ListView.separated(
+                            padding: const EdgeInsets.symmetric(horizontal: 24),
+                            scrollDirection: Axis.horizontal,
+                            itemCount: state.services.length,
+                            separatorBuilder: (context, index) => const SizedBox(width: 16),
+                            itemBuilder: (context, index) {
+                              final service = state.services[index];
+                              return _ServiceCard(gig: service);
+                            },
+                          ),
+                        ),
+                        const SizedBox(height: 40),
+                      ],
+                    );
+                  }
+                  
+                  return const SizedBox.shrink(); // Hide if no services
                 },
               ),
 
@@ -456,7 +476,7 @@ class _PerformanceStat extends StatelessWidget {
 }
 
 class _ServiceCard extends StatelessWidget {
-  final GigEntity gig;
+  final ServiceEntity gig;
 
   const _ServiceCard({required this.gig});
 

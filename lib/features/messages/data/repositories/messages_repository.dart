@@ -32,8 +32,9 @@ class MessagesRepository {
 
   void initializeSocket() {
     final userId = _getUserIdFromToken();
-    if (userId != null) {
-      _socketClient.connect(userId);
+    final token = _storage.getToken();
+    if (userId != null && token != null) {
+      _socketClient.connect(token);
       
       // Listen for real-time messages from the backend
       _socketClient.on('messageToUser-$userId', (data) {

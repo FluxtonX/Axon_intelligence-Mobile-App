@@ -50,11 +50,15 @@ void main() async {
   final socketClient = SocketClient(baseUrl);
   
   final pushNotificationService = PushNotificationService();
-  await pushNotificationService.initialize();
+  await pushNotificationService.initialize(socketClient: socketClient);
 
   final authRepository = AuthRepository(apiClient, secureStorage, pushNotificationService);
   if (authRepository.isLoggedIn()) {
     authRepository.syncDeviceToken();
+    final token = secureStorage.getToken();
+    if (token != null) {
+      socketClient.connect(token);
+    }
   }
 
   final profileRepository = ProfileRepository(apiClient);
