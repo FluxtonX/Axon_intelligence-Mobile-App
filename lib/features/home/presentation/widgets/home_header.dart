@@ -120,32 +120,6 @@ class HomeHeader extends StatelessWidget {
             ),
           ],
         ),
-        const SizedBox(width: 8),
-        // Temporary Test Button
-        IconButton(
-          icon: const Icon(Icons.bolt, color: Colors.amber),
-          tooltip: 'Test WebSocket Notification',
-          onPressed: () async {
-            try {
-              // Retrieve token directly (dirty test code)
-              final secureStorage = await SecureStorage.init();
-              final token = secureStorage.getToken();
-              
-              if (token != null) {
-                // Use the ApiClient already in scope, or fetch it
-                final dio = Dio();
-                final baseUrl = dotenv.env['API_BASE_URL'] ?? 'http://192.168.1.21:3000/api';
-                
-                await dio.get(
-                  '$baseUrl/notifications/test-trigger',
-                  options: Options(headers: {'Authorization': 'Bearer $token'}),
-                );
-              }
-            } catch (e) {
-              debugPrint('Test failed: $e');
-            }
-          },
-        ),
       ],
     );
       },
