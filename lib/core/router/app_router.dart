@@ -31,6 +31,7 @@ import '../../features/seller_onboarding/presentation/pages/become_freelancer_pa
 import '../../features/services/presentation/pages/create_gig_page.dart';
 import '../../features/find_work/presentation/pages/submit_proposal_page.dart';
 import '../../features/proposals/presentation/pages/submitted_proposals_page.dart';
+import '../../features/notifications/presentation/pages/notifications_page.dart';
 
 /// Axon Intelligence — App Router
 final GoRouter appRouter = GoRouter(
@@ -213,6 +214,11 @@ final GoRouter appRouter = GoRouter(
       path: '/submittedProposals',
       name: 'submittedProposals',
       builder: (context, state) => const SubmittedProposalsPage(),
+    ),
+    GoRoute(
+      path: '/notifications',
+      name: 'notifications',
+      builder: (context, state) => const NotificationsPage(),
     ),
   ],
   errorBuilder: (context, state) => Scaffold(

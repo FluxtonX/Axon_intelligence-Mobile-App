@@ -10,6 +10,8 @@ import 'package:dio/dio.dart';
 import '../../../../core/storage/secure_storage.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import '../../../profile/presentation/bloc/profile_state.dart';
+import '../../../../features/notifications/presentation/bloc/notifications_cubit.dart';
+import '../../../../features/notifications/presentation/bloc/notifications_state.dart';
 
 class HomeHeader extends StatelessWidget {
   const HomeHeader({super.key});
@@ -89,36 +91,63 @@ class HomeHeader extends StatelessWidget {
           ),
         ),
         // Notification Bell
-        Stack(
-          children: [
-            Container(
-              width: 44,
-              height: 44,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: const Color(0xFFF3F4F6), // Light gray background
-                border: Border.all(color: const Color(0xFFE5E7EB), width: 1),
+        BlocBuilder<NotificationsCubit, NotificationsState>(
+          builder: (context, notificationState) {
+            int unreadCount = 0;
+            if (notificationState is NotificationsLoaded) {
+              unreadCount = notificationState.unreadCount;
+            }
+
+            return GestureDetector(
+              onTap: () {
+                context.push('/notifications');
+              },
+              child: Stack(
+                children: [
+                  Container(
+                    width: 44,
+                    height: 44,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: const Color(0xFFF3F4F6),
+                      border: Border.all(color: const Color(0xFFE5E7EB), width: 1),
+                    ),
+                    child: const Icon(
+                      Icons.notifications_outlined,
+                      color: AppColors.textDark,
+                      size: 24,
+                    ),
+                  ),
+                  if (unreadCount > 0)
+                    Positioned(
+                      top: 6,
+                      right: 6,
+                      child: Container(
+                        padding: const EdgeInsets.all(4),
+                        decoration: const BoxDecoration(
+                          color: Color(0xFFEF4444),
+                          shape: BoxShape.circle,
+                        ),
+                        constraints: const BoxConstraints(
+                          minWidth: 16,
+                          minHeight: 16,
+                        ),
+                        child: Text(
+                          unreadCount > 9 ? '9+' : unreadCount.toString(),
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold,
+                            height: 1,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                    ),
+                ],
               ),
-              child: const Icon(
-                Icons.notifications_outlined,
-                color: AppColors.textDark,
-                size: 24,
-              ),
-            ),
-            // Notification Badge (Red dot)
-            Positioned(
-              top: 10,
-              right: 12,
-              child: Container(
-                width: 8,
-                height: 8,
-                decoration: const BoxDecoration(
-                  color: Color(0xFFEF4444),
-                  shape: BoxShape.circle,
-                ),
-              ),
-            ),
-          ],
+            );
+          },
         ),
       ],
     );

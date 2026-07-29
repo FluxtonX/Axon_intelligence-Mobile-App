@@ -34,6 +34,9 @@ import 'features/services/data/repositories/services_repository.dart';
 import 'features/services/presentation/bloc/services_bloc.dart';
 import 'features/services/presentation/bloc/services_event.dart';
 
+import 'features/notifications/data/repositories/notifications_repository.dart';
+import 'features/notifications/presentation/bloc/notifications_cubit.dart';
+
 import 'core/services/push_notification_service.dart';
 
 void main() async {
@@ -69,6 +72,7 @@ void main() async {
   final messagesRepository = MessagesRepository(apiClient, socketClient, secureStorage);
   final reviewsRepository = ReviewsRepository(apiClient);
   final servicesRepository = ServicesRepository(apiClient);
+  final notificationsRepository = NotificationsRepository(apiClient: apiClient);
 
   // Lock to portrait orientation
   await SystemChrome.setPreferredOrientations([
@@ -94,6 +98,7 @@ void main() async {
     messagesRepository: messagesRepository,
     reviewsRepository: reviewsRepository,
     servicesRepository: servicesRepository,
+    notificationsRepository: notificationsRepository,
     apiClient: apiClient,
     socketClient: socketClient,
   ));
@@ -109,6 +114,7 @@ class AxonIntelligenceApp extends StatelessWidget {
   final MessagesRepository messagesRepository;
   final ReviewsRepository reviewsRepository;
   final ServicesRepository servicesRepository;
+  final NotificationsRepository notificationsRepository;
   final ApiClient apiClient;
   final SocketClient socketClient;
 
@@ -123,6 +129,7 @@ class AxonIntelligenceApp extends StatelessWidget {
     required this.messagesRepository,
     required this.reviewsRepository,
     required this.servicesRepository,
+    required this.notificationsRepository,
     required this.apiClient,
     required this.socketClient,
   });
@@ -140,6 +147,7 @@ class AxonIntelligenceApp extends StatelessWidget {
         RepositoryProvider.value(value: messagesRepository),
         RepositoryProvider.value(value: reviewsRepository),
         RepositoryProvider.value(value: servicesRepository),
+        RepositoryProvider.value(value: notificationsRepository),
         RepositoryProvider.value(value: apiClient),
         RepositoryProvider.value(value: socketClient),
       ],
@@ -180,6 +188,9 @@ class AxonIntelligenceApp extends StatelessWidget {
         ),
         BlocProvider<ServicesBloc>(
           create: (context) => ServicesBloc(servicesRepository)..add(const LoadServices()),
+        ),
+        BlocProvider<NotificationsCubit>(
+          create: (context) => NotificationsCubit(repository: notificationsRepository)..loadNotifications(),
         ),
       ],
       child: MaterialApp.router(
