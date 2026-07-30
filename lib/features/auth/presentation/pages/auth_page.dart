@@ -37,9 +37,7 @@ class _AuthView extends StatelessWidget {
           }
           context.go('/home');
         }
-        if (state is AuthEmailFlowStarted) {
-          context.push('/login/email');
-        }
+
         if (state is AuthError) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
@@ -207,9 +205,10 @@ class _AuthButtons extends StatelessWidget {
             // ── Email ────────────────────────────────────────────────
             PrimaryButton(
               label: 'Continue with Email',
-              onTap: () => context
-                  .read<AuthBloc>()
-                  .add(const EmailSignInRequested()),
+              onTap: () {
+                context.read<AuthBloc>().add(const EmailSignInRequested());
+                context.push('/login/email');
+              },
               icon: Icons.mail_outline_rounded,
               borderRadius: 28,
             ),
