@@ -23,6 +23,7 @@ class ContractDetailPage extends StatefulWidget {
 
 class _ContractDetailPageState extends State<ContractDetailPage> {
   final _submissionController = TextEditingController();
+  int _rating = 5;
 
   @override
   void dispose() {
@@ -186,6 +187,23 @@ class _ContractDetailPageState extends State<ContractDetailPage> {
                       const SizedBox(height: 8),
                       Text('Share your experience working on this contract.', style: AppTypography.caption.copyWith(color: const Color(0xFF6B7280))),
                       const SizedBox(height: 16),
+                      Row(
+                        children: List.generate(5, (index) {
+                          return GestureDetector(
+                            onTap: () {
+                              setState(() {
+                                _rating = index + 1;
+                              });
+                            },
+                            child: Icon(
+                              index < _rating ? Icons.star_rounded : Icons.star_border_rounded,
+                              color: const Color(0xFFF59E0B),
+                              size: 32,
+                            ),
+                          );
+                        }),
+                      ),
+                      const SizedBox(height: 16),
                       TextField(
                         controller: _submissionController,
                         maxLines: 3,
@@ -216,7 +234,7 @@ class _ContractDetailPageState extends State<ContractDetailPage> {
                               context.read<ContractsBloc>().add(LeaveReview(
                                 contractId: widget.contract.id,
                                 revieweeId: revieweeId,
-                                rating: 5,
+                                rating: _rating,
                                 comment: _submissionController.text,
                               ));
                             },

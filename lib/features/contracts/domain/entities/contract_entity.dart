@@ -12,6 +12,8 @@ class ContractEntity extends Equatable {
   final String status;
   final DateTime createdAt;
 
+  final String? submissionUrl;
+  final String? submissionNotes;
   final ProjectModel? project;
   final ProposalEntity? proposal;
 
@@ -24,6 +26,8 @@ class ContractEntity extends Equatable {
     required this.amount,
     required this.status,
     required this.createdAt,
+    this.submissionUrl,
+    this.submissionNotes,
     this.project,
     this.proposal,
   });
@@ -38,6 +42,8 @@ class ContractEntity extends Equatable {
         amount,
         status,
         createdAt,
+        submissionUrl,
+        submissionNotes,
         project,
         proposal,
       ];

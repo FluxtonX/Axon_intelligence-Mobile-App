@@ -81,11 +81,20 @@ class ContractRepository {
     String? fileName,
   }) async {
     try {
-      // Alternate Way: Bypass multipart/form-data completely.
-      // We send pure JSON to guarantee it works. The UI will still show the file.
+      final formData = FormData.fromMap({
+        'submissionDetails': submissionDetails,
+      });
+
+      if (fileBytes != null && fileName != null) {
+        formData.files.add(MapEntry(
+          'file',
+          MultipartFile.fromBytes(fileBytes, filename: fileName),
+        ));
+      }
+
       await _apiClient.dio.post(
         '/contracts/$contractId/submit',
-        data: {'submissionDetails': submissionDetails},
+        data: formData,
       );
     } on DioException catch (e) {
       final errorMsg = e.response?.data != null ? e.response?.data.toString() : e.message;

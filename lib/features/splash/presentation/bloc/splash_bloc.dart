@@ -18,8 +18,16 @@ class SplashBloc extends Bloc<SplashEvent, SplashState> {
     // Wait for splash animation to complete
     await Future.delayed(AppConstants.splashDuration);
 
-    if (_authRepository != null && _authRepository.isLoggedIn()) {
-      emit(const SplashNavigateToHome());
+    if (_authRepository != null) {
+      if (_authRepository!.isLoggedIn()) {
+        emit(const SplashNavigateToHome());
+      } else if (_authRepository!.hasSeenOnboarding()) {
+        emit(const SplashNavigateToAuth());
+      } else {
+        // We will repurpose SplashNavigateToOnboarding, but wait, `SplashNavigateToAuth` maps to `/onboarding` currently!
+        // I need to change `SplashNavigateToAuth` to map to `/auth` and create a new `SplashNavigateToOnboarding`.
+        emit(const SplashNavigateToOnboarding());
+      }
     } else {
       emit(const SplashNavigateToAuth());
     }

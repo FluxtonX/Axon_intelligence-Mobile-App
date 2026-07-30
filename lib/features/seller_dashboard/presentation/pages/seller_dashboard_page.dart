@@ -8,6 +8,9 @@ import '../../../services/presentation/bloc/services_state.dart';
 import '../../../services/domain/entities/service_entity.dart';
 import '../../../profile/presentation/bloc/profile_cubit.dart';
 import '../../../profile/presentation/bloc/profile_state.dart';
+import '../../../contracts/presentation/bloc/contracts_bloc.dart';
+import '../../../contracts/presentation/bloc/contracts_event.dart';
+import '../../../contracts/presentation/bloc/contracts_state.dart';
 
 class SellerDashboardPage extends StatefulWidget {
   const SellerDashboardPage({super.key});
@@ -16,15 +19,19 @@ class SellerDashboardPage extends StatefulWidget {
   State<SellerDashboardPage> createState() => _SellerDashboardPageState();
 }
 
-class _SellerDashboardPageState extends State<SellerDashboardPage> {
+class _SellerDashboardPageState extends State<SellerDashboardPage> with AutomaticKeepAliveClientMixin {
+  @override
+  bool get wantKeepAlive => true;
   @override
   void initState() {
     super.initState();
     context.read<ServicesBloc>().add(LoadMyServices());
+    context.read<ContractsBloc>().add(const FetchMyContracts());
   }
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     return Scaffold(
       backgroundColor: const Color(0xFFF9FAFB),
       body: SafeArea(
@@ -94,11 +101,28 @@ class _SellerDashboardPageState extends State<SellerDashboardPage> {
                 padding: const EdgeInsets.symmetric(horizontal: 24),
                 child: Row(
                   children: [
-                    _DashboardStatCard(
-                      title: 'Available for Withdrawal',
-                      amount: '\$1,240.00',
-                      icon: Icons.account_balance_wallet_rounded,
-                      color: const Color(0xFF10B981),
+                    GestureDetector(
+                      onTap: () {
+                        showDialog(
+                          context: context,
+                          builder: (ctx) => AlertDialog(
+                            title: const Text('Withdraw Funds'),
+                            content: const Text('Please visit our web portal to manage your payouts and withdraw funds.'),
+                            actions: [
+                              TextButton(
+                                onPressed: () => Navigator.pop(ctx),
+                                child: const Text('OK'),
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                      child: _DashboardStatCard(
+                        title: 'Available for Withdrawal',
+                        amount: '\$0.00',
+                        icon: Icons.account_balance_wallet_rounded,
+                        color: const Color(0xFF10B981),
+                      ),
                     ),
                     const SizedBox(width: 16),
                     _DashboardStatCard(
@@ -263,27 +287,49 @@ class _SellerDashboardPageState extends State<SellerDashboardPage> {
                 ),
               ),
               const SizedBox(height: 16),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 24),
-                child: Column(
-                  children: [
-                    _ActiveOrderCard(
-                      clientName: 'Alex Mercer',
-                      projectTitle: 'E-commerce App UI/UX Design',
-                      price: '\$1,200',
-                      dueDate: 'In 3 days',
-                      progress: 0.8,
+              BlocBuilder<ContractsBloc, ContractsState>(
+                builder: (context, state) {
+                  if (state.status == ContractsStatus.loading) {
+                    return const Center(child: Padding(
+                      padding: EdgeInsets.all(24.0),
+                      child: CircularProgressIndicator(),
+                    ));
+                  }
+                  
+                  final activeContracts = state.contracts.where((c) => 
+                    c.status == 'ACTIVE' || c.status == 'PENDING' || c.status == 'PENDING_PAYMENT'
+                  ).toList();
+
+                  if (activeContracts.isEmpty) {
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 24),
+                      child: Text('No active orders right now.', style: AppTypography.bodyMedium.copyWith(color: const Color(0xFF6B7280))),
+                    );
+                  }
+
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 24),
+                    child: Column(
+                      children: activeContracts.map((contract) {
+                        return Padding(
+                          padding: const EdgeInsets.only(bottom: 16.0),
+                          child: GestureDetector(
+                            onTap: () {
+                              context.pushNamed('contract_detail', extra: {'contract': contract});
+                            },
+                            child: _ActiveOrderCard(
+                              clientName: contract.project?.client?['profile']?['firstName'] ?? 'Client',
+                              projectTitle: contract.project?.title ?? 'Gig Order',
+                              price: '\$${contract.amount.toStringAsFixed(0)}',
+                              dueDate: 'Active',
+                              progress: 0.5,
+                            ),
+                          ),
+                        );
+                      }).toList(),
                     ),
-                    const SizedBox(height: 16),
-                    _ActiveOrderCard(
-                      clientName: 'TechStart Inc.',
-                      projectTitle: 'Flutter App Migration',
-                      price: '\$3,500',
-                      dueDate: 'In 12 days',
-                      progress: 0.3,
-                    ),
-                  ],
-                ),
+                  );
+                },
               ),
 
               const SizedBox(height: 40),
@@ -317,12 +363,6 @@ class _SellerDashboardPageState extends State<SellerDashboardPage> {
             ],
           ),
         ),
-      ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => context.pushNamed('createGig'),
-        backgroundColor: const Color(0xFF111827),
-        icon: const Icon(Icons.add, color: Colors.white),
-        label: Text('Create Service', style: AppTypography.labelLarge.copyWith(color: Colors.white, fontWeight: FontWeight.bold)),
       ),
     );
   }

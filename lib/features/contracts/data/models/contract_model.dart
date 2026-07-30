@@ -12,6 +12,8 @@ class ContractModel extends ContractEntity {
     required super.amount,
     required super.status,
     required super.createdAt,
+    super.submissionUrl,
+    super.submissionNotes,
     super.project,
     super.proposal,
   });
@@ -26,6 +28,8 @@ class ContractModel extends ContractEntity {
       amount: (json['amount'] as num).toDouble(),
       status: json['status'] as String,
       createdAt: DateTime.parse(json['createdAt'] as String),
+      submissionUrl: json['submissionUrl'] as String?,
+      submissionNotes: json['submissionNotes'] as String?,
       project: json['project'] != null ? ProjectModel.fromJson(json['project']) : null,
       proposal: json['proposal'] != null ? ProposalEntity.fromJson(json['proposal']) : null,
     );

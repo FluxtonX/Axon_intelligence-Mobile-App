@@ -117,8 +117,10 @@ class _SplashViewState extends State<_SplashView>
   Widget build(BuildContext context) {
     return BlocListener<SplashBloc, SplashState>(
       listener: (context, state) {
-        if (state is SplashNavigateToAuth) {
+        if (state is SplashNavigateToOnboarding) {
           context.go('/onboarding');
+        } else if (state is SplashNavigateToAuth) {
+          context.go('/auth');
         } else if (state is SplashNavigateToHome) {
           context.go('/home');
         }

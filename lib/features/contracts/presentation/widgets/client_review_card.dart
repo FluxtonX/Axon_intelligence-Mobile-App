@@ -1,5 +1,9 @@
+import 'dart:io';
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:path_provider/path_provider.dart';
 import '../../../../core/theme/theme.dart';
 import '../../../../shared/widgets/primary_button.dart';
 import '../bloc/contracts_bloc.dart';
@@ -71,23 +75,70 @@ class ClientReviewCard extends StatelessWidget {
                 Text('Freelancer\'s Message:', style: AppTypography.labelLarge.copyWith(fontWeight: FontWeight.bold, color: const Color(0xFF111827))),
                 const SizedBox(height: 8),
                 Text(
-                  contract.status == 'SUBMITTED' ? 'Here is the final delivery as requested! Let me know if you need any adjustments.' : 'Delivery approved.',
+                  contract.submissionNotes ?? 'No message provided.',
                   style: AppTypography.bodyMedium.copyWith(color: const Color(0xFF4B5563), fontStyle: FontStyle.italic),
                 ),
-                const Padding(
-                  padding: EdgeInsets.symmetric(vertical: 16),
-                  child: Divider(color: Color(0xFFE5E7EB)),
-                ),
-                Row(
-                  children: [
-                    const Icon(Icons.insert_drive_file_rounded, color: Color(0xFF9CA3AF)),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Text('deliverable.zip', style: AppTypography.labelLarge.copyWith(color: const Color(0xFF111827))),
+                if (contract.submissionUrl != null) ...[
+                  const Padding(
+                    padding: EdgeInsets.symmetric(vertical: 16),
+                    child: Divider(color: Color(0xFFE5E7EB)),
+                  ),
+                  GestureDetector(
+                    onTap: () async {
+                      final baseUrl = dotenv.env['API_BASE_URL']?.replaceAll('/api', '') ?? 'http://10.0.2.2:3000';
+                      final url = '$baseUrl${contract.submissionUrl}';
+                      try {
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('Downloading file...')),
+                          );
+                        }
+                        
+                        Directory? dir;
+                        if (Platform.isAndroid) {
+                          dir = await getExternalStorageDirectory();
+                        } else {
+                          dir = await getApplicationDocumentsDirectory();
+                        }
+                        
+                        if (dir == null) throw Exception('Could not access storage directory');
+                        
+                        final filename = contract.submissionUrl!.split('/').last;
+                        final savePath = '${dir.path}/$filename';
+                        
+                        await Dio().download(url, savePath);
+                        
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text('File downloaded successfully to: $savePath'),
+                              duration: const Duration(seconds: 4),
+                            ),
+                          );
+                        }
+                      } catch (e) {
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text('Failed to download file: $e')),
+                          );
+                        }
+                      }
+                    },
+                    child: Row(
+                      children: [
+                        const Icon(Icons.insert_drive_file_rounded, color: Color(0xFF9CA3AF)),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Text(
+                            contract.submissionUrl!.split('/').last, 
+                            style: AppTypography.labelLarge.copyWith(color: const Color(0xFF111827), decoration: TextDecoration.underline),
+                          ),
+                        ),
+                        const Icon(Icons.download_rounded, color: AppColors.primary),
+                      ],
                     ),
-                    const Icon(Icons.download_rounded, color: AppColors.primary),
-                  ],
-                ),
+                  ),
+                ],
               ],
             ),
           ),

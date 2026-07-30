@@ -13,6 +13,10 @@ class SplashInitial extends SplashState {
 }
 
 /// Animation complete — navigate to next screen
+class SplashNavigateToOnboarding extends SplashState {
+  const SplashNavigateToOnboarding();
+}
+
 class SplashNavigateToAuth extends SplashState {
   const SplashNavigateToAuth();
 }

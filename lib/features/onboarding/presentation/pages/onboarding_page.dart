@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/theme/theme.dart';
+import '../../../auth/data/auth_repository.dart';
 import '../../domain/models/onboarding_slide_model.dart';
 import '../bloc/onboarding_bloc.dart';
 import '../bloc/onboarding_event.dart';
@@ -66,6 +67,7 @@ class _OnboardingViewState extends State<_OnboardingView> {
     return BlocListener<OnboardingBloc, OnboardingState>(
       listener: (context, state) {
         if (state is OnboardingDone) {
+          context.read<AuthRepository>().setHasSeenOnboarding();
           context.go('/auth');
         }
       },

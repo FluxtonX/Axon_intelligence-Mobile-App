@@ -96,6 +96,14 @@ class AuthRepository {
     return token != null && token.isNotEmpty;
   }
 
+  bool hasSeenOnboarding() {
+    return _storage.hasSeenOnboarding();
+  }
+
+  Future<void> setHasSeenOnboarding() async {
+    await _storage.setHasSeenOnboarding();
+  }
+
   Future<void> googleLogin(String idToken, {String? email, String? displayName, String? photoUrl}) async {
     try {
       final response = await _apiClient.dio.post('/auth/google', data: {
