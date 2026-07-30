@@ -11,6 +11,7 @@ import '../../domain/entities/contract_entity.dart';
 import '../widgets/contract_timeline.dart';
 import '../widgets/delivery_upload_form.dart';
 import '../widgets/client_review_card.dart';
+import '../../../auth/presentation/bloc/auth_bloc.dart';
 
 class ContractDetailPage extends StatefulWidget {
   final ContractEntity contract;
@@ -173,76 +174,118 @@ class _ContractDetailPageState extends State<ContractDetailPage> {
 
               // 6. Leave Review for COMPLETED contracts
               if (widget.contract.status == 'COMPLETED') ...[
-                Container(
-                  padding: const EdgeInsets.all(24),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: const Color(0xFFE5E7EB)),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text('Leave a Review', style: AppTypography.headingSmall.copyWith(color: AppColors.textDark)),
-                      const SizedBox(height: 8),
-                      Text('Share your experience working on this contract.', style: AppTypography.caption.copyWith(color: const Color(0xFF6B7280))),
-                      const SizedBox(height: 16),
-                      Row(
-                        children: List.generate(5, (index) {
-                          return GestureDetector(
-                            onTap: () {
-                              setState(() {
-                                _rating = index + 1;
-                              });
-                            },
-                            child: Icon(
-                              index < _rating ? Icons.star_rounded : Icons.star_border_rounded,
-                              color: const Color(0xFFF59E0B),
-                              size: 32,
-                            ),
-                          );
-                        }),
-                      ),
-                      const SizedBox(height: 16),
-                      TextField(
-                        controller: _submissionController,
-                        maxLines: 3,
-                        style: const TextStyle(color: Color(0xFF111827)),
-                        decoration: InputDecoration(
-                          hintText: 'Share your experience...',
-                          hintStyle: const TextStyle(color: Color(0xFF9CA3AF)),
-                          filled: true,
-                          fillColor: const Color(0xFFF9FAFB),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            borderSide: BorderSide(color: const Color(0xFFE5E7EB)),
-                          ),
+                Builder(
+                  builder: (context) {
+                    final currentUser = context.read<AuthBloc>().state.user;
+                    final myReviewList = widget.contract.reviews?.where((r) => r.reviewerId == currentUser?.id).toList();
+                    final myReview = myReviewList != null && myReviewList.isNotEmpty ? myReviewList.first : null;
+
+                    if (myReview != null) {
+                      return Container(
+                        padding: const EdgeInsets.all(24),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFF9FAFB),
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(color: const Color(0xFFE5E7EB)),
                         ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text('Your Review', style: AppTypography.headingSmall.copyWith(color: AppColors.textDark)),
+                            const SizedBox(height: 12),
+                            Row(
+                              children: List.generate(
+                                5,
+                                (index) => Icon(
+                                  index < myReview.rating ? Icons.star_rounded : Icons.star_border_rounded,
+                                  color: const Color(0xFFF59E0B),
+                                  size: 20,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 12),
+                            if (myReview.comment != null && myReview.comment!.isNotEmpty)
+                              Text(
+                                myReview.comment!,
+                                style: AppTypography.bodyMedium.copyWith(color: const Color(0xFF4B5563), height: 1.5),
+                              ),
+                          ],
+                        ),
+                      );
+                    }
+
+                    return Container(
+                      padding: const EdgeInsets.all(24),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(color: const Color(0xFFE5E7EB)),
                       ),
-                      const SizedBox(height: 16),
-                      BlocBuilder<ContractsBloc, ContractsState>(
-                        builder: (context, state) {
-                          return PrimaryButton(
-                            label: 'Submit Review',
-                            isLoading: state.status == ContractsStatus.approving,
-                            showIcon: false,
-                            onTap: () {
-                              if (_submissionController.text.trim().isEmpty) return;
-                              
-                              final revieweeId = isClient ? widget.contract.freelancerId : widget.contract.clientId;
-                              
-                              context.read<ContractsBloc>().add(LeaveReview(
-                                contractId: widget.contract.id,
-                                revieweeId: revieweeId,
-                                rating: _rating,
-                                comment: _submissionController.text,
-                              ));
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text('Leave a Review', style: AppTypography.headingSmall.copyWith(color: AppColors.textDark)),
+                          const SizedBox(height: 8),
+                          Text('Share your experience working on this contract.', style: AppTypography.caption.copyWith(color: const Color(0xFF6B7280))),
+                          const SizedBox(height: 16),
+                          Row(
+                            children: List.generate(5, (index) {
+                              return GestureDetector(
+                                onTap: () {
+                                  setState(() {
+                                    _rating = index + 1;
+                                  });
+                                },
+                                child: Icon(
+                                  index < _rating ? Icons.star_rounded : Icons.star_border_rounded,
+                                  color: const Color(0xFFF59E0B),
+                                  size: 32,
+                                ),
+                              );
+                            }),
+                          ),
+                          const SizedBox(height: 16),
+                          TextField(
+                            controller: _submissionController,
+                            maxLines: 3,
+                            style: const TextStyle(color: Color(0xFF111827)),
+                            decoration: InputDecoration(
+                              hintText: 'Share your experience...',
+                              hintStyle: const TextStyle(color: Color(0xFF9CA3AF)),
+                              filled: true,
+                              fillColor: const Color(0xFFF9FAFB),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                borderSide: BorderSide(color: const Color(0xFFE5E7EB)),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          BlocBuilder<ContractsBloc, ContractsState>(
+                            builder: (context, state) {
+                              return PrimaryButton(
+                                label: 'Submit Review',
+                                isLoading: state.status == ContractsStatus.approving,
+                                showIcon: false,
+                                onTap: () {
+                                  if (_submissionController.text.trim().isEmpty) return;
+                                  
+                                  final revieweeId = isClient ? widget.contract.freelancerId : widget.contract.clientId;
+                                  
+                                  context.read<ContractsBloc>().add(LeaveReview(
+                                    contractId: widget.contract.id,
+                                    revieweeId: revieweeId,
+                                    rating: _rating,
+                                    comment: _submissionController.text,
+                                  ));
+                                },
+                              );
                             },
-                          );
-                        },
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
+                    );
+                  }
                 ),
               ],
             ],

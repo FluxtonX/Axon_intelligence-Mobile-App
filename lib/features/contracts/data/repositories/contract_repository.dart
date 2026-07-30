@@ -97,18 +97,31 @@ class ContractRepository {
         data: formData,
       );
     } on DioException catch (e) {
-      final errorMsg = e.response?.data != null ? e.response?.data.toString() : e.message;
-      throw Exception('Failed to submit work: $errorMsg');
+      String errorMessage = 'A network error occurred. Please try again.';
+      if (e.response?.data != null && e.response?.data is Map) {
+        errorMessage = e.response?.data['message'] ?? e.response?.data['error'] ?? 'Failed to submit work.';
+      } else if (e.message != null) {
+        errorMessage = e.message!;
+      }
+      throw Exception(errorMessage);
     } catch (e) {
-      throw Exception('Failed to submit work: $e');
+      throw Exception('An unexpected error occurred while submitting work.');
     }
   }
 
   Future<void> approveWork(String contractId) async {
     try {
       await _apiClient.dio.post('/contracts/$contractId/complete');
+    } on DioException catch (e) {
+      String errorMessage = 'A network error occurred. Please try again.';
+      if (e.response?.data != null && e.response?.data is Map) {
+        errorMessage = e.response?.data['message'] ?? e.response?.data['error'] ?? 'Failed to approve work.';
+      } else if (e.message != null) {
+        errorMessage = e.message!;
+      }
+      throw Exception(errorMessage);
     } catch (e) {
-      throw Exception('Failed to approve work: $e');
+      throw Exception('An unexpected error occurred while approving work.');
     }
   }
 }

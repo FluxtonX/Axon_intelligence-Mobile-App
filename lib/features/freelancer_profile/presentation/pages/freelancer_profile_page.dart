@@ -123,10 +123,13 @@ class FreelancerProfilePage extends StatelessWidget {
                 const SizedBox(height: 40),
                 
                 // Reviews Section
-                const Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 24),
-                  child: ReviewsList(),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 24),
+                  child: ReviewsList(userId: user?.id ?? ''),
                 ),
+                
+                // Extra padding so the bottom action bar doesn't cover the last review
+                const SizedBox(height: 120),
               ],
             ),
           ),

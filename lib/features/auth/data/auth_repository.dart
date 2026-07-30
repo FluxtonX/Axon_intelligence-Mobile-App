@@ -24,10 +24,15 @@ class AuthRepository {
         await syncDeviceToken();
       }
     } on DioException catch (e) {
-      if (e.response?.statusCode == 401) {
-        throw Exception('Invalid credentials');
+      String errorMessage = 'A network error occurred. Please try again.';
+      if (e.response?.data != null && e.response?.data is Map) {
+        errorMessage = e.response?.data['message'] ?? e.response?.data['error'] ?? 'Login failed. Please check your credentials.';
+      } else if (e.type == DioExceptionType.connectionError || e.type == DioExceptionType.connectionTimeout) {
+        errorMessage = 'Unable to connect to the server. Please ensure your backend is running.';
+      } else if (e.response?.statusCode == 401) {
+        errorMessage = 'Invalid email or password.';
       }
-      throw Exception('DioError: ${e.message} - ${e.error} - ${e.response?.data}');
+      throw Exception(errorMessage);
     } catch (e) {
       throw Exception('Exception: $e');
     }

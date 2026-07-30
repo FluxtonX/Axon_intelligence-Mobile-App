@@ -359,6 +359,57 @@ class ProfilePage extends StatelessWidget {
                       },
                     ),
                   const Divider(height: 1, indent: 16, endIndent: 16, color: Color(0xFFF3F4F6)),
+                  
+                  // View Public Profile
+                  BlocBuilder<ProfileCubit, ProfileState>(
+                    builder: (context, state) {
+                      bool hasFreelancerProfile = false;
+                      if (state is ProfileLoaded) {
+                        final p = state.user.profile;
+                        if (p != null && p.title != null && p.title!.isNotEmpty) {
+                          hasFreelancerProfile = true;
+                        }
+                      }
+                      
+                      if (!hasFreelancerProfile) return const SizedBox.shrink();
+                      
+                      return Column(
+                        children: [
+                          ListTile(
+                            leading: Container(
+                              padding: const EdgeInsets.all(8),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFF3F4F6),
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              child: const Icon(
+                                Icons.person_outline_rounded,
+                                color: AppColors.textDark,
+                                size: 20,
+                              ),
+                            ),
+                            title: Text(
+                              'View Public Profile',
+                              style: AppTypography.bodyMedium.copyWith(
+                                color: AppColors.textDark,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            trailing: const Icon(
+                              Icons.chevron_right_rounded,
+                              color: AppColors.textSecondary,
+                            ),
+                            onTap: () {
+                              if (state is ProfileLoaded) {
+                                context.push('/freelancer-profile', extra: state.user);
+                              }
+                            },
+                          ),
+                          const Divider(height: 1, indent: 16, endIndent: 16, color: Color(0xFFF3F4F6)),
+                        ],
+                      );
+                    },
+                  ),
                 ],
                 ListTile(
                   leading: Container(

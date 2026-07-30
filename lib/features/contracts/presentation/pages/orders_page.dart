@@ -7,6 +7,7 @@ import '../bloc/contracts_bloc.dart';
 import '../bloc/contracts_event.dart';
 import '../bloc/contracts_state.dart';
 import '../../domain/entities/contract_entity.dart';
+import '../../../auth/presentation/bloc/auth_bloc.dart';
 
 class OrdersPage extends StatefulWidget {
   const OrdersPage({super.key});
@@ -142,87 +143,121 @@ class _OrdersPageState extends State<OrdersPage> with AutomaticKeepAliveClientMi
   Widget build(BuildContext context) {
     super.build(context);
     final isClient = context.watch<UserModeCubit>().state == UserMode.client;
+    final currentUserId = context.watch<AuthBloc>().state.user?.id;
 
-    return DefaultTabController(
-      length: 5,
-      child: Scaffold(
-        backgroundColor: Colors.white,
-        appBar: AppBar(
-          backgroundColor: Colors.white,
-          elevation: 0,
-          centerTitle: false,
-          title: Padding(
-            padding: const EdgeInsets.only(left: 8.0),
-            child: Text(
-              isClient ? 'Orders' : 'My Contracts',
-              style: AppTypography.headingMedium.copyWith(color: AppColors.textDark),
+    return BlocBuilder<ContractsBloc, ContractsState>(
+      builder: (context, state) {
+        if (state.status == ContractsStatus.loading || state.status == ContractsStatus.initial) {
+          return const Scaffold(
+            backgroundColor: Colors.white,
+            body: Center(child: CircularProgressIndicator()),
+          );
+        }
+
+        if (state.status == ContractsStatus.failure) {
+          return Scaffold(
+            backgroundColor: Colors.white,
+            body: Center(
+              child: Text(
+                state.errorMessage ?? 'Failed to load contracts.',
+                style: AppTypography.bodyMedium,
+              ),
+            ),
+          );
+        }
+
+        final activeContracts = state.contracts.where((c) => 
+          c.status == 'ACTIVE' || c.status == 'IN_PROGRESS'
+        ).toList();
+
+        final pendingContracts = state.contracts.where((c) => 
+          c.status == 'PENDING_PAYMENT' || c.status == 'PENDING'
+        ).toList();
+        
+        final cancelledContracts = state.contracts.where((c) => 
+          c.status == 'CANCELLED' || c.status == 'DISPUTED'
+        ).toList();
+
+        // Fiverr style review logic:
+        // A contract is waiting for review if it's SUBMITTED, 
+        // OR it's COMPLETED but the CURRENT USER hasn't reviewed it yet.
+        final reviewContracts = state.contracts.where((c) {
+          if (c.status == 'SUBMITTED') return true;
+          if (c.status == 'COMPLETED') {
+            final hasReviewed = c.reviews?.any((r) => r.reviewerId == currentUserId) ?? false;
+            return !hasReviewed;
+          }
+          return false;
+        }).toList();
+
+        // Completed contracts ONLY show up here if they are COMPLETED AND the user has reviewed them.
+        final completedContracts = state.contracts.where((c) {
+          if (c.status == 'COMPLETED') {
+            final hasReviewed = c.reviews?.any((r) => r.reviewerId == currentUserId) ?? false;
+            return hasReviewed;
+          }
+          return false;
+        }).toList();
+
+        // Build dynamic tabs
+        final List<Tab> tabs = [
+          const Tab(text: 'Active'),
+        ];
+        final List<Widget> tabViews = [
+          _buildContractsList(activeContracts, isClient),
+        ];
+
+        // Only add "Waiting for Review" if there are actually contracts that need reviewing
+        if (reviewContracts.isNotEmpty) {
+          tabs.add(const Tab(text: 'Review'));
+          tabViews.add(_buildContractsList(reviewContracts, isClient));
+        }
+
+        tabs.addAll([
+          const Tab(text: 'Pending'),
+          const Tab(text: 'Completed'),
+          const Tab(text: 'Cancelled'),
+        ]);
+
+        tabViews.addAll([
+          _buildContractsList(pendingContracts, isClient),
+          _buildContractsList(completedContracts, isClient),
+          _buildContractsList(cancelledContracts, isClient),
+        ]);
+
+        return DefaultTabController(
+          length: tabs.length,
+          child: Scaffold(
+            backgroundColor: Colors.white,
+            appBar: AppBar(
+              backgroundColor: Colors.white,
+              elevation: 0,
+              centerTitle: false,
+              title: Padding(
+                padding: const EdgeInsets.only(left: 8.0),
+                child: Text(
+                  isClient ? 'Orders' : 'My Contracts',
+                  style: AppTypography.headingMedium.copyWith(color: AppColors.textDark),
+                ),
+              ),
+              bottom: TabBar(
+                isScrollable: true,
+                tabAlignment: TabAlignment.start,
+                labelColor: AppColors.primary,
+                unselectedLabelColor: const Color(0xFF9CA3AF),
+                indicatorColor: AppColors.primary,
+                indicatorWeight: 3,
+                labelStyle: const TextStyle(fontWeight: FontWeight.bold, fontFamily: 'PlusJakartaSans'),
+                unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.w600, fontFamily: 'PlusJakartaSans'),
+                tabs: tabs,
+              ),
+            ),
+            body: TabBarView(
+              children: tabViews,
             ),
           ),
-          bottom: const TabBar(
-            isScrollable: true,
-            tabAlignment: TabAlignment.start,
-            labelColor: AppColors.primary,
-            unselectedLabelColor: Color(0xFF9CA3AF),
-            indicatorColor: AppColors.primary,
-            indicatorWeight: 3,
-            labelStyle: TextStyle(fontWeight: FontWeight.bold, fontFamily: 'PlusJakartaSans'),
-            unselectedLabelStyle: TextStyle(fontWeight: FontWeight.w600, fontFamily: 'PlusJakartaSans'),
-            tabs: [
-              Tab(text: 'Active'),
-              Tab(text: 'Review'),
-              Tab(text: 'Pending'),
-              Tab(text: 'Completed'),
-              Tab(text: 'Cancelled'),
-            ],
-          ),
-        ),
-        body: BlocBuilder<ContractsBloc, ContractsState>(
-          builder: (context, state) {
-            if (state.status == ContractsStatus.loading || state.status == ContractsStatus.initial) {
-              return const Center(child: CircularProgressIndicator());
-            }
-
-            if (state.status == ContractsStatus.failure) {
-              return Center(
-                child: Text(
-                  state.errorMessage ?? 'Failed to load contracts.',
-                  style: AppTypography.bodyMedium,
-                ),
-              );
-            }
-
-            final activeContracts = state.contracts.where((c) => 
-              c.status == 'ACTIVE' || c.status == 'IN_PROGRESS'
-            ).toList();
-
-            final reviewContracts = state.contracts.where((c) => 
-              c.status == 'SUBMITTED'
-            ).toList();
-            
-            final pendingContracts = state.contracts.where((c) => 
-              c.status == 'PENDING_PAYMENT' || c.status == 'PENDING'
-            ).toList();
-            
-            final completedContracts = state.contracts.where((c) => 
-              c.status == 'COMPLETED'
-            ).toList();
-            
-            final cancelledContracts = state.contracts.where((c) => 
-              c.status == 'CANCELLED' || c.status == 'DISPUTED'
-            ).toList();
-
-            return TabBarView(
-              children: [
-                _buildContractsList(activeContracts, isClient),
-                _buildContractsList(reviewContracts, isClient),
-                _buildContractsList(pendingContracts, isClient),
-                _buildContractsList(completedContracts, isClient),
-                _buildContractsList(cancelledContracts, isClient),
-              ],
-            );
-          },
-        ),
-      ),
+        );
+      },
     );
   }
 }

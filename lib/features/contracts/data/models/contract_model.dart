@@ -1,6 +1,7 @@
 import '../../domain/entities/contract_entity.dart';
 import '../../../../core/models/project_model.dart';
 import '../../../proposals/domain/entities/proposal_entity.dart';
+import '../../domain/entities/review_entity.dart';
 
 class ContractModel extends ContractEntity {
   const ContractModel({
@@ -16,6 +17,7 @@ class ContractModel extends ContractEntity {
     super.submissionNotes,
     super.project,
     super.proposal,
+    super.reviews,
   });
 
   factory ContractModel.fromJson(Map<String, dynamic> json) {
@@ -32,6 +34,9 @@ class ContractModel extends ContractEntity {
       submissionNotes: json['submissionNotes'] as String?,
       project: json['project'] != null ? ProjectModel.fromJson(json['project']) : null,
       proposal: json['proposal'] != null ? ProposalEntity.fromJson(json['proposal']) : null,
+      reviews: json['reviews'] != null
+          ? (json['reviews'] as List).map((r) => ReviewEntity.fromJson(r)).toList()
+          : null,
     );
   }
 

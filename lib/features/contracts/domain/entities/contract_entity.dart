@@ -1,6 +1,7 @@
 import 'package:equatable/equatable.dart';
 import '../../../../core/models/project_model.dart';
 import '../../../proposals/domain/entities/proposal_entity.dart';
+import 'review_entity.dart';
 
 class ContractEntity extends Equatable {
   final String id;
@@ -11,11 +12,11 @@ class ContractEntity extends Equatable {
   final double amount;
   final String status;
   final DateTime createdAt;
-
   final String? submissionUrl;
   final String? submissionNotes;
   final ProjectModel? project;
   final ProposalEntity? proposal;
+  final List<ReviewEntity>? reviews;
 
   const ContractEntity({
     required this.id,
@@ -30,6 +31,7 @@ class ContractEntity extends Equatable {
     this.submissionNotes,
     this.project,
     this.proposal,
+    this.reviews,
   });
 
   @override
@@ -46,5 +48,6 @@ class ContractEntity extends Equatable {
         submissionNotes,
         project,
         proposal,
+        reviews,
       ];
 }
