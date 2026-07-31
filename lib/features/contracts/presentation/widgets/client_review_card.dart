@@ -96,9 +96,12 @@ class ClientReviewCard extends StatelessWidget {
                         
                         Directory? dir;
                         if (Platform.isAndroid) {
-                          dir = await getExternalStorageDirectory();
+                          dir = Directory('/storage/emulated/0/Download');
+                          if (!await dir.exists()) {
+                            dir = await getExternalStorageDirectory();
+                          }
                         } else {
-                          dir = await getApplicationDocumentsDirectory();
+                          dir = await getDownloadsDirectory() ?? await getApplicationDocumentsDirectory();
                         }
                         
                         if (dir == null) throw Exception('Could not access storage directory');
@@ -111,8 +114,9 @@ class ClientReviewCard extends StatelessWidget {
                         if (context.mounted) {
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
-                              content: Text('File downloaded successfully to: $savePath'),
+                              content: Text('File downloaded to: ${Platform.isAndroid ? "Downloads/$filename" : savePath}'),
                               duration: const Duration(seconds: 4),
+                              behavior: SnackBarBehavior.floating,
                             ),
                           );
                         }
