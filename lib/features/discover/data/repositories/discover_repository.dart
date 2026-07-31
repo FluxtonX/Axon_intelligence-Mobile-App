@@ -9,14 +9,27 @@ class DiscoverRepository {
   Future<List<UserModel>> searchFreelancers({
     String? query,
     double? maxHourlyRate,
+    double? minRating,
+    String? category,
+    int page = 1,
+    int limit = 20,
   }) async {
     try {
-      final queryParams = <String, dynamic>{};
+      final queryParams = <String, dynamic>{
+        'page': page,
+        'limit': limit,
+      };
       if (query != null && query.isNotEmpty) {
         queryParams['q'] = query;
       }
       if (maxHourlyRate != null) {
         queryParams['maxHourlyRate'] = maxHourlyRate;
+      }
+      if (minRating != null) {
+        queryParams['minRating'] = minRating;
+      }
+      if (category != null && category.isNotEmpty) {
+        queryParams['category'] = category;
       }
 
       final response = await _apiClient.dio.get(

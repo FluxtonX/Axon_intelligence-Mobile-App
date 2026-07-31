@@ -137,8 +137,8 @@ class _DiscoverView extends StatelessWidget {
                     builder: (context, state) {
                       if (state.status == DiscoverStatus.initial) {
                         return userMode == UserMode.client 
-                          ? _DiscoverStorefront(topFreelancers: state.topFreelancers)
-                          : _DiscoverProjectsStorefront(projects: state.availableProjects);
+                          ? _DiscoverStorefront(topFreelancers: state.topFreelancers, state: state)
+                          : _DiscoverProjectsStorefront(projects: state.availableProjects, state: state);
                       } else if (state.status == DiscoverStatus.searching) {
                         return const SearchingIndicator();
                       } else {
@@ -191,25 +191,40 @@ class _DiscoverView extends StatelessWidget {
             ),
           ),
           Expanded(
-            child: ListView.builder(
-              padding: const EdgeInsets.symmetric(horizontal: 24),
-              itemCount: results.length,
-              itemBuilder: (context, index) {
-                final user = results[index];
-                return TalentResultCard(
-                  user: user,
-                  name: '${user.profile?.firstName} ${user.profile?.lastName}',
-                  title: user.profile?.title ?? 'Freelancer',
-                  hourlyRate: (user.profile?.hourlyRate?.toInt() ?? 0),
-                  rating: user.profile?.averageRating ?? 0.0,
-                  reviewCount: user.profile?.totalReviews ?? 0,
-                  location: 'Remote', // Could be added to profile later
-                  skills: user.profile?.skills ?? [],
-                  imageUrl: user.profile?.avatarUrl ?? 'https://i.pravatar.cc/150?img=${index % 70}',
-                  matchPercentage: ((user.profile?.averageRating ?? 4.0) * 18 + (user.id.hashCode % 10)).toInt().clamp(70, 99),
-                  isVerified: true,
-                );
+            child: NotificationListener<ScrollNotification>(
+              onNotification: (ScrollNotification scrollInfo) {
+                if (!state.hasReachedMax && 
+                    scrollInfo.metrics.pixels >= scrollInfo.metrics.maxScrollExtent - 200) {
+                  context.read<DiscoverBloc>().add(DiscoverLoadMore(userMode));
+                }
+                return false;
               },
+              child: ListView.builder(
+                padding: const EdgeInsets.symmetric(horizontal: 24),
+                itemCount: results.length + (state.hasReachedMax ? 0 : 1),
+                itemBuilder: (context, index) {
+                  if (index >= results.length) {
+                    return const Padding(
+                      padding: EdgeInsets.all(16.0),
+                      child: Center(child: CircularProgressIndicator()),
+                    );
+                  }
+                  final user = results[index];
+                  return TalentResultCard(
+                    user: user,
+                    name: '${user.profile?.firstName} ${user.profile?.lastName}',
+                    title: user.profile?.title ?? 'Freelancer',
+                    hourlyRate: (user.profile?.hourlyRate?.toInt() ?? 0),
+                    rating: user.profile?.averageRating ?? 0.0,
+                    reviewCount: user.profile?.totalReviews ?? 0,
+                    location: 'Remote', // Could be added to profile later
+                    skills: user.profile?.skills ?? [],
+                    imageUrl: user.profile?.avatarUrl ?? 'https://i.pravatar.cc/150?img=${index % 70}',
+                    matchPercentage: ((user.profile?.averageRating ?? 4.0) * 18 + (user.id.hashCode % 10)).toInt().clamp(70, 99),
+                    isVerified: true,
+                  );
+                },
+              ),
             ),
           ),
         ],
@@ -249,12 +264,27 @@ class _DiscoverView extends StatelessWidget {
             ),
           ),
           Expanded(
-            child: ListView.builder(
-              padding: const EdgeInsets.symmetric(horizontal: 24),
-              itemCount: results.length,
-              itemBuilder: (context, index) {
-                return ProjectResultCard(project: results[index]);
+            child: NotificationListener<ScrollNotification>(
+              onNotification: (ScrollNotification scrollInfo) {
+                if (!state.hasReachedMax && 
+                    scrollInfo.metrics.pixels >= scrollInfo.metrics.maxScrollExtent - 200) {
+                  context.read<DiscoverBloc>().add(DiscoverLoadMore(userMode));
+                }
+                return false;
               },
+              child: ListView.builder(
+                padding: const EdgeInsets.symmetric(horizontal: 24),
+                itemCount: results.length + (state.hasReachedMax ? 0 : 1),
+                itemBuilder: (context, index) {
+                  if (index >= results.length) {
+                    return const Padding(
+                      padding: EdgeInsets.all(16.0),
+                      child: Center(child: CircularProgressIndicator()),
+                    );
+                  }
+                  return ProjectResultCard(project: results[index]);
+                },
+              ),
             ),
           ),
         ],
@@ -265,8 +295,9 @@ class _DiscoverView extends StatelessWidget {
 
 class _DiscoverProjectsStorefront extends StatelessWidget {
   final List<ProjectModel> projects;
+  final DiscoverState state;
 
-  const _DiscoverProjectsStorefront({required this.projects});
+  const _DiscoverProjectsStorefront({required this.projects, required this.state});
 
   @override
   Widget build(BuildContext context) {
@@ -291,12 +322,28 @@ class _DiscoverProjectsStorefront extends StatelessWidget {
           child: ListView(
             scrollDirection: Axis.horizontal,
             padding: const EdgeInsets.symmetric(horizontal: 24),
-            children: const [
-              _CategoryChip(title: 'Design & Creative', isSelected: true),
-              _CategoryChip(title: 'Development & IT', isSelected: false),
-              _CategoryChip(title: 'AI Services', isSelected: false),
-              _CategoryChip(title: 'Marketing', isSelected: false),
-            ],
+            children: [
+              'Design & Creative',
+              'Development & IT',
+              'AI Services',
+              'Marketing'
+            ].map((category) {
+              return _CategoryChip(
+                title: category,
+                isSelected: state.selectedCategory == category,
+                onTap: () {
+                  final newCategory = state.selectedCategory == category ? null : category;
+                  context.read<DiscoverBloc>().add(
+                    DiscoverFiltersUpdated(
+                      userMode: UserMode.freelancer,
+                      selectedCategory: newCategory,
+                      minRating: state.minRating,
+                      maxBudget: state.maxBudget,
+                    ),
+                  );
+                },
+              );
+            }).toList(),
           ),
         ),
         
@@ -316,11 +363,16 @@ class _DiscoverProjectsStorefront extends StatelessWidget {
                   fontSize: 18,
                 ),
               ),
-              Text(
-                'See all',
-                style: AppTypography.labelMedium.copyWith(
-                  color: AppColors.primary,
-                  fontWeight: FontWeight.bold,
+              GestureDetector(
+                onTap: () {
+                  context.read<DiscoverBloc>().add(const DiscoverSearchInitiated('', UserMode.freelancer));
+                },
+                child: Text(
+                  'See all',
+                  style: AppTypography.labelMedium.copyWith(
+                    color: AppColors.primary,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
             ],
@@ -346,8 +398,9 @@ class _DiscoverProjectsStorefront extends StatelessWidget {
 
 class _DiscoverStorefront extends StatelessWidget {
   final List<UserModel> topFreelancers;
+  final DiscoverState state;
 
-  const _DiscoverStorefront({required this.topFreelancers});
+  const _DiscoverStorefront({required this.topFreelancers, required this.state});
 
   @override
   Widget build(BuildContext context) {
@@ -372,12 +425,28 @@ class _DiscoverStorefront extends StatelessWidget {
           child: ListView(
             scrollDirection: Axis.horizontal,
             padding: const EdgeInsets.symmetric(horizontal: 24),
-            children: const [
-              _CategoryChip(title: 'Design & Creative', isSelected: true),
-              _CategoryChip(title: 'Development & IT', isSelected: false),
-              _CategoryChip(title: 'AI Services', isSelected: false),
-              _CategoryChip(title: 'Marketing', isSelected: false),
-            ],
+            children: [
+              'Design & Creative',
+              'Development & IT',
+              'AI Services',
+              'Marketing'
+            ].map((category) {
+              return _CategoryChip(
+                title: category,
+                isSelected: state.selectedCategory == category,
+                onTap: () {
+                  final newCategory = state.selectedCategory == category ? null : category;
+                  context.read<DiscoverBloc>().add(
+                    DiscoverFiltersUpdated(
+                      userMode: UserMode.client,
+                      selectedCategory: newCategory,
+                      minRating: state.minRating,
+                      maxBudget: state.maxBudget,
+                    ),
+                  );
+                },
+              );
+            }).toList(),
           ),
         ),
         
@@ -397,11 +466,16 @@ class _DiscoverStorefront extends StatelessWidget {
                   fontSize: 18,
                 ),
               ),
-              Text(
-                'See all',
-                style: AppTypography.labelMedium.copyWith(
-                  color: AppColors.primary,
-                  fontWeight: FontWeight.bold,
+              GestureDetector(
+                onTap: () {
+                  context.read<DiscoverBloc>().add(const DiscoverSearchInitiated('', UserMode.client));
+                },
+                child: Text(
+                  'See all',
+                  style: AppTypography.labelMedium.copyWith(
+                    color: AppColors.primary,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
             ],
@@ -442,12 +516,15 @@ class _DiscoverStorefront extends StatelessWidget {
 class _CategoryChip extends StatelessWidget {
   final String title;
   final bool isSelected;
+  final VoidCallback? onTap;
 
-  const _CategoryChip({required this.title, required this.isSelected});
+  const _CategoryChip({required this.title, required this.isSelected, this.onTap});
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
       margin: const EdgeInsets.only(right: 12),
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       decoration: BoxDecoration(
@@ -463,6 +540,7 @@ class _CategoryChip extends StatelessWidget {
           fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
           fontSize: 14,
         ),
+      ),
       ),
     );
   }

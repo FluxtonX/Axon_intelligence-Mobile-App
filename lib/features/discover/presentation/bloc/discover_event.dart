@@ -30,16 +30,27 @@ class DiscoverSearchInitiated extends DiscoverEvent {
 class DiscoverSearchCleared extends DiscoverEvent {}
 
 class DiscoverFiltersUpdated extends DiscoverEvent {
+  final UserMode userMode;
   final String? selectedCategory;
   final double? minRating;
   final double? maxBudget;
 
   const DiscoverFiltersUpdated({
+    required this.userMode,
     this.selectedCategory,
     this.minRating,
     this.maxBudget,
   });
 
   @override
-  List<Object?> get props => [selectedCategory, minRating, maxBudget];
+  List<Object?> get props => [userMode, selectedCategory, minRating, maxBudget];
+}
+
+class DiscoverLoadMore extends DiscoverEvent {
+  final UserMode userMode;
+
+  const DiscoverLoadMore(this.userMode);
+
+  @override
+  List<Object?> get props => [userMode];
 }

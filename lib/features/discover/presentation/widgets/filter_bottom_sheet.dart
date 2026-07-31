@@ -4,6 +4,7 @@ import '../../../../core/theme/theme.dart';
 import '../../../../shared/widgets/primary_button.dart';
 import '../bloc/discover_bloc.dart';
 import '../bloc/discover_event.dart';
+import '../../../../core/blocs/user_mode_cubit.dart';
 
 class FilterBottomSheet extends StatefulWidget {
   const FilterBottomSheet({super.key});
@@ -50,8 +51,10 @@ class _FilterBottomSheetState extends State<FilterBottomSheet> {
   }
 
   void _applyFilters() {
+    final userMode = context.read<UserModeCubit>().state;
     context.read<DiscoverBloc>().add(
           DiscoverFiltersUpdated(
+            userMode: userMode,
             selectedCategory: _selectedCategory,
             minRating: _minRating,
             maxBudget: _maxBudget,

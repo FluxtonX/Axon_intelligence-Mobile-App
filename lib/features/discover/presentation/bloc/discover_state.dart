@@ -14,6 +14,8 @@ class DiscoverState extends Equatable {
   final List<UserModel> results;
   final List<ProjectModel> availableProjects;
   final List<ProjectModel> projectResults;
+  final int currentPage;
+  final bool hasReachedMax;
 
   const DiscoverState({
     this.status = DiscoverStatus.initial,
@@ -25,6 +27,8 @@ class DiscoverState extends Equatable {
     this.results = const [],
     this.availableProjects = const [],
     this.projectResults = const [],
+    this.currentPage = 1,
+    this.hasReachedMax = false,
   });
 
   DiscoverState copyWith({
@@ -37,6 +41,8 @@ class DiscoverState extends Equatable {
     List<UserModel>? results,
     List<ProjectModel>? availableProjects,
     List<ProjectModel>? projectResults,
+    int? currentPage,
+    bool? hasReachedMax,
   }) {
     return DiscoverState(
       status: status ?? this.status,
@@ -48,12 +54,15 @@ class DiscoverState extends Equatable {
       results: results ?? this.results,
       availableProjects: availableProjects ?? this.availableProjects,
       projectResults: projectResults ?? this.projectResults,
+      currentPage: currentPage ?? this.currentPage,
+      hasReachedMax: hasReachedMax ?? this.hasReachedMax,
     );
   }
 
   @override
   List<Object?> get props => [
     status, query, selectedCategory, minRating, maxBudget, 
-    topFreelancers, results, availableProjects, projectResults
+    topFreelancers, results, availableProjects, projectResults,
+    currentPage, hasReachedMax
   ];
 }
