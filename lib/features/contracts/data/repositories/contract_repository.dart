@@ -109,6 +109,25 @@ class ContractRepository {
     }
   }
 
+  Future<void> requestRevision(String contractId, String notes) async {
+    try {
+      await _apiClient.dio.post(
+        '/contracts/$contractId/revision',
+        data: { 'notes': notes },
+      );
+    } on DioException catch (e) {
+      String errorMessage = 'A network error occurred. Please try again.';
+      if (e.response?.data != null && e.response?.data is Map) {
+        errorMessage = e.response?.data['message'] ?? e.response?.data['error'] ?? 'Failed to request revision.';
+      } else if (e.message != null) {
+        errorMessage = e.message!;
+      }
+      throw Exception(errorMessage);
+    } catch (e) {
+      throw Exception('An unexpected error occurred while requesting revision.');
+    }
+  }
+
   Future<void> approveWork(String contractId) async {
     try {
       await _apiClient.dio.post('/contracts/$contractId/complete');

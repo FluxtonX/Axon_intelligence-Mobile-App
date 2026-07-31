@@ -14,6 +14,7 @@ class ContractsBloc extends Bloc<ContractsEvent, ContractsState> {
     on<FundContract>(_onFundContract);
     on<SubmitWork>(_onSubmitWork);
     on<ApproveWork>(_onApproveWork);
+    on<RequestRevision>(_onRequestRevision);
     on<LeaveReview>(_onLeaveReview);
   }
 
@@ -98,6 +99,23 @@ class ContractsBloc extends Bloc<ContractsEvent, ContractsState> {
       emit(state.copyWith(
         status: ContractsStatus.failure,
         errorMessage: 'Failed to approve work.',
+      ));
+    }
+  }
+
+  Future<void> _onRequestRevision(RequestRevision event, Emitter<ContractsState> emit) async {
+    emit(state.copyWith(status: ContractsStatus.submitting, clearMessages: true));
+    try {
+      await _contractRepository.requestRevision(event.contractId, event.notes);
+      emit(state.copyWith(
+        status: ContractsStatus.success,
+        actionSuccessMessage: 'Revision requested successfully! The contract is back in progress.',
+      ));
+      add(const FetchMyContracts()); // Refresh list
+    } catch (e) {
+      emit(state.copyWith(
+        status: ContractsStatus.failure,
+        errorMessage: 'Failed to request revision: ${e.toString()}',
       ));
     }
   }

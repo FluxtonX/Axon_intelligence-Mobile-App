@@ -146,9 +146,53 @@ class ClientReviewCard extends StatelessWidget {
                     width: double.infinity,
                     child: OutlinedButton(
                       onPressed: () {
-                        // Request revision (not fully implemented in backend yet, so just show a snackbar)
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Revision request sent in messages.')),
+                        final TextEditingController notesController = TextEditingController();
+                        showDialog(
+                          context: context,
+                          builder: (dialogContext) {
+                            return AlertDialog(
+                              title: const Text('Request Revision'),
+                              content: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  const Text('Please provide specific details about what needs to be changed.'),
+                                  const SizedBox(height: 16),
+                                  TextField(
+                                    controller: notesController,
+                                    maxLines: 4,
+                                    decoration: InputDecoration(
+                                      hintText: 'E.g. Change the color to blue...',
+                                      border: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(12),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              actions: [
+                                TextButton(
+                                  onPressed: () => Navigator.pop(dialogContext),
+                                  child: const Text('Cancel'),
+                                ),
+                                ElevatedButton(
+                                  onPressed: () {
+                                    if (notesController.text.trim().isNotEmpty) {
+                                      Navigator.pop(dialogContext);
+                                      context.read<ContractsBloc>().add(RequestRevision(
+                                        contractId: contract.id, 
+                                        notes: notesController.text.trim()
+                                      ));
+                                    }
+                                  },
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: AppColors.primary,
+                                    foregroundColor: Colors.white,
+                                  ),
+                                  child: const Text('Send Request'),
+                                ),
+                              ],
+                            );
+                          }
                         );
                       },
                       style: OutlinedButton.styleFrom(
