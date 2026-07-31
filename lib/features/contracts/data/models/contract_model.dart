@@ -13,6 +13,7 @@ class ContractModel extends ContractEntity {
     required super.amount,
     required super.status,
     required super.createdAt,
+    super.deadline,
     super.submissionUrl,
     super.submissionNotes,
     super.project,
@@ -30,6 +31,7 @@ class ContractModel extends ContractEntity {
       amount: (json['amount'] as num).toDouble(),
       status: json['status'] as String,
       createdAt: DateTime.parse(json['createdAt'] as String),
+      deadline: json['deadline'] != null ? DateTime.parse(json['deadline'] as String) : null,
       submissionUrl: json['submissionUrl'] as String?,
       submissionNotes: json['submissionNotes'] as String?,
       project: json['project'] != null ? ProjectModel.fromJson(json['project']) : null,
@@ -50,6 +52,7 @@ class ContractModel extends ContractEntity {
       'amount': amount,
       'status': status,
       'createdAt': createdAt.toIso8601String(),
+      if (deadline != null) 'deadline': deadline!.toIso8601String(),
     };
   }
 }

@@ -8,6 +8,7 @@ import '../bloc/contracts_event.dart';
 import '../bloc/contracts_state.dart';
 import '../../domain/entities/contract_entity.dart';
 import '../../../auth/presentation/bloc/auth_bloc.dart';
+import '../widgets/countdown_timer_text.dart';
 
 class OrdersPage extends StatefulWidget {
   const OrdersPage({super.key});
@@ -43,8 +44,14 @@ class _OrdersPageState extends State<OrdersPage> with AutomaticKeepAliveClientMi
       );
     }
 
-    return ListView.separated(
-      padding: const EdgeInsets.all(24),
+    return RefreshIndicator(
+      onRefresh: () async {
+        context.read<ContractsBloc>().add(const FetchMyContracts());
+        await Future.delayed(const Duration(milliseconds: 600));
+      },
+      child: ListView.separated(
+        physics: const AlwaysScrollableScrollPhysics(),
+        padding: const EdgeInsets.all(24),
       itemCount: contracts.length,
       separatorBuilder: (context, index) => const SizedBox(height: 16),
       itemBuilder: (context, index) {
@@ -124,19 +131,26 @@ class _OrdersPageState extends State<OrdersPage> with AutomaticKeepAliveClientMi
                   ),
                 ),
                 const SizedBox(height: 8),
-                Text(
-                  'Amount: \$${contract.amount.toStringAsFixed(0)}',
-                  style: AppTypography.labelLarge.copyWith(
-                    color: const Color(0xFF111827),
-                    fontWeight: FontWeight.bold,
-                  ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'Amount: \$${contract.amount.toStringAsFixed(0)}',
+                      style: AppTypography.labelLarge.copyWith(
+                        color: const Color(0xFF111827),
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    if (contract.deadline != null && contract.status != 'COMPLETED')
+                      CountdownTimerText(deadline: contract.deadline!),
+                  ],
                 ),
               ],
             ),
           ),
         );
       },
-    );
+    ));
   }
 
   @override

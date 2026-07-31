@@ -241,6 +241,7 @@ class _ActiveProjectsTabState extends State<_ActiveProjectsTab> {
                     status: contract.status,
                     escrowAmount: contract.amount,
                     progress: contract.status == 'SUBMITTED' ? 0.9 : 0.5,
+                    deadline: contract.deadline,
                   ),
                 );
               }),
@@ -272,30 +273,55 @@ class _InReviewProjectsTab extends StatelessWidget {
   }
 }
 
-class _PublishedProjectsTab extends StatelessWidget {
+class _PublishedProjectsTab extends StatefulWidget {
   const _PublishedProjectsTab();
+
+  @override
+  State<_PublishedProjectsTab> createState() => _PublishedProjectsTabState();
+}
+
+class _PublishedProjectsTabState extends State<_PublishedProjectsTab> {
+  @override
+  void initState() {
+    super.initState();
+    context.read<ClientProjectsBloc>().add(LoadClientProjectsEvent());
+  }
 
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<ClientProjectsBloc, ClientProjectsState>(
       builder: (context, state) {
-        if (state.isLoading) {
+        if (state.isLoading && state.projects.isEmpty) {
           return const Center(child: CircularProgressIndicator());
         }
         
-        if (state.error != null) {
+        if (state.error != null && state.projects.isEmpty) {
           return Center(child: Text('Error: ${state.error}'));
         }
 
-        if (state.projects.isEmpty) {
-          return const Center(child: Text('No published projects yet.'));
-        }
+        final publishedProjects = state.projects.where((p) => p.status == 'PUBLISHED').toList();
 
-        return ListView(
-          padding: const EdgeInsets.all(24),
-          children: state.projects.map((project) {
-            return _buildPublishedItem(context, project);
-          }).toList(),
+        return RefreshIndicator(
+          onRefresh: () async {
+            context.read<ClientProjectsBloc>().add(LoadClientProjectsEvent());
+            await Future.delayed(const Duration(milliseconds: 600));
+          },
+          child: publishedProjects.isEmpty
+            ? SingleChildScrollView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                child: Container(
+                  height: MediaQuery.of(context).size.height * 0.5,
+                  alignment: Alignment.center,
+                  child: const Text('No published projects yet.'),
+                ),
+              )
+            : ListView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                padding: const EdgeInsets.all(24),
+                children: publishedProjects.map((project) {
+                  return _buildPublishedItem(context, project);
+                }).toList(),
+              ),
         );
       },
     );

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../../core/theme/theme.dart';
+import '../../../contracts/presentation/widgets/countdown_timer_text.dart';
 
 class ContractCard extends StatelessWidget {
   const ContractCard({
@@ -11,6 +12,7 @@ class ContractCard extends StatelessWidget {
     required this.escrowAmount,
     required this.progress,
     this.isActive = true,
+    this.deadline,
   });
 
   final String title;
@@ -20,6 +22,7 @@ class ContractCard extends StatelessWidget {
   final double escrowAmount;
   final double progress;
   final bool isActive;
+  final DateTime? deadline;
 
   @override
   Widget build(BuildContext context) {
@@ -90,6 +93,10 @@ class ContractCard extends StatelessWidget {
               ),
             ],
           ),
+          if (isActive && deadline != null) ...[
+            const SizedBox(height: 16),
+            CountdownTimerText(deadline: deadline!),
+          ],
           const SizedBox(height: 20),
           
           // Escrow & Progress

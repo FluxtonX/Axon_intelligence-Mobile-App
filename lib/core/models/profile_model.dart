@@ -30,7 +30,7 @@ class ProfileModel {
     
     // If it's a relative URL
     if (url.startsWith('/uploads/')) {
-      final baseUrl = dotenv.env['API_BASE_URL'] ?? 'http://127.0.0.1:3000/api';
+      final baseUrl = dotenv.env['API_BASE_URL'] ?? 'http://192.168.1.26:3000/api';
       final host = baseUrl.replaceAll(RegExp(r'/api$'), '');
       return '$host$url';
     }
@@ -39,7 +39,7 @@ class ProfileModel {
     if (url.startsWith('http://') && url.contains('/uploads/')) {
       final uri = Uri.tryParse(url);
       if (uri != null && (uri.host == 'localhost' || uri.host == '127.0.0.1' || uri.host.startsWith('192.168.') || uri.host.startsWith('10.'))) {
-        final baseUrl = dotenv.env['API_BASE_URL'] ?? 'http://127.0.0.1:3000/api';
+        final baseUrl = dotenv.env['API_BASE_URL'] ?? 'http://192.168.1.26:3000/api';
         final host = baseUrl.replaceAll(RegExp(r'/api$'), '');
         return '$host${uri.path}';
       }

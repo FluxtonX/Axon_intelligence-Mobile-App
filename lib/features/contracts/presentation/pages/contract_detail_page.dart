@@ -9,6 +9,7 @@ import '../bloc/contracts_event.dart';
 import '../bloc/contracts_state.dart';
 import '../../domain/entities/contract_entity.dart';
 import '../widgets/contract_timeline.dart';
+import '../widgets/countdown_timer_text.dart';
 import '../widgets/delivery_upload_form.dart';
 import '../widgets/client_review_card.dart';
 import '../../../auth/presentation/bloc/auth_bloc.dart';
@@ -75,7 +76,15 @@ class _ContractDetailPageState extends State<ContractDetailPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(widget.contract.project?.title ?? 'Project', style: AppTypography.headingMedium.copyWith(color: AppColors.textDark)),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(child: Text(widget.contract.project?.title ?? 'Project', style: AppTypography.headingMedium.copyWith(color: AppColors.textDark))),
+                  if (widget.contract.deadline != null && widget.contract.status == 'ACTIVE')
+                    CountdownTimerText(deadline: widget.contract.deadline!),
+                ],
+              ),
               const SizedBox(height: 24),
               
               // 1. Order Timeline

@@ -11,6 +11,7 @@ import '../../../profile/presentation/bloc/profile_state.dart';
 import '../../../contracts/presentation/bloc/contracts_bloc.dart';
 import '../../../contracts/presentation/bloc/contracts_event.dart';
 import '../../../contracts/presentation/bloc/contracts_state.dart';
+import '../../../contracts/presentation/widgets/countdown_timer_text.dart';
 
 class SellerDashboardPage extends StatefulWidget {
   const SellerDashboardPage({super.key});
@@ -321,7 +322,7 @@ class _SellerDashboardPageState extends State<SellerDashboardPage> with Automati
                               clientName: contract.project?.client?['profile']?['firstName'] ?? 'Client',
                               projectTitle: contract.project?.title ?? 'Gig Order',
                               price: '\$${contract.amount.toStringAsFixed(0)}',
-                              dueDate: 'Active',
+                              deadline: contract.deadline,
                               progress: 0.5,
                             ),
                           ),
@@ -424,14 +425,14 @@ class _ActiveOrderCard extends StatelessWidget {
   final String clientName;
   final String projectTitle;
   final String price;
-  final String dueDate;
+  final DateTime? deadline;
   final double progress;
 
   const _ActiveOrderCard({
     required this.clientName,
     required this.projectTitle,
     required this.price,
-    required this.dueDate,
+    this.deadline,
     required this.progress,
   });
 
@@ -451,21 +452,7 @@ class _ActiveOrderCard extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(clientName, style: AppTypography.caption.copyWith(color: const Color(0xFF6B7280))),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFFEF2F2),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Icon(Icons.timer_outlined, size: 12, color: Color(0xFFEF4444)),
-                    const SizedBox(width: 4),
-                    Text(dueDate, style: AppTypography.caption.copyWith(color: const Color(0xFFEF4444), fontWeight: FontWeight.bold)),
-                  ],
-                ),
-              ),
+              if (deadline != null) CountdownTimerText(deadline: deadline!),
             ],
           ),
           const SizedBox(height: 8),
