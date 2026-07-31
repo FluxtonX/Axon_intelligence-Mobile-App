@@ -129,10 +129,11 @@ class ContractsBloc extends Bloc<ContractsEvent, ContractsState> {
         status: ContractsStatus.success,
         actionSuccessMessage: 'Review submitted successfully!',
       ));
+      add(const FetchMyContracts()); // Refresh list
     } catch (e) {
       emit(state.copyWith(
         status: ContractsStatus.failure,
-        errorMessage: 'Failed to submit review.',
+        errorMessage: e.toString().replaceAll('Exception: ', ''),
       ));
     }
   }

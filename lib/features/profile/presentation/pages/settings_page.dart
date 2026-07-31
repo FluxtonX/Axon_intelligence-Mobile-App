@@ -40,7 +40,7 @@ class SettingsPage extends StatelessWidget {
           _buildSettingsItem(
             icon: Icons.payment_rounded,
             title: 'Payment Methods',
-            onTap: () {},
+            onTap: () => _showComingSoon(context),
           ),
           const SizedBox(height: 32),
           
@@ -67,19 +67,19 @@ class SettingsPage extends StatelessWidget {
           _buildSettingsItem(
             icon: Icons.notifications_none_rounded,
             title: 'Notifications',
-            onTap: () {},
+            onTap: () => _showComingSoon(context),
           ),
           _buildSettingsItem(
             icon: Icons.dark_mode_outlined,
             title: 'Appearance',
             trailing: const Text('Light'),
-            onTap: () {},
+            onTap: () => _showComingSoon(context),
           ),
           _buildSettingsItem(
             icon: Icons.language_rounded,
             title: 'Language',
             trailing: const Text('English (US)'),
-            onTap: () {},
+            onTap: () => _showComingSoon(context),
           ),
           const SizedBox(height: 32),
           
@@ -87,17 +87,17 @@ class SettingsPage extends StatelessWidget {
           _buildSettingsItem(
             icon: Icons.lock_outline_rounded,
             title: 'Password & Security',
-            onTap: () {},
+            onTap: () => _showComingSoon(context),
           ),
           _buildSettingsItem(
             icon: Icons.fingerprint_rounded,
             title: 'Biometric Authentication',
             trailing: Switch(
               value: true,
-              onChanged: (val) {},
+              onChanged: (val) => _showComingSoon(context),
               activeColor: AppColors.primary,
             ),
-            onTap: () {},
+            onTap: () => _showComingSoon(context),
           ),
           const SizedBox(height: 24),
           
@@ -160,6 +160,15 @@ class SettingsPage extends StatelessWidget {
         trailing: trailing ?? const Icon(Icons.arrow_forward_ios_rounded, size: 16, color: AppColors.textSecondary),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         onTap: onTap,
+      ),
+    );
+  }
+
+  void _showComingSoon(BuildContext context) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('This feature is coming soon in the next update!'),
+        behavior: SnackBarBehavior.floating,
       ),
     );
   }

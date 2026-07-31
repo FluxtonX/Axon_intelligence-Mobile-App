@@ -13,7 +13,8 @@ import '../widgets/countdown_timer_text.dart';
 import '../widgets/delivery_upload_form.dart';
 import '../widgets/client_review_card.dart';
 import '../../../auth/presentation/bloc/auth_bloc.dart';
-
+import '../../../profile/presentation/bloc/profile_cubit.dart';
+import '../../../profile/presentation/bloc/profile_state.dart';
 class ContractDetailPage extends StatefulWidget {
   final ContractEntity contract;
 
@@ -183,44 +184,18 @@ class _ContractDetailPageState extends State<ContractDetailPage> {
 
               // 6. Leave Review for COMPLETED contracts
               if (widget.contract.status == 'COMPLETED') ...[
-                Builder(
-                  builder: (context) {
-                    final currentUser = context.read<AuthBloc>().state.user;
-                    final myReviewList = widget.contract.reviews?.where((r) => r.reviewerId == currentUser?.id).toList();
+                BlocBuilder<ContractsBloc, ContractsState>(
+                  builder: (context, state) {
+                    final match = state.contracts.where((c) => c.id == widget.contract.id).toList();
+                    final currentContract = match.isNotEmpty ? match.first : widget.contract;
+                    
+                    final profileState = context.read<ProfileCubit>().state;
+                    final currentUser = profileState is ProfileLoaded ? profileState.user : null;
+                    final myReviewList = currentContract.reviews?.where((r) => r.reviewerId == currentUser?.id).toList();
                     final myReview = myReviewList != null && myReviewList.isNotEmpty ? myReviewList.first : null;
 
                     if (myReview != null) {
-                      return Container(
-                        padding: const EdgeInsets.all(24),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFF9FAFB),
-                          borderRadius: BorderRadius.circular(20),
-                          border: Border.all(color: const Color(0xFFE5E7EB)),
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text('Your Review', style: AppTypography.headingSmall.copyWith(color: AppColors.textDark)),
-                            const SizedBox(height: 12),
-                            Row(
-                              children: List.generate(
-                                5,
-                                (index) => Icon(
-                                  index < myReview.rating ? Icons.star_rounded : Icons.star_border_rounded,
-                                  color: const Color(0xFFF59E0B),
-                                  size: 20,
-                                ),
-                              ),
-                            ),
-                            const SizedBox(height: 12),
-                            if (myReview.comment != null && myReview.comment!.isNotEmpty)
-                              Text(
-                                myReview.comment!,
-                                style: AppTypography.bodyMedium.copyWith(color: const Color(0xFF4B5563), height: 1.5),
-                              ),
-                          ],
-                        ),
-                      );
+                      return const SizedBox.shrink();
                     }
 
                     return Container(
