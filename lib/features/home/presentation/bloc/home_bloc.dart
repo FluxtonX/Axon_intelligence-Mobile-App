@@ -1,9 +1,12 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../data/repositories/home_repository.dart';
 import 'home_event.dart';
 import 'home_state.dart';
 
 class HomeBloc extends Bloc<HomeEvent, HomeState> {
-  HomeBloc() : super(const HomeState()) {
+  final HomeRepository _homeRepository;
+
+  HomeBloc(this._homeRepository) : super(const HomeState()) {
     on<HomeDataFetched>(_onDataFetched);
     on<HomeDebugStateToggled>(_onDebugStateToggled);
   }
@@ -14,11 +17,23 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
   ) async {
     emit(state.copyWith(status: HomeStatus.loading));
     
-    // Simulate network delay
-    await Future.delayed(const Duration(seconds: 1));
-    
-    // For development, we default to the Active state
-    emit(state.copyWith(status: HomeStatus.active));
+    try {
+      final dashboardData = await _homeRepository.getClientDashboard();
+      
+      final nextStatus = dashboardData.stats.totalHires > 0 || dashboardData.stats.activeContracts > 0
+          ? HomeStatus.active
+          : HomeStatus.empty;
+
+      emit(state.copyWith(
+        status: nextStatus,
+        dashboardData: dashboardData,
+      ));
+    } catch (e) {
+      emit(state.copyWith(
+        status: HomeStatus.error,
+        errorMessage: 'Failed to load dashboard data: $e',
+      ));
+    }
   }
 
   void _onDebugStateToggled(

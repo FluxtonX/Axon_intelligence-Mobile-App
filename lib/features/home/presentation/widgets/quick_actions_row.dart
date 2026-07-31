@@ -5,6 +5,7 @@ import '../../../../core/theme/theme.dart';
 import '../../../main_shell/presentation/bloc/main_shell_bloc.dart';
 import '../../../main_shell/presentation/bloc/main_shell_event.dart';
 import '../../../../shared/widgets/auth_guard_dialog.dart';
+import '../../../proposals/domain/entities/proposal_entity.dart';
 
 class QuickActionsRow extends StatelessWidget {
   const QuickActionsRow({super.key});
@@ -42,16 +43,11 @@ class QuickActionsRow extends StatelessWidget {
         const SizedBox(width: 12),
         Expanded(
           child: _ActionCard(
-            label: 'Hire',
-            icon: Icons.person_add_alt_1_rounded,
+            label: 'My Projects',
+            icon: Icons.folder_shared_rounded,
             iconColor: const Color(0xFF8B5CF6), // Purple
             onTap: () {
-              AuthGuard.requireAuth(
-                context,
-                title: 'Sign in to Hire',
-                subtitle: 'You need an account to securely hire freelancers.',
-                onAuthenticated: () => context.push('/hire'),
-              );
+              context.read<MainShellBloc>().add(const TabChanged(1));
             },
           ),
         ),
@@ -112,6 +108,8 @@ class _ActionCard extends StatelessWidget {
                 fontWeight: FontWeight.w600,
               ),
               textAlign: TextAlign.center,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
             ),
           ],
         ),

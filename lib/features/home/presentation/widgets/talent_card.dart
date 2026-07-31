@@ -14,6 +14,7 @@ class TalentCard extends StatelessWidget {
     required this.matchPercentage,
     required this.skills,
     required this.imageUrl,
+    this.bio,
   });
 
   final String name;
@@ -23,6 +24,7 @@ class TalentCard extends StatelessWidget {
   final int matchPercentage;
   final List<String> skills;
   final String imageUrl;
+  final String? bio;
 
   @override
   Widget build(BuildContext context) {
@@ -42,6 +44,7 @@ class TalentCard extends StatelessWidget {
             hourlyRate: rate.toDouble(),
             averageRating: rating,
             skills: skills,
+            bio: bio,
           ),
         ),
       ),
@@ -128,11 +131,23 @@ class TalentCard extends StatelessWidget {
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 12),
+          if (bio != null && bio!.isNotEmpty) ...[
+            Text(
+              bio!,
+              style: AppTypography.caption.copyWith(
+                color: AppColors.textSecondary,
+                height: 1.4,
+              ),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
+            const SizedBox(height: 12),
+          ],
           Wrap(
             spacing: 8,
             runSpacing: 8,
-            children: skills.map((skill) {
+            children: skills.take(3).map((skill) {
               return Container(
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                 decoration: BoxDecoration(

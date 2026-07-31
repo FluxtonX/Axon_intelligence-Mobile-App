@@ -12,16 +12,26 @@ import '../widgets/interview_card.dart';
 import '../widgets/project_stats_row.dart';
 import '../widgets/quick_actions_row.dart';
 import '../widgets/talent_card.dart';
+import '../../../contracts/presentation/widgets/client_review_card.dart';
+import 'package:timeago/timeago.dart' as timeago;
 import '../../../auth/data/auth_repository.dart';
+import '../../data/repositories/home_repository.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (_) => HomeBloc()..add(const HomeDataFetched()),
-      child: const _HomeView(),
+    return RepositoryProvider(
+      create: (context) => HomeRepository(context.read()),
+      child: Builder(
+        builder: (context) {
+          return BlocProvider(
+            create: (_) => HomeBloc(context.read<HomeRepository>())..add(const HomeDataFetched()),
+            child: const _HomeView(),
+          );
+        }
+      ),
     );
   }
 }
@@ -68,9 +78,16 @@ class _HomeView extends StatelessWidget {
 
                     // ── Active Dashboard Only ───────────────────────
                     if (isActive) ...[
-                      const HiringSpendCard(),
+                      HiringSpendCard(
+                        totalSpend: state.dashboardData?.stats.totalSpend ?? 0,
+                        activeContracts: state.dashboardData?.stats.activeContracts ?? 0,
+                        totalHires: state.dashboardData?.stats.totalHires ?? 0,
+                      ),
                       const SizedBox(height: 24),
-                      const ProjectStatsRow(),
+                      ProjectStatsRow(
+                        activeContracts: state.dashboardData?.stats.activeContracts ?? 0,
+                        inReviewContracts: state.dashboardData?.submittedContracts.length ?? 0,
+                      ),
                       const SizedBox(height: 24),
                     ],
 
@@ -92,70 +109,57 @@ class _HomeView extends StatelessWidget {
 
                     // ── Active Dashboard Content ────────────────────
                     if (isActive) ...[
-                      _buildSectionHeader('Waiting for Your Review', 'See all'),
-                      const SizedBox(height: 16),
-                      _buildReviewCard(),
-                      const SizedBox(height: 32),
+                      if (state.dashboardData != null && state.dashboardData!.submittedContracts.isNotEmpty) ...[
+                        _buildSectionHeader('Waiting for Your Review', 'See all'),
+                        const SizedBox(height: 16),
+                        ...state.dashboardData!.submittedContracts.map((c) => Padding(
+                          padding: const EdgeInsets.only(bottom: 16),
+                          child: ClientReviewCard(contract: c),
+                        )),
+                        const SizedBox(height: 16),
+                      ],
 
-                      _buildSectionHeader('AI Recommended Talent', 'See all'),
-                      const SizedBox(height: 4),
-                      Text(
-                        '✦ Matched to your open projects',
-                        style: AppTypography.caption.copyWith(color: AppColors.primary),
-                      ),
-                      const SizedBox(height: 16),
-                      _buildTalentList(),
-                      const SizedBox(height: 32),
+                      if (state.dashboardData != null && state.dashboardData!.recommendedTalent.isNotEmpty) ...[
+                        _buildSectionHeader('AI Recommended Talent', 'See all'),
+                        const SizedBox(height: 4),
+                        Text(
+                          '✦ Matched to your open projects',
+                          style: AppTypography.caption.copyWith(color: AppColors.primary),
+                        ),
+                        const SizedBox(height: 16),
+                        SizedBox(
+                          height: 310,
+                          child: ListView.separated(
+                            scrollDirection: Axis.horizontal,
+                            itemCount: state.dashboardData!.recommendedTalent.length,
+                            separatorBuilder: (_, __) => const SizedBox(width: 16),
+                            itemBuilder: (context, index) {
+                              final talent = state.dashboardData!.recommendedTalent[index];
+                              return TalentCard(
+                                name: '${talent.profile?.firstName ?? ''} ${talent.profile?.lastName ?? ''}',
+                                title: talent.profile?.title ?? 'Freelancer',
+                                rating: talent.profile?.averageRating?.toDouble() ?? 5.0,
+                                rate: (talent.profile?.hourlyRate ?? 0).toInt(),
+                                matchPercentage: 95,
+                                skills: talent.profile?.skills ?? [],
+                                imageUrl: talent.profile?.avatarUrl ?? 'https://i.pravatar.cc/150?u=${talent.id}',
+                                bio: talent.profile?.bio ?? 'Experienced professional ready to bring your ideas to life.',
+                              );
+                            },
+                          ),
+                        ),
+                        const SizedBox(height: 32),
+                      ],
 
-                      _buildSectionHeader('Upcoming Interviews', 'Schedule'),
-                      const SizedBox(height: 16),
-                      const InterviewCard(
-                        name: 'Sophia Chen',
-                        time: 'Today • 3:00 PM',
-                        status: 'Confirmed',
-                        imageUrl: 'https://i.pravatar.cc/150?img=5',
-                      ),
-                      const InterviewCard(
-                        name: 'Priya Sharma',
-                        time: 'Tomorrow • 11:00 AM',
-                        status: 'Pending',
-                        imageUrl: 'https://i.pravatar.cc/150?img=9',
-                      ),
-                      const InterviewCard(
-                        name: 'Marcus Williams',
-                        time: 'Jul 11 • 2:30 PM',
-                        status: 'Confirmed',
-                        imageUrl: 'https://i.pravatar.cc/150?img=11',
-                      ),
-                      const SizedBox(height: 32),
-
-                      _buildSectionHeader('Recent Activity', null),
-                      const SizedBox(height: 16),
-                      const ActivityTile(
-                        type: ActivityType.application,
-                        description: 'Amara Osei applied to Growth Marketing Retainer',
-                        timeAgo: '2h ago',
-                      ),
-                      const ActivityTile(
-                        type: ActivityType.milestone,
-                        description: 'You approved milestone "Visual Identity"',
-                        timeAgo: '5h ago',
-                      ),
-                      const ActivityTile(
-                        type: ActivityType.message,
-                        description: 'New message from Marcus Williams',
-                        timeAgo: '6h ago',
-                      ),
-                      const ActivityTile(
-                        type: ActivityType.shortlist,
-                        description: 'You shortlisted Sophia Chen',
-                        timeAgo: '1d ago',
-                      ),
-                      const ActivityTile(
-                        type: ActivityType.completion,
-                        description: 'Project "iOS Launch Campaign" was completed',
-                        timeAgo: '2d ago',
-                      ),
+                      if (state.dashboardData != null && state.dashboardData!.recentActivity.isNotEmpty) ...[
+                        _buildSectionHeader('Recent Activity', null),
+                        const SizedBox(height: 16),
+                        ...state.dashboardData!.recentActivity.map((notif) => ActivityTile(
+                          type: ActivityType.message, // Map appropriately if needed
+                          description: notif.body,
+                          timeAgo: timeago.format(notif.createdAt),
+                        )),
+                      ],
                     ],
                   ],
                 ),
@@ -193,87 +197,7 @@ class _HomeView extends StatelessWidget {
     );
   }
 
-  Widget _buildReviewCard() {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: const Color(0xFFF3F4F6), width: 1.5),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.02),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: const Color(0xFFF3F4F6),
-              borderRadius: BorderRadius.circular(16),
-            ),
-            child: const Icon(Icons.assignment_turned_in_rounded, color: AppColors.textSecondary),
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Brand Identity System',
-                  style: AppTypography.labelLarge.copyWith(
-                    color: AppColors.textDark,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  'Deliverable ready - Yuki Tanaka',
-                  style: AppTypography.caption.copyWith(color: AppColors.textSecondary),
-                ),
-              ],
-            ),
-          ),
-          const Icon(Icons.chevron_right_rounded, color: AppColors.textSecondary),
-        ],
-      ),
-    );
-  }
 
-  Widget _buildTalentList() {
-    return SizedBox(
-      height: 280,
-      child: ListView(
-        scrollDirection: Axis.horizontal,
-        clipBehavior: Clip.none,
-        children: const [
-          TalentCard(
-            name: 'Sophia Chen',
-            title: 'Product Designer & Brand Strategist',
-            rate: 120,
-            rating: 4.98,
-            matchPercentage: 98,
-            skills: ['Product Design', 'Figma'],
-            imageUrl: 'https://i.pravatar.cc/150?img=5',
-          ),
-          SizedBox(width: 16),
-          TalentCard(
-            name: 'Marcus Williams',
-            title: 'Full-Stack Engineer - AI / React Specialist',
-            rate: 155,
-            rating: 4.95,
-            matchPercentage: 95,
-            skills: ['React', 'TypeScript'],
-            imageUrl: 'https://i.pravatar.cc/150?img=11',
-          ),
-        ],
-      ),
-    );
-  }
 
   Widget _buildEmptyStateIntro() {
     return Container(

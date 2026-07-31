@@ -2,7 +2,16 @@ import 'package:flutter/material.dart';
 import '../../../../core/theme/theme.dart';
 
 class HiringSpendCard extends StatelessWidget {
-  const HiringSpendCard({super.key});
+  final double totalSpend;
+  final int activeContracts;
+  final int totalHires;
+
+  const HiringSpendCard({
+    super.key,
+    required this.totalSpend,
+    required this.activeContracts,
+    required this.totalHires,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -63,7 +72,7 @@ class HiringSpendCard extends StatelessWidget {
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: Text(
-                      '3 active',
+                      '$activeContracts active',
                       style: AppTypography.caption.copyWith(
                         color: Colors.white,
                         fontWeight: FontWeight.w600,
@@ -74,7 +83,7 @@ class HiringSpendCard extends StatelessWidget {
               ),
               const SizedBox(height: 8),
               Text(
-                '\$142K',
+                '\$${(totalSpend / 1000).toStringAsFixed(1)}K',
                 style: AppTypography.headingLarge.copyWith(
                   color: Colors.white,
                   fontSize: 36,
@@ -92,7 +101,7 @@ class HiringSpendCard extends StatelessWidget {
                   ),
                   const SizedBox(width: 6),
                   Text(
-                    '15 hires all-time',
+                    '$totalHires hires all-time',
                     style: AppTypography.caption.copyWith(
                       color: Colors.white.withValues(alpha: 0.9),
                     ),

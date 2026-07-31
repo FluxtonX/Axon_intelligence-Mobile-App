@@ -2,7 +2,14 @@ import 'package:flutter/material.dart';
 import '../../../../core/theme/theme.dart';
 
 class ProjectStatsRow extends StatelessWidget {
-  const ProjectStatsRow({super.key});
+  final int activeContracts;
+  final int inReviewContracts;
+
+  const ProjectStatsRow({
+    super.key,
+    required this.activeContracts,
+    required this.inReviewContracts,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -10,7 +17,7 @@ class ProjectStatsRow extends StatelessWidget {
       children: [
         Expanded(
           child: _StatCard(
-            count: 3,
+            count: activeContracts,
             label: 'Open',
             icon: Icons.work_outline_rounded,
             iconColor: AppColors.primary,
@@ -19,7 +26,7 @@ class ProjectStatsRow extends StatelessWidget {
         const SizedBox(width: 12),
         Expanded(
           child: _StatCard(
-            count: 1,
+            count: 0,
             label: 'Drafts',
             icon: Icons.description_outlined,
             iconColor: const Color(0xFFF59E0B), // Warning Orange
@@ -28,7 +35,7 @@ class ProjectStatsRow extends StatelessWidget {
         const SizedBox(width: 12),
         Expanded(
           child: _StatCard(
-            count: 1,
+            count: inReviewContracts,
             label: 'In Review',
             icon: Icons.schedule_rounded,
             iconColor: const Color(0xFF8B5CF6), // Purple
