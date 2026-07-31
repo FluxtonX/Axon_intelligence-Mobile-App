@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../../../core/theme/theme.dart';
 import '../../../../shared/widgets/primary_button.dart';
 import '../bloc/contracts_bloc.dart';
@@ -88,37 +89,16 @@ class ClientReviewCard extends StatelessWidget {
                       final baseUrl = dotenv.env['API_BASE_URL']?.replaceAll('/api', '') ?? 'http://10.0.2.2:3000';
                       final url = '$baseUrl${contract.submissionUrl}';
                       try {
-                        if (context.mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Downloading file...')),
-                          );
-                        }
-                        
-                        Directory? dir;
-                        if (Platform.isAndroid) {
-                          dir = Directory('/storage/emulated/0/Download');
-                          if (!await dir.exists()) {
-                            dir = await getExternalStorageDirectory();
+                        final uri = Uri.parse(url);
+                        if (await canLaunchUrl(uri)) {
+                          await launchUrl(uri, mode: LaunchMode.externalApplication);
+                          if (context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text('Starting download... Check your notifications.')),
+                            );
                           }
                         } else {
-                          dir = await getDownloadsDirectory() ?? await getApplicationDocumentsDirectory();
-                        }
-                        
-                        if (dir == null) throw Exception('Could not access storage directory');
-                        
-                        final filename = contract.submissionUrl!.split('/').last;
-                        final savePath = '${dir.path}/$filename';
-                        
-                        await Dio().download(url, savePath);
-                        
-                        if (context.mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text('File downloaded to: ${Platform.isAndroid ? "Downloads/$filename" : savePath}'),
-                              duration: const Duration(seconds: 4),
-                              behavior: SnackBarBehavior.floating,
-                            ),
-                          );
+                          throw Exception('Could not launch browser for download');
                         }
                       } catch (e) {
                         if (context.mounted) {
