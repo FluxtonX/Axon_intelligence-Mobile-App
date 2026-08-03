@@ -86,7 +86,7 @@ class ClientReviewCard extends StatelessWidget {
                   ),
                   GestureDetector(
                     onTap: () async {
-                      final baseUrl = dotenv.env['API_BASE_URL']?.replaceAll('/api', '') ?? 'http://10.0.2.2:3000';
+                      final baseUrl = dotenv.env['API_BASE_URL']?.replaceAll('/api', '') ?? 'https://axon-intelligence-backend-in-nest-js.onrender.com';
                       final url = '$baseUrl${contract.submissionUrl}';
                       try {
                         final uri = Uri.parse(url);

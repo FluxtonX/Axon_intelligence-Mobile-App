@@ -49,7 +49,7 @@ void main() async {
   final secureStorage = await SecureStorage.init();
   final apiClient = ApiClient(secureStorage);
   
-  final baseUrl = dotenv.env['API_BASE_URL'] ?? 'http://192.168.1.26:3000/api';
+  final baseUrl = dotenv.env['API_BASE_URL'] ?? 'https://axon-intelligence-backend-in-nest-js.onrender.com/api';
   final socketClient = SocketClient(baseUrl);
   
   final pushNotificationService = PushNotificationService();

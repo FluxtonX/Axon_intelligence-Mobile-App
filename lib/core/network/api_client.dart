@@ -8,7 +8,7 @@ class ApiClient {
   final SecureStorage _storage;
 
   ApiClient(this._storage) : _dio = Dio(BaseOptions(
-    baseUrl: dotenv.env['API_BASE_URL'] ?? 'http://192.168.1.26:3000/api',
+    baseUrl: dotenv.env['API_BASE_URL'] ?? 'https://axon-intelligence-backend-in-nest-js.onrender.com/api',
     connectTimeout: const Duration(seconds: 10),
     receiveTimeout: const Duration(seconds: 10),
     headers: {
